@@ -44,7 +44,7 @@
     <modules>
         <!--<module>components</module>-->
         <!--<module>features</module>-->
-        <!--<module>tests</module>-->
+        <module>tests</module>
     </modules>
 
     <dependencyManagement>
