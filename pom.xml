@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2017, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+  ~ Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
   ~ You may obtain a copy of the License at
   ~
-  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~   http://www.apache.org/licenses/LICENSE-2.0
   ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -49,6 +51,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.wso2.carbon.uis</groupId>
+                <artifactId>org.wso2.carbon.uis.core</artifactId>
+                <version>${carbon.uis.version}</version>
+            </dependency>
+
             <!--Kernel-->
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -72,6 +80,7 @@
                 <version>${carbon.kernel.version}</version>
                 <type>zip</type>
             </dependency>
+
             <!--Transport-->
             <dependency>
                 <groupId>org.wso2.carbon.messaging</groupId>
@@ -106,6 +115,7 @@
                 <version>${carbon.transport.connector.version}</version>
                 <type>zip</type>
             </dependency>
+
             <!--Deployment-->
             <dependency>
                 <groupId>org.wso2.carbon.deployment</groupId>
@@ -124,6 +134,7 @@
                 <version>${carbon.deployment.version}</version>
                 <type>zip</type>
             </dependency>
+
             <!--MSF4J-->
             <dependency>
                 <groupId>org.wso2.msf4j</groupId>
@@ -135,6 +146,12 @@
                 <artifactId>org.wso2.msf4j.feature</artifactId>
                 <version>${msf4j.version}</version>
                 <type>zip</type>
+            </dependency>
+            <!--Netty-->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http</artifactId>
+                <version>${netty.version}</version>
             </dependency>
             <!--Metrics-->
             <dependency>
@@ -167,6 +184,58 @@
                 <version>${carbon.datasources.version}</version>
                 <type>zip</type>
             </dependency>
+
+            <!--OSGi-->
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${org.osgi.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.eclipse.osgi</groupId>
+                <artifactId>org.eclipse.osgi.services</artifactId>
+                <version>${org.wso2.eclipse.osgi.version}</version>
+            </dependency>
+
+            <!--Logging-->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.log4j.version}</version>
+            </dependency>
+
+            <!--Other-->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${org.snakeyaml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${org.apache.commons.commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io.wso2</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.wso2.version}</version>
+            </dependency>
+
             <!--Test-->
             <dependency>
                 <groupId>org.testng</groupId>
@@ -219,11 +288,28 @@
                     <artifactId>carbon-feature-plugin</artifactId>
                     <version>3.0.0</version>
                 </plugin>
+                <!--TODO: Remove following skips ASAP-->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>findbugs-maven-plugin</artifactId>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
 
     <properties>
+        <carbon.uis.version>${project.version}</carbon.uis.version>
+
         <!--Kernel-->
         <carbon.kernel.version>5.2.0-m3</carbon.kernel.version>
         <carbon.kernel.version.range>[5.0.0, 6.0.0)</carbon.kernel.version.range>
@@ -241,10 +327,41 @@
         <!--MSF4J-->
         <msf4j.version>2.3.0-m2</msf4j.version>
         <msf4j.version.range>[2.0.0, 3.0.0)</msf4j.version.range>
+        <javax.ws.rs.version.range>[2.0.0, 3.0.0)</javax.ws.rs.version.range>
+        <!--Netty-->
+        <netty.version>4.0.30.Final</netty.version>
+        <netty.version.range>[4.0.30, 5.0.0)</netty.version.range>
         <!--Metrics-->
         <carbon.metrics.version>2.0.1</carbon.metrics.version>
         <carbon.jndi.version>1.0.2</carbon.jndi.version>
         <carbon.datasources.version>1.1.0</carbon.datasources.version>
+
+        <!--OSGi-->
+        <org.osgi.api.version>6.0.0</org.osgi.api.version>
+        <org.wso2.eclipse.osgi.version>3.4.0.v20140312-2051</org.wso2.eclipse.osgi.version>
+        <org.osgi.framework.version.range>[1.8.0, 2.0.0)</org.osgi.framework.version.range>
+        <org.osgi.framework.wiring.version.range>[1.2.0, 2.0.0)</org.osgi.framework.wiring.version.range>
+        <org.osgi.service.component.annotations.version.range>
+            [1.2.0, 2.0.0)
+        </org.osgi.service.component.annotations.version.range>
+
+        <!--Logging-->
+        <slf4j.version>1.7.5</slf4j.version>
+        <slf4j.version.range>[1.7,2)</slf4j.version.range>
+        <slf4j.log4j.version>1.6.0</slf4j.log4j.version>
+        <slf4j.log4j.version.range>[1.6.0, 2.0.0)</slf4j.log4j.version.range>
+
+        <!--Other-->
+        <guava.version>18.0</guava.version>
+        <guava.version.range>[18.0,19.0)</guava.version.range>
+        <gson.version>2.6.2</gson.version>
+        <gson.version.range>[2.6.2,3)</gson.version.range>
+        <org.snakeyaml.version>1.17</org.snakeyaml.version>
+        <orbit.org.yaml.version.range>[1.17.0,2.0.0)</orbit.org.yaml.version.range>
+        <org.apache.commons.commons-lang3.version>3.1</org.apache.commons.commons-lang3.version>
+        <org.apache.commons.commons-lang3.version.range>[3.1, 4.0)</org.apache.commons.commons-lang3.version.range>
+        <commons-io.wso2.version>2.4.0.wso2v1</commons-io.wso2.version>
+        <commons-io.wso2.version.range>[2.4.0, 3.0.0)</commons-io.wso2.version.range>
 
         <!--Test-->
         <testng.version>6.9.10</testng.version>
@@ -253,7 +370,7 @@
         <!--Maven plugins-->
         <!--Bundle Plugin - Overridden from parent due to a bug in latest version related to capability providers-->
         <maven.bundle.plugin.version>2.5.4</maven.bundle.plugin.version>
-        <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
+        <!--<mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>-->
 
         <!--Character encoding for source files-->
         <!--See: https://maven.apache.org/general.html#encoding-warning-->
