@@ -101,7 +101,7 @@ public class StaticResolver {
     }
 
     public void serveDefaultFavicon(HttpRequest request, HttpResponse response) {
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("/favicon.png");
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("/default-favicon.png");
         if (inputStream == null) {
             LOGGER.error("Cannot find default favicon 'favicon.png' in classpath.");
             response.setStatus(STATUS_NOT_FOUND);
