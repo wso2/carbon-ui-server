@@ -44,8 +44,8 @@
     </scm>
 
     <modules>
-        <!--<module>components</module>-->
-        <!--<module>features</module>-->
+        <module>components/core</module>
+        <!--<module>features/org.wso2.carbon.uis</module>-->
         <module>tests</module>
     </modules>
 
