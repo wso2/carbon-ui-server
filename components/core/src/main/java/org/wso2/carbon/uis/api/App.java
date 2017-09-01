@@ -149,15 +149,15 @@ public class App {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (!(obj instanceof App)) {
+        if (!(o instanceof App)) {
             return false;
         }
-        App otherApp = (App) obj;
-        return Objects.equals(name, otherApp.name) && Objects.equals(contextPath, otherApp.contextPath);
+        App app = (App) o;
+        return Objects.equals(name, app.name) && Objects.equals(contextPath, app.contextPath);
     }
 
     @Override
@@ -167,6 +167,6 @@ public class App {
 
     @Override
     public String toString() {
-        return "App{" + "name='" + name + '\'' + ", contextPath='" + contextPath + '\'' + '}';
+        return "App{name='" + name + "', contextPath='" + contextPath + "', path='" + path + "'}";
     }
 }
