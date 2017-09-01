@@ -25,7 +25,7 @@ import java.util.Optional;
 /**
  * Represents the final configuration of a web App.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public class Configuration {
 
@@ -72,6 +72,11 @@ public class Configuration {
         return responseHeaders;
     }
 
+    /**
+     * Sets the HTTP headers for the response in the security configuration.
+     *
+     * @param responseHeaders HTTP headers for the response
+     */
     public void setResponseHeaders(ResponseHeaders responseHeaders) {
         this.responseHeaders = responseHeaders;
     }
@@ -127,6 +132,10 @@ public class Configuration {
             this.pages = pages;
         }
 
+        /**
+         * Creates a new empty response headers.
+         * @return empty response headers
+         */
         static ResponseHeaders emptyResponseHeaders() {
             return new ResponseHeaders(Collections.emptyMap(), Collections.emptyMap());
         }

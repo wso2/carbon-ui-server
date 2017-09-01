@@ -149,14 +149,14 @@ public class App {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (!(o instanceof App)) {
+        if (!(obj instanceof App)) {
             return false;
         }
-        App app = (App) o;
+        App app = (App) obj;
         return Objects.equals(name, app.name) && Objects.equals(contextPath, app.contextPath);
     }
 
