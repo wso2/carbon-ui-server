@@ -20,20 +20,40 @@ package org.wso2.carbon.uis.api;
 
 import java.util.Objects;
 
+/**
+ * Represents a theme in a web app.
+ *
+ * @since 0.8.0
+ */
 public class Theme {
 
     private final String name;
     private final String path;
 
+    /**
+     * Creates a new theme which can be located in the specified path.
+     *
+     * @param name name of the theme
+     * @param path path to the theme
+     */
     public Theme(String name, String path) {
         this.name = name;
         this.path = path;
     }
 
+    /**
+     * Returns the name of this theme.
+     *
+     * @return name of this theme
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the path of this theme.
+     * @return path of this theme
+     */
     public String getPath() {
         return path;
     }
