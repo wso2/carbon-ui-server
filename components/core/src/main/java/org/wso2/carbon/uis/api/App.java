@@ -29,7 +29,8 @@ import java.util.SortedSet;
 import java.util.stream.Collectors;
 
 /**
- * Created by sajith on 8/22/17.
+ * Represents a web app.
+ * @since 0.8.0
  */
 public class App {
 
@@ -42,6 +43,18 @@ public class App {
     private final Configuration configuration;
     private final String path;
 
+    /**
+     * Creates a new app.
+     *
+     * @param name          name of the app
+     * @param contextPath   context path of the app
+     * @param pages         pages of the app
+     * @param extensions    extensions of the app
+     * @param themes        themes of the app
+     * @param i18nResources i18n resources of the app
+     * @param configuration configurations of the app
+     * @param path          path to the app
+     */
     public App(String name, String contextPath,
                SortedSet<Page> pages, Set<Extension> extensions, Set<Theme> themes,
                I18nResources i18nResources, Configuration configuration,
@@ -58,41 +71,74 @@ public class App {
         this.path = path;
     }
 
+    /**
+     * Returns the name of this app.
+     *
+     * @return name of the app
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the context path of this app.
+     * @return context path of the app
+     */
     public String getContextPath() {
         return contextPath;
     }
 
-    public Set<Extension> getExtensions(String extensionType) {
-        return extensions.values().stream()
-                .filter(extension -> extension.getType().equals(extensionType))
-                .collect(Collectors.toSet());
-    }
-
+    /**
+     * Returns the extension in this app specified by the given type and name.
+     * @param extensionType type of the extension
+     * @param extensionName name of the extension
+     * @return extension in the app
+     */
     public Optional<Extension> getExtension(String extensionType, String extensionName) {
         return Optional.ofNullable(extensions.get(extensionType + ":" + extensionName));
     }
 
+    /**
+     * Returns the theme in this app specified by the given name.
+     * @param themeName name of the theme
+     * @return theme in the app
+     */
     public Optional<Theme> getTheme(String themeName) {
         return Optional.ofNullable(themes.get(themeName));
     }
 
+    /**
+     * Returns i18n resources of this app.
+     * @return i18n resources of the app
+     */
     public I18nResources getI18nResources() {
         return i18nResources;
     }
 
+    /**
+     * Returns the configurations of this app.
+     * @return configurations of the app
+     */
     public Configuration getConfiguration() {
         return configuration;
     }
 
+    /**
+     * Returns the path of this app.
+     * @return path of the app
+     */
     public String getPath() {
         return path;
     }
 
-    public String renderPage(HttpRequest request) {
+    /**
+     * Renders and returns the HTML of the corresponding paage in this app.
+     *
+     * @param request HTTP request for the page
+     * @return HTML content of the page
+     * @throws PageNotFoundException if there is no page matching for the HTTP request
+     */
+    public String renderPage(HttpRequest request) throws PageNotFoundException{
         for (Page page : pages) {
             if (page.getUriPatten().matches(request.getUriWithoutContextPath())) {
                 return page.getContent();
