@@ -44,7 +44,7 @@ public class Theme {
     /**
      * Returns the name of this theme.
      *
-     * @return name of this theme
+     * @return name of the theme
      */
     public String getName() {
         return name;
@@ -52,7 +52,7 @@ public class Theme {
 
     /**
      * Returns the path of this theme.
-     * @return path of this theme
+     * @return path of the theme
      */
     public String getPath() {
         return path;
