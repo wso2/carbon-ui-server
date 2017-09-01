@@ -59,22 +59,24 @@ public class Theme {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Theme)) return false;
-        Theme theme = (Theme) o;
-        return Objects.equals(name, theme.name);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Theme)) {
+            return false;
+        }
+        Theme theme = (Theme) obj;
+        return Objects.equals(name, theme.name) && Objects.equals(path, theme.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(name, path);
     }
 
     @Override
     public String toString() {
-        return "Theme{" +
-               "name='" + name + '\'' +
-               '}';
+        return "Theme{name='" + name + "', path='" + path + "'}";
     }
 }
