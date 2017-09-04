@@ -42,6 +42,12 @@
             <artifactId>org.wso2.carbon.core</artifactId>
         </dependency>
 
+        <!--Transport-->
+        <dependency>
+            <groupId>org.wso2.carbon.transport</groupId>
+            <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
+        </dependency>
+
         <!--MSF4J-->
         <dependency>
             <groupId>org.wso2.msf4j</groupId>
@@ -116,10 +122,12 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
+                            org.wso2.carbon.kernel.startupresolver.*; version="${carbon.kernel.version.range}",
                             org.wso2.msf4j; version="${msf4j.version.range}",
                             javax.ws.rs.*; version="${javax.ws.rs.version.range}",
                             io.netty.handler.*; version="${netty.version.range}",
                             org.wso2.carbon.messaging; version="${carbon.messaging.version.range}",
+                            org.wso2.carbon.transport.http.netty.*;version="${carbon.transport.http.netty.version.range}",
                             org.osgi.framework; version="${org.osgi.framework.version.range}",
                             org.osgi.framework.wiring; version="${org.osgi.framework.wiring.version.range}",
                             org.osgi.service.component.annotations.*;
@@ -132,10 +140,13 @@
                             org.yaml.snakeyaml.*; version="${orbit.org.yaml.version.range}"
                         </Import-Package>
                         <Private-Package>org.wso2.carbon.uis.internal.*</Private-Package>
-                        <Export-Package>org.wso2.carbon.uis.api.*;version="${project.version}"</Export-Package>
+                        <Export-Package>
+                            org.wso2.carbon.uis.api.*;version="${project.version}",
+                            org.wso2.carbon.uis.spi.*;version="${project.version}"
+                        </Export-Package>
                         <Carbon-Component>
-                            osgi.service;objectClass="org.wso2.carbon.uis.internal.StartupListener";
-                            dependentComponentName="carbon-sample-transport-mgt"
+                            osgi.service;objectClass=org.wso2.carbon.uis.api.http.HttpConnector",
+                            osgi.service;objectClass="org.wso2.carbon.uis.spi.Server"
                         </Carbon-Component>
                         <Include-Resource>src/main/resources</Include-Resource>
                     </instructions>
