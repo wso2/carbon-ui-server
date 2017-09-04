@@ -19,9 +19,12 @@
 package org.wso2.carbon.uis.api.http;
 
 
+import java.util.Map;
 import java.util.function.Function;
 
 public interface HttpConnector {
 
     void registerApp(String appName, String appContextPath, Function<HttpRequest, HttpResponse> httpListener);
+
+    void registerApps(Map<String, String> appNamesContextPaths, Function<HttpRequest, HttpResponse> httpListener);
 }

@@ -19,35 +19,166 @@
 package org.wso2.carbon.uis.internal.http;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.messaging.ServerConnector;
+import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
+import org.wso2.carbon.transport.http.netty.listener.HTTPServerConnector;
 import org.wso2.carbon.uis.api.http.HttpConnector;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
 import org.wso2.msf4j.Microservice;
 
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
- * Created by sajith on 8/28/17.
+ * MSF4J based implementation of HTTP connector.
+ *
+ * @since 0.8.0
  */
+@Component(name = "org.wso2.carbon.uis.internal.http.OsgiHttpConnector",
+           service = HttpConnector.class,
+           immediate = true
+)
 public class OsgiHttpConnector implements HttpConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OsgiHttpConnector.class);
 
+    private Set<HttpTransport> httpTransports = new HashSet<>();
     private BundleContext bundleContext;
 
-    public OsgiHttpConnector(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
+    @Reference(
+            name = "http-connector-provider",
+            service = ServerConnector.class,
+            cardinality = ReferenceCardinality.AT_LEAST_ONE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetCarbonTransport"
+    )
+    protected void setCarbonTransport(ServerConnector serverConnector) {
+        if (serverConnector instanceof HTTPServerConnector) {
+            HTTPServerConnector httpServerConnector = (HTTPServerConnector) serverConnector;
+            HttpTransport httpTransport = HttpTransport.toHttpTransport(httpServerConnector);
+            httpTransports.add(httpTransport);
+            LOGGER.info("HTTP transport '{}' registered via '{}' to Microservices HTTP connector.",
+                        httpTransport.getId(), serverConnector.getClass().getName());
+        }
     }
 
+    protected void unsetCarbonTransport(ServerConnector serverConnector) {
+        if (serverConnector instanceof HTTPServerConnector) {
+            HTTPServerConnector httpServerConnector = (HTTPServerConnector) serverConnector;
+            HttpTransport httpTransport = HttpTransport.toHttpTransport(httpServerConnector);
+            httpTransports.remove(httpTransport);
+            LOGGER.info("HTTP transport '{}' unregistered via '{}' from Microservices HTTP connector.",
+                        httpTransport.getId(), serverConnector.getClass().getName());
+        }
+    }
+
+    @Activate
+    protected void activate(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+        LOGGER.info("Microservices HTTP connector activated.");
+    }
+
+    @Deactivate
+    protected void deactivate(BundleContext bundleContext) {
+        this.bundleContext = null;
+        LOGGER.info("Microservices HTTP connector deactivated.");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void registerApp(String appName, String appContextPath, Function<HttpRequest, HttpResponse> httpListener) {
-        Dictionary<String, String> dictionary = new Hashtable<>();
-        dictionary.put("contextPath", appContextPath);
-        bundleContext.registerService(Microservice.class, new WebappMicroservice(httpListener), dictionary);
-        LOGGER.info("Webapp '{}' is available at '{}'.", appName, appContextPath);
+        for (HttpTransport httpTransport : httpTransports) {
+            Dictionary<String, String> dictionary = new Hashtable<>();
+            dictionary.put("CHANNEL_ID", httpTransport.getId());
+            dictionary.put("contextPath", appContextPath);
+            bundleContext.registerService(Microservice.class, new WebappMicroservice(httpListener), dictionary);
+            LOGGER.info("Webapp '{}' is available at '{}'.", appName, httpTransport.getAppUrl(appContextPath));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void registerApps(Map<String, String> appNamesContextPaths,
+                             Function<HttpRequest, HttpResponse> httpListener) {
+        for (Map.Entry<String, String> appNameContextPath : appNamesContextPaths.entrySet()) {
+            registerApp(appNameContextPath.getKey(), appNameContextPath.getValue(), httpListener);
+        }
+    }
+
+    private static class HttpTransport {
+
+        private final String id;
+        private final String scheme;
+        private final String host;
+        private final int port;
+
+        public HttpTransport(String id, String scheme, String host, int port) {
+            this.id = id;
+            this.scheme = scheme;
+            this.host = host;
+            this.port = port;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getScheme() {
+            return scheme;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public boolean isSecured() {
+            return host.equalsIgnoreCase("https");
+        }
+
+        public String getAppUrl(String appContextPath) {
+            return scheme + "://" + host + ":" + port + appContextPath + "/";
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return (this == obj) || ((obj instanceof HttpTransport) && Objects.equals(id, ((HttpTransport) obj).id));
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id);
+        }
+
+        @Override
+        public String toString() {
+            return "HttpTransport{id='" + id + "', scheme='" + scheme + "', host='" + host + "', port='" + port + "'}";
+        }
+
+        public static HttpTransport toHttpTransport(HTTPServerConnector httpServerConnector) {
+            ListenerConfiguration config = httpServerConnector.getListenerConfiguration();
+            return new HttpTransport(config.getId(), config.getScheme(), config.getHost(), config.getPort());
+        }
     }
 }
