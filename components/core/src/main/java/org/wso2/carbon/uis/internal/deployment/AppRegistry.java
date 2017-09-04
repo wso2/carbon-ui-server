@@ -46,7 +46,6 @@ public class AppRegistry {
      * Creates a new app registry with the specified app finder and app creator.
      *
      * @param appFinder  app finder to be used
-     * @param appCreator app creator to be used
      */
     public AppRegistry(AppFinder appFinder) {
         this.appFinder = appFinder;
