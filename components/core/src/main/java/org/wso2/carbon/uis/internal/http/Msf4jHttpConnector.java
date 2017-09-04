@@ -71,7 +71,7 @@ public class Msf4jHttpConnector implements HttpConnector {
             HTTPServerConnector httpServerConnector = (HTTPServerConnector) serverConnector;
             HttpTransport httpTransport = HttpTransport.toHttpTransport(httpServerConnector);
             httpTransports.add(httpTransport);
-            LOGGER.info("HTTP transport '{}' registered via '{}' to Microservices HTTP connector.",
+            LOGGER.debug("HTTP transport '{}' registered via '{}' to Microservices HTTP connector.",
                         httpTransport.getId(), serverConnector.getClass().getName());
         }
     }
@@ -81,7 +81,7 @@ public class Msf4jHttpConnector implements HttpConnector {
             HTTPServerConnector httpServerConnector = (HTTPServerConnector) serverConnector;
             HttpTransport httpTransport = HttpTransport.toHttpTransport(httpServerConnector);
             httpTransports.remove(httpTransport);
-            LOGGER.info("HTTP transport '{}' unregistered via '{}' from Microservices HTTP connector.",
+            LOGGER.debug("HTTP transport '{}' unregistered via '{}' from Microservices HTTP connector.",
                         httpTransport.getId(), serverConnector.getClass().getName());
         }
     }
@@ -89,13 +89,13 @@ public class Msf4jHttpConnector implements HttpConnector {
     @Activate
     protected void activate(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
-        LOGGER.info("Microservices HTTP connector activated.");
+        LOGGER.debug("Microservices HTTP connector activated.");
     }
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
         this.bundleContext = null;
-        LOGGER.info("Microservices HTTP connector deactivated.");
+        LOGGER.debug("Microservices HTTP connector deactivated.");
     }
 
     /**
