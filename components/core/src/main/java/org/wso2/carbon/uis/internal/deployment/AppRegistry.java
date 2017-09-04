@@ -100,7 +100,7 @@ public class AppRegistry {
             throw new DeploymentException(
                     "Cannot deploy app '" + appReference.getName() + "' for context path '" + appContextPath + "'.", e);
         }
-        LOGGER.info("UUF app '{}' deployed for context path '{}' successfully.", app.getName(), app.getContextPath());
+        LOGGER.debug("Web app '{}' deployed for context path '{}' successfully.", app.getName(), app.getContextPath());
         return app;
     }
 }
