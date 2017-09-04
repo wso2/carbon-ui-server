@@ -61,7 +61,7 @@ public class WebappMicroservice implements Microservice {
     }
 
     private Response getImpl(@Context Request request) {
-        MicroserviceHttpRequest httpRequest = new MicroserviceHttpRequest(request);
+        Msf4jHttpRequest httpRequest = new Msf4jHttpRequest(request);
         return buildResponse(httpListener.apply(httpRequest));
     }
 
@@ -94,7 +94,7 @@ public class WebappMicroservice implements Microservice {
     }
 
     private Response postImpl(Request request, MultivaluedMap<String, ?> multivaluedMap, Object params) {
-        MicroserviceHttpRequest httpRequest = new MicroserviceHttpRequest(request, multivaluedMap, params);
+        Msf4jHttpRequest httpRequest = new Msf4jHttpRequest(request, multivaluedMap, params);
         return buildResponse(httpListener.apply(httpRequest));
     }
 

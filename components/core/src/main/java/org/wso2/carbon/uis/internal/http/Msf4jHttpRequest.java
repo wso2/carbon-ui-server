@@ -35,9 +35,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 
 /**
- * UUF HttpRequest implementation based on MSF4J request.
+ * MSF4J based implementation of HTTP request.
+ *
+ * @since 0.8.0
  */
-public class MicroserviceHttpRequest implements HttpRequest {
+public class Msf4jHttpRequest implements HttpRequest {
 
     private static final String PROPERTY_HTTP_VERSION = "HTTP_VERSION";
     private static final String PROPERTY_LOCAL_NAME = "LOCAL_NAME";
@@ -60,11 +62,11 @@ public class MicroserviceHttpRequest implements HttpRequest {
     private final Map<String, Object> files;
     private final boolean isGetRequest;
 
-    public MicroserviceHttpRequest(Request request) {
+    public Msf4jHttpRequest(Request request) {
         this(request, null, null);
     }
 
-    public MicroserviceHttpRequest(Request request, MultivaluedMap<String, ?> formParams, Object postParams) {
+    public Msf4jHttpRequest(Request request, MultivaluedMap<String, ?> formParams, Object postParams) {
 
         this.msf4jRequest = request;
         this.method = request.getHttpMethod();
