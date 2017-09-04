@@ -26,6 +26,7 @@ import org.wso2.carbon.uis.internal.exception.DeploymentException;
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -50,6 +51,15 @@ public class AppRegistry {
     public AppRegistry(AppFinder appFinder) {
         this.appFinder = appFinder;
         this.deployedApps = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Returns names and context paths of available apps.
+     *
+     * @return names and context paths of available apps
+     */
+    public Map<String, String> getAvailableApps() {
+        return appFinder.getAvailableApps();
     }
 
     /**
