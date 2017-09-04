@@ -48,13 +48,13 @@ import java.util.function.Function;
  *
  * @since 0.8.0
  */
-@Component(name = "org.wso2.carbon.uis.internal.http.OsgiHttpConnector",
+@Component(name = "org.wso2.carbon.uis.internal.http.Msf4jHttpConnector",
            service = HttpConnector.class,
            immediate = true
 )
-public class OsgiHttpConnector implements HttpConnector {
+public class Msf4jHttpConnector implements HttpConnector {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OsgiHttpConnector.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Msf4jHttpConnector.class);
 
     private Set<HttpTransport> httpTransports = new HashSet<>();
     private BundleContext bundleContext;
