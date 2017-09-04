@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.uis.internal.io;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.uis.internal.deployment.AppFinder;
@@ -30,9 +29,8 @@ import org.wso2.carbon.uis.internal.reference.AppReference;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -50,7 +48,14 @@ public class ArtifactAppFinder implements AppFinder {
     private final Map<String, AppReference> availableApps;
 
     /**
-     * Create a new app finder that locates apps from the given directory.
+     * Creates a new app finder that locates apps from {@code <CARBON_HOME>/deployment/reactapps} directory.
+     */
+    public ArtifactAppFinder() {
+        this(Paths.get(System.getProperty("carbon.home", "."), "deployment", "reactapps"));
+    }
+
+    /**
+     * Creates a new app finder that locates apps from the given directory.
      *
      * @param appsRepository app repository directory
      */
@@ -63,22 +68,22 @@ public class ArtifactAppFinder implements AppFinder {
      * {@inheritDoc}
      */
     @Override
-    public List<Pair<String, String>> getAvailableApps() {
+    public Map<String, String> getAvailableApps() {
         Map<String, AppReference> foundApps = findApps(appsRepository);
         if (foundApps.isEmpty()) {
             throw new DeploymentException("No apps were found in '" + appsRepository + "'.");
         }
-        List<Pair<String, String>> appNameContextPath = new ArrayList<>();
+        Map<String, String> appNamesContextPaths = new HashMap<>();
         for (Map.Entry<String, AppReference> entry : foundApps.entrySet()) {
             AppReference appReference = entry.getValue();
             String appName = appReference.getName();
             String appContextPath = entry.getKey();
             availableApps.put(appContextPath, appReference);
-            appNameContextPath.add(Pair.of(appName, appContextPath));
+            appNamesContextPaths.put(appName, appContextPath);
             LOGGER.debug("Web app '{}' found at '{}' for context path '{}'.", appName, appReference.getPath(),
                          appContextPath);
         }
-        return appNameContextPath;
+        return appNamesContextPaths;
     }
 
     /**

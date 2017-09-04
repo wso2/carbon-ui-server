@@ -18,17 +18,15 @@
 
 package org.wso2.carbon.uis.internal.deployment;
 
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
- * A locator that finds UUF apps from an app repository.
+ * A locator that finds web apps from an app repository.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public interface AppFinder {
 
@@ -36,7 +34,7 @@ public interface AppFinder {
      * Returns names and context paths of available apps.
      * @return names and context paths of available apps
      */
-    List<Pair<String, String>> getAvailableApps();
+    Map<String, String> getAvailableApps();
 
     /**
      * Returns an app reference to the app which is specified by the given context path.
