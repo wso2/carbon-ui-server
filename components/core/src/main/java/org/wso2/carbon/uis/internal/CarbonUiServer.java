@@ -86,14 +86,14 @@ public class CarbonUiServer implements Server {
         RequestDispatcher requestDispatcher = new RequestDispatcher();
         this.httpListener = httpRequest -> requestDispatcher.serve(httpRequest, appRegistry);
         this.start();
-        LOGGER.info("Carbon UI Server activated.");
+        LOGGER.debug("Carbon UI Server activated.");
     }
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
         this.bundleContext = null;
         this.stop();
-        LOGGER.info("Carbon UI Server deactivated.");
+        LOGGER.debug("Carbon UI Server deactivated.");
     }
 
     private void start() {
