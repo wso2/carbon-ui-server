@@ -318,6 +318,7 @@
         <carbon.messaging.version>2.3.2</carbon.messaging.version>
         <carbon.messaging.version.range>[2.0.0, 3.0.0)</carbon.messaging.version.range>
         <carbon.transport.http.netty.version>4.4.26</carbon.transport.http.netty.version>
+        <carbon.transport.http.netty.version.range>[4.0,5)</carbon.transport.http.netty.version.range>
         <carbon.transport.connector.version>4.4.26</carbon.transport.connector.version>
 
         <!--Deployment-->
