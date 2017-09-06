@@ -27,6 +27,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.kernel.utils.CarbonServerInfo;
 import org.wso2.carbon.messaging.ServerConnector;
 import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.carbon.transport.http.netty.listener.HTTPServerConnector;
@@ -84,6 +85,21 @@ public class Msf4jHttpConnector implements HttpConnector {
             LOGGER.debug("HTTP transport '{}' unregistered via '{}' from Microservices HTTP connector.",
                         httpTransport.getId(), serverConnector.getClass().getName());
         }
+    }
+
+    @Reference(
+            name = "carbon-server-info",
+            service = CarbonServerInfo.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetCarbonServerInfo"
+    )
+    protected void setCarbonServerInfo(CarbonServerInfo carbonServerInfo) {
+        LOGGER.info("CarbonServerInfo instance '{}' registered.", carbonServerInfo.getClass().getName());
+    }
+
+    protected void unsetCarbonServerInfo(CarbonServerInfo carbonServerInfo) {
+        LOGGER.info("CarbonServerInfo instance '{}' unregistered.", carbonServerInfo.getClass().getName());
     }
 
     @Activate

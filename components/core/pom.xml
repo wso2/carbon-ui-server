@@ -122,6 +122,7 @@
                     <instructions>
                         <Import-Package>
                             org.wso2.carbon.kernel.startupresolver.*; version="${carbon.kernel.version.range}",
+                            org.wso2.carbon.kernel.utils.*; version="${carbon.kernel.version.range}",
                             org.wso2.msf4j; version="${msf4j.version.range}",
                             javax.ws.rs.*; version="${javax.ws.rs.version.range}",
                             io.netty.handler.*; version="${netty.version.range}",
