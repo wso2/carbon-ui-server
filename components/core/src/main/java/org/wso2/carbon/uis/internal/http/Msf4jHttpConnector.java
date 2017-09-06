@@ -19,6 +19,7 @@
 package org.wso2.carbon.uis.internal.http;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -37,6 +38,7 @@ import org.wso2.carbon.uis.api.http.HttpResponse;
 import org.wso2.msf4j.Microservice;
 
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
@@ -57,7 +59,8 @@ public class Msf4jHttpConnector implements HttpConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Msf4jHttpConnector.class);
 
-    private Set<HttpTransport> httpTransports = new HashSet<>();
+    private final Set<HttpTransport> httpTransports = new HashSet<>();
+    private final Map<String, ServiceRegistration<Microservice>> microservicesRegistrations = new HashMap<>();
     private BundleContext bundleContext;
 
     @Reference(
@@ -105,13 +108,13 @@ public class Msf4jHttpConnector implements HttpConnector {
     @Activate
     protected void activate(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
-        LOGGER.debug("Microservices HTTP connector activated.");
+        LOGGER.debug("MSF4J HTTP connector activated.");
     }
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
         this.bundleContext = null;
-        LOGGER.debug("Microservices HTTP connector deactivated.");
+        LOGGER.debug("MSF4J HTTP connector deactivated.");
     }
 
     /**
@@ -123,8 +126,11 @@ public class Msf4jHttpConnector implements HttpConnector {
             Dictionary<String, String> dictionary = new Hashtable<>();
             dictionary.put("CHANNEL_ID", httpTransport.getId());
             dictionary.put("contextPath", appContextPath);
-            bundleContext.registerService(Microservice.class, new WebappMicroservice(httpListener), dictionary);
-            LOGGER.info("Webapp '{}' is available at '{}'.", appName, httpTransport.getAppUrl(appContextPath));
+            ServiceRegistration<Microservice> serviceRegistration =
+                    bundleContext.registerService(Microservice.class, new WebappMicroservice(httpListener), dictionary);
+
+            microservicesRegistrations.put(appName, serviceRegistration);
+            LOGGER.info("Web app '{}' is available at '{}'.", appName, httpTransport.getAppUrl(appContextPath));
         }
     }
 
@@ -136,6 +142,28 @@ public class Msf4jHttpConnector implements HttpConnector {
                              Function<HttpRequest, HttpResponse> httpListener) {
         for (Map.Entry<String, String> appNameContextPath : appNamesContextPaths.entrySet()) {
             registerApp(appNameContextPath.getKey(), appNameContextPath.getValue(), httpListener);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void unregisterApp(String appName) {
+        ServiceRegistration<Microservice> serviceRegistration = microservicesRegistrations.remove(appName);
+        if (serviceRegistration == null) {
+            throw new IllegalArgumentException("Cannot unregister web app '" + appName +
+                                               "'. App might be already unregistered or not be registered at all.");
+        }
+
+        serviceRegistration.unregister();
+        LOGGER.info("Web app '{}' undeployed.", appName);
+    }
+
+    @Override
+    public void unregisterAllApps() {
+        for (String appName : microservicesRegistrations.keySet()) {
+            unregisterApp(appName);
         }
     }
 

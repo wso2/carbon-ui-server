@@ -57,10 +57,11 @@ public class CarbonUiServer implements Server {
     private final AppRegistry appRegistry;
     private HttpConnector httpConnector;
     private Function<HttpRequest, HttpResponse> httpListener;
-    private BundleContext bundleContext;
 
     public CarbonUiServer() {
         this.appRegistry = new AppRegistry(new ArtifactAppFinder());
+        RequestDispatcher requestDispatcher = new RequestDispatcher();
+        this.httpListener = httpRequest -> requestDispatcher.serve(httpRequest, appRegistry);
     }
 
     @Reference(name = "httpConnector",
@@ -82,32 +83,27 @@ public class CarbonUiServer implements Server {
 
     @Activate
     protected void activate(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-        RequestDispatcher requestDispatcher = new RequestDispatcher();
-        this.httpListener = httpRequest -> requestDispatcher.serve(httpRequest, appRegistry);
-        this.start();
+        start();
         LOGGER.debug("Carbon UI Server activated.");
     }
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
-        this.bundleContext = null;
-        this.stop();
+        stop();
         LOGGER.debug("Carbon UI Server deactivated.");
     }
 
     private void start() {
         Map<String, String> availableApps = appRegistry.getAvailableApps();
-        LOGGER.debug("'" + availableApps.size() + "' web app(s) found.");
         httpConnector.registerApps(availableApps, httpListener);
     }
 
     private void stop() {
-        // TODO: 9/4/17 to be implemented
+        httpConnector.unregisterAllApps();
     }
 
     @Override
     public Extension getExtensionsOfApp(String appName, String extensionType) {
-        return null;
+        throw new UnsupportedOperationException("to be implemented");
     }
 }

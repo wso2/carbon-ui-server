@@ -27,4 +27,8 @@ public interface HttpConnector {
     void registerApp(String appName, String appContextPath, Function<HttpRequest, HttpResponse> httpListener);
 
     void registerApps(Map<String, String> appNamesContextPaths, Function<HttpRequest, HttpResponse> httpListener);
+
+    void unregisterApp(String appName);
+
+    void unregisterAllApps();
 }
