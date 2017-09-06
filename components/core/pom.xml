@@ -144,7 +144,7 @@
                             org.wso2.carbon.uis.spi.*;version="${project.version}"
                         </Export-Package>
                         <Carbon-Component>
-                            osgi.service;objectClass=org.wso2.carbon.uis.api.http.HttpConnector",
+                            osgi.service;objectClass="org.wso2.carbon.uis.api.http.HttpConnector",
                             osgi.service;objectClass="org.wso2.carbon.uis.spi.Server"
                         </Carbon-Component>
                         <Include-Resource>src/main/resources</Include-Resource>
