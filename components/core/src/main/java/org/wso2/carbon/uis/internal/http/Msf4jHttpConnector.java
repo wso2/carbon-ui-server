@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.uis.internal.http;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -28,7 +30,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.utils.CarbonServerInfo;
+import org.wso2.carbon.kernel.startupresolver.CapabilityProvider;
 import org.wso2.carbon.messaging.ServerConnector;
 import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.carbon.transport.http.netty.listener.HTTPServerConnector;
@@ -38,7 +40,6 @@ import org.wso2.carbon.uis.api.http.HttpResponse;
 import org.wso2.msf4j.Microservice;
 
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
@@ -59,9 +60,14 @@ public class Msf4jHttpConnector implements HttpConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Msf4jHttpConnector.class);
 
-    private final Set<HttpTransport> httpTransports = new HashSet<>();
-    private final Map<String, ServiceRegistration<Microservice>> microservicesRegistrations = new HashMap<>();
+    private final Set<HttpTransport> httpTransports;
+    private final SetMultimap<String, ServiceRegistration<Microservice>> microserviceRegistrations;
     private BundleContext bundleContext;
+
+    public Msf4jHttpConnector() {
+        this.httpTransports = new HashSet<>();
+        this.microserviceRegistrations = HashMultimap.create();
+    }
 
     @Reference(
             name = "http-connector-provider",
@@ -90,21 +96,6 @@ public class Msf4jHttpConnector implements HttpConnector {
         }
     }
 
-    @Reference(
-            name = "carbon-server-info",
-            service = CarbonServerInfo.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetCarbonServerInfo"
-    )
-    protected void setCarbonServerInfo(CarbonServerInfo carbonServerInfo) {
-        LOGGER.info("CarbonServerInfo instance '{}' registered.", carbonServerInfo.getClass().getName());
-    }
-
-    protected void unsetCarbonServerInfo(CarbonServerInfo carbonServerInfo) {
-        LOGGER.info("CarbonServerInfo instance '{}' unregistered.", carbonServerInfo.getClass().getName());
-    }
-
     @Activate
     protected void activate(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
@@ -126,10 +117,10 @@ public class Msf4jHttpConnector implements HttpConnector {
             Dictionary<String, String> dictionary = new Hashtable<>();
             dictionary.put("CHANNEL_ID", httpTransport.getId());
             dictionary.put("contextPath", appContextPath);
-            ServiceRegistration<Microservice> serviceRegistration =
+            ServiceRegistration<Microservice> microserviceServiceRegistration =
                     bundleContext.registerService(Microservice.class, new WebappMicroservice(httpListener), dictionary);
 
-            microservicesRegistrations.put(appName, serviceRegistration);
+            microserviceRegistrations.put(appName, microserviceServiceRegistration);
             LOGGER.info("Web app '{}' is available at '{}'.", appName, httpTransport.getAppUrl(appContextPath));
         }
     }
@@ -143,6 +134,11 @@ public class Msf4jHttpConnector implements HttpConnector {
         for (Map.Entry<String, String> appNameContextPath : appNamesContextPaths.entrySet()) {
             registerApp(appNameContextPath.getKey(), appNameContextPath.getValue(), httpListener);
         }
+
+        // Register CapabilityProvider to give number of Microservice capabilities provided by this bundle.
+        Dictionary<String, String> properties = new Hashtable<>();
+        properties.put("capabilityName", Microservice.class.getName());
+        bundleContext.registerService(CapabilityProvider.class, microserviceRegistrations::size, properties);
     }
 
     /**
@@ -150,21 +146,19 @@ public class Msf4jHttpConnector implements HttpConnector {
      */
     @Override
     public void unregisterApp(String appName) {
-        ServiceRegistration<Microservice> serviceRegistration = microservicesRegistrations.remove(appName);
-        if (serviceRegistration == null) {
+        Set<ServiceRegistration<Microservice>> registrations = microserviceRegistrations.get(appName);
+        if (registrations.isEmpty()) {
             throw new IllegalArgumentException("Cannot unregister web app '" + appName +
                                                "'. App might be already unregistered or not be registered at all.");
         }
 
-        serviceRegistration.unregister();
+        registrations.forEach(ServiceRegistration::unregister);
         LOGGER.info("Web app '{}' undeployed.", appName);
     }
 
     @Override
     public void unregisterAllApps() {
-        for (String appName : microservicesRegistrations.keySet()) {
-            unregisterApp(appName);
-        }
+        microserviceRegistrations.keySet().forEach(this::unregisterApp);
     }
 
     private static class HttpTransport {
