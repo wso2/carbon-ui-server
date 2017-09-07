@@ -22,7 +22,7 @@
 
     <groupId>org.wso2.carbon.uis</groupId>
     <artifactId>uis-parent</artifactId>
-    <version>0.8.2</version>
+    <version>0.8.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>WSO2 Carbon UI Server - Parent</name>
@@ -39,7 +39,7 @@
         <url>https://github.com/wso2/carbon-ui-server.git</url>
         <developerConnection>scm:git:https://github.com/wso2/carbon-ui-server.git</developerConnection>
         <connection>scm:git:https://github.com/wso2/carbon-ui-server.git</connection>
-        <tag>v0.8.2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
@@ -307,7 +307,7 @@
     </build>
 
     <properties>
-        <carbon.uis.version>0.8.2</carbon.uis.version>
+        <carbon.uis.version>0.8.3-SNAPSHOT</carbon.uis.version>
 
         <!--Kernel-->
         <carbon.kernel.version>5.2.0-m3</carbon.kernel.version>
