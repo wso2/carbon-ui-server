@@ -202,11 +202,11 @@
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.transport.http.netty.feature</id>
-                                    <version>${carbon.transport.http.netty.version}</version>
+                                    <version>${carbon.transport.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.connector.framework.feature</id>
-                                    <version>${carbon.transport.http.netty.version}</version>
+                                    <version>${carbon.transport.version}</version>
                                 </feature>
                                 <!--Deployment-->
                                 <feature>
@@ -306,11 +306,11 @@
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.transport.http.netty.feature</id>
-                                    <version>${carbon.transport.http.netty.version}</version>
+                                    <version>${carbon.transport.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.connector.framework.feature</id>
-                                    <version>${carbon.transport.http.netty.version}</version>
+                                    <version>${carbon.transport.version}</version>
                                 </feature>
                                 <!--Deployment-->
                                 <feature>

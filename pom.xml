@@ -95,23 +95,23 @@
             <dependency>
                 <groupId>org.wso2.carbon.transport</groupId>
                 <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
-                <version>${carbon.transport.http.netty.version}</version>
+                <version>${carbon.transport.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.transport</groupId>
                 <artifactId>org.wso2.carbon.transport.http.netty.feature</artifactId>
-                <version>${carbon.transport.http.netty.version}</version>
+                <version>${carbon.transport.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.transport</groupId>
                 <artifactId>org.wso2.carbon.connector.framework</artifactId>
-                <version>${carbon.transport.connector.version}</version>
+                <version>${carbon.transport.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.transport</groupId>
                 <artifactId>org.wso2.carbon.connector.framework.feature</artifactId>
-                <version>${carbon.transport.connector.version}</version>
+                <version>${carbon.transport.version}</version>
                 <type>zip</type>
             </dependency>
 
@@ -316,9 +316,8 @@
         <!--Transport-->
         <carbon.messaging.version>2.3.2</carbon.messaging.version>
         <carbon.messaging.version.range>[2.0.0, 3.0.0)</carbon.messaging.version.range>
-        <carbon.transport.http.netty.version>4.4.26</carbon.transport.http.netty.version>
-        <carbon.transport.http.netty.version.range>[4.0,5)</carbon.transport.http.netty.version.range>
-        <carbon.transport.connector.version>4.4.26</carbon.transport.connector.version>
+        <carbon.transport.version>4.4.26</carbon.transport.version>
+        <carbon.transport.version.range>[4.0,5)</carbon.transport.version.range>
 
         <!--Deployment-->
         <carbon.deployment.version>5.1.0</carbon.deployment.version>
