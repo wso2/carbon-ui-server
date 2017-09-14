@@ -27,16 +27,18 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.kernel.startupresolver.CapabilityProvider;
 import org.wso2.carbon.uis.api.Extension;
 import org.wso2.carbon.uis.api.http.HttpConnector;
-import org.wso2.carbon.uis.api.http.HttpRequest;
-import org.wso2.carbon.uis.api.http.HttpResponse;
+import org.wso2.carbon.uis.internal.deployment.AppDeploymentEventListener;
 import org.wso2.carbon.uis.internal.deployment.AppRegistry;
-import org.wso2.carbon.uis.internal.io.ArtifactAppFinder;
+import org.wso2.carbon.uis.internal.reference.AppReference;
 import org.wso2.carbon.uis.spi.Server;
+import org.wso2.msf4j.Microservice;
 
-import java.util.Map;
-import java.util.function.Function;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Set;
 
 /**
  * Carbon UI server service component.
@@ -50,19 +52,14 @@ import java.util.function.Function;
                    "componentName=wso2-carbon-ui-server"
            }
 )
-public class CarbonUiServer implements Server {
+public class CarbonUiServer implements Server, AppDeploymentEventListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CarbonUiServer.class);
 
-    private final AppRegistry appRegistry;
+    private final AppRegistry appRegistry = new AppRegistry();
+    private final RequestDispatcher requestDispatcher = new RequestDispatcher();
     private HttpConnector httpConnector;
-    private Function<HttpRequest, HttpResponse> httpListener;
-
-    public CarbonUiServer() {
-        this.appRegistry = new AppRegistry(new ArtifactAppFinder());
-        RequestDispatcher requestDispatcher = new RequestDispatcher();
-        this.httpListener = httpRequest -> requestDispatcher.serve(httpRequest, appRegistry);
-    }
+    private BundleContext bundleContext;
 
     @Reference(name = "httpConnector",
                service = HttpConnector.class,
@@ -83,27 +80,49 @@ public class CarbonUiServer implements Server {
 
     @Activate
     protected void activate(BundleContext bundleContext) {
-        start();
+        this.bundleContext = bundleContext;
+        bundleContext.registerService(AppDeploymentEventListener.class, this, null);
         LOGGER.debug("Carbon UI Server activated.");
     }
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
-        stop();
-        LOGGER.debug("Carbon UI Server deactivated.");
-    }
-
-    private void start() {
-        Map<String, String> availableApps = appRegistry.getAvailableApps();
-        httpConnector.registerApps(availableApps, httpListener);
-    }
-
-    private void stop() {
+        this.bundleContext = null;
         httpConnector.unregisterAllApps();
+        LOGGER.debug("Carbon UI Server deactivated.");
     }
 
     @Override
     public Extension getExtensionsOfApp(String appName, String extensionType) {
         throw new UnsupportedOperationException("to be implemented");
+    }
+
+    @Override
+    public void appDeploymentEvent(AppReference appReference) {
+        String appName = appReference.getName();
+        String appContextPath = getAppContextPath(appReference);
+        appRegistry.addApp(appReference, appContextPath);
+        httpConnector.registerApp(appName, appContextPath,
+                                  request -> requestDispatcher.serve(request, appRegistry, appName));
+    }
+
+    @Override
+    public void appsDeploymentEvents(Set<AppReference> appReferences) {
+        appReferences.forEach(this::appDeploymentEvent);
+
+        // Register CapabilityProvider to give number of Microservice capabilities provided by this bundle.
+        Dictionary<String, String> properties = new Hashtable<>();
+        properties.put("capabilityName", Microservice.class.getName());
+        bundleContext.registerService(CapabilityProvider.class, () -> appReferences.size() * 2, properties);
+    }
+
+    @Override
+    public void appUndeploymentEvent(String appName) {
+        appRegistry.removeApp(appName);
+        httpConnector.unregisterApp(appName);
+    }
+
+    private String getAppContextPath(AppReference appReference) {
+        return "/" + appReference.getName();
     }
 }
