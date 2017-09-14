@@ -25,7 +25,7 @@ import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
 import org.wso2.carbon.uis.internal.deployment.AppRegistry;
-import org.wso2.carbon.uis.internal.exception.DeploymentException;
+import org.wso2.carbon.uis.internal.exception.AppCreationException;
 import org.wso2.carbon.uis.internal.exception.HttpErrorException;
 import org.wso2.carbon.uis.internal.io.StaticResolver;
 
@@ -38,7 +38,6 @@ import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_FRAME_OPTIONS;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_XSS_PROTECTION;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_BAD_REQUEST;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_INTERNAL_SERVER_ERROR;
-import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_NOT_FOUND;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_OK;
 
 public class RequestDispatcher {
@@ -55,7 +54,7 @@ public class RequestDispatcher {
         this.staticResolver = staticResolver;
     }
 
-    public HttpResponse serve(HttpRequest request, AppRegistry appRegistry) {
+    public HttpResponse serve(HttpRequest request, AppRegistry appRegistry, String appName) {
         HttpResponse response = new HttpResponse();
 
         if (!request.isValid()) {
@@ -69,16 +68,11 @@ public class RequestDispatcher {
 
         App app;
         try {
-            app = appRegistry.getApp(request.getContextPath());
-        } catch (DeploymentException e) {
-            String msg = "Cannot deploy an app for context path '" + request.getContextPath() + "'.";
+            app = appRegistry.getApp(appName);
+        } catch (AppCreationException e) {
+            String msg = "Cannot create app '" + appName + "'.";
             LOGGER.error(msg, e);
             serveDefaultErrorPage(STATUS_INTERNAL_SERVER_ERROR, msg, response);
-            return response;
-        }
-        if (app == null) {
-            serveDefaultErrorPage(STATUS_NOT_FOUND,
-                                  "Cannot find an app for context path '" + request.getContextPath() + "'.", response);
             return response;
         }
 
