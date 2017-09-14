@@ -31,7 +31,7 @@ import javax.ws.rs.core.MultivaluedMap;
 /**
  * Represents a HTTP response.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public class HttpResponse {
 

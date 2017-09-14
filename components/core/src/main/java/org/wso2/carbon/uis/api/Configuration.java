@@ -84,7 +84,7 @@ public class Configuration {
     /**
      * Bean class that represents security headers configurations in the app's config file of an UUF App.
      *
-     * @since 1.0.0
+     * @since 0.8.0
      */
     public static class ResponseHeaders {
 

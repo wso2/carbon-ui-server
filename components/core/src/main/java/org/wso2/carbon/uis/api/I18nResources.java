@@ -27,7 +27,7 @@ import java.util.Properties;
 /**
  * Holds the i18n language resources of a web App.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public class I18nResources {
 

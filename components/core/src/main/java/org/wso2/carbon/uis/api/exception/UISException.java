@@ -21,7 +21,7 @@ package org.wso2.carbon.uis.api.exception;
 /**
  * Indicates a generic exception occurred in UUF.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public class UISException extends Exception {
 

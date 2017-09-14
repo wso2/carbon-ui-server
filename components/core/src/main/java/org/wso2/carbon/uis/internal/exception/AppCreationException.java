@@ -21,7 +21,7 @@ package org.wso2.carbon.uis.internal.exception;
 /**
  * Indicates an error occurred when creating an app.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public class AppCreationException extends DeploymentException {
 
