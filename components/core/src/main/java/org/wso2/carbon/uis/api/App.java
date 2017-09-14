@@ -66,6 +66,12 @@ public class App {
         return contextPath;
     }
 
+    public Set<Extension> getExtensions(String extensionType) {
+        return extensions.values().stream()
+                .filter(extension -> extension.getType().equals(extensionType))
+                .collect(Collectors.toSet());
+    }
+
     public Optional<Extension> getExtension(String extensionType, String extensionName) {
         return Optional.ofNullable(extensions.get(extensionType + ":" + extensionName));
     }
