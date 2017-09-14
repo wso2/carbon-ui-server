@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.startupresolver.CapabilityProvider;
-import org.wso2.carbon.uis.api.Extension;
+import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.http.HttpConnector;
 import org.wso2.carbon.uis.internal.deployment.AppDeploymentEventListener;
 import org.wso2.carbon.uis.internal.deployment.AppRegistry;
@@ -38,6 +38,7 @@ import org.wso2.msf4j.Microservice;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -93,8 +94,8 @@ public class CarbonUiServer implements Server, AppDeploymentEventListener {
     }
 
     @Override
-    public Extension getExtensionsOfApp(String appName, String extensionType) {
-        throw new UnsupportedOperationException("to be implemented");
+    public Optional<App> getApp(String appName) {
+        return Optional.ofNullable(appRegistry.getApp(appName));
     }
 
     @Override

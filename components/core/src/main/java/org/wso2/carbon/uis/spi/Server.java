@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.uis.spi;
 
-import org.wso2.carbon.uis.api.Extension;
+import org.wso2.carbon.uis.api.App;
+
+import java.util.Optional;
 
 /**
  * Represents Carbon UI server.
@@ -28,11 +30,11 @@ import org.wso2.carbon.uis.api.Extension;
 public interface Server {
 
     /**
-     * Returns extensions of given app.
+     * Returns fully deployed web app with the specified name.
      *
-     * @param appName       name of the app
-     * @param extensionType type of extensions
-     * @return specified type of extensions of the specified app
+     * @param appName name of the app
+     * @return app with the specified name; {@link Optional#empty() empty} if there is no app with the given name or app
+     * is not deployed yet
      */
-    Extension getExtensionsOfApp(String appName, String extensionType);
+    Optional<App> getApp(String appName);
 }
