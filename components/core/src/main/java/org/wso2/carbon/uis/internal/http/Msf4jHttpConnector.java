@@ -30,7 +30,6 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.startupresolver.CapabilityProvider;
 import org.wso2.carbon.messaging.ServerConnector;
 import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.carbon.transport.http.netty.listener.HTTPServerConnector;
@@ -134,11 +133,6 @@ public class Msf4jHttpConnector implements HttpConnector {
         for (Map.Entry<String, String> appNameContextPath : appNamesContextPaths.entrySet()) {
             registerApp(appNameContextPath.getKey(), appNameContextPath.getValue(), httpListener);
         }
-
-        // Register CapabilityProvider to give number of Microservice capabilities provided by this bundle.
-        Dictionary<String, String> properties = new Hashtable<>();
-        properties.put("capabilityName", Microservice.class.getName());
-        bundleContext.registerService(CapabilityProvider.class, microserviceRegistrations::size, properties);
     }
 
     /**
