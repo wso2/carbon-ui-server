@@ -21,7 +21,7 @@ package org.wso2.carbon.uis.internal.exception;
 /**
  * Indicates an error happens when reading or parsing or loading or processing configuration.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public class ConfigurationException extends DeploymentException {
 

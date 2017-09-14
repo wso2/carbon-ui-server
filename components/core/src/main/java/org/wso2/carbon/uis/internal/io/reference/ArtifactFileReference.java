@@ -31,7 +31,7 @@ import java.nio.file.Path;
 /**
  * A reference to a file in the file system.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public class ArtifactFileReference implements FileReference {
 

@@ -23,7 +23,7 @@ import org.wso2.carbon.uis.internal.exception.FileOperationException;
 /**
  * A reference to a theme in a web app artifact.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public interface ThemeReference {
 

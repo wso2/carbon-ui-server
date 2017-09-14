@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * A reference to a web app artifact in a directory.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public class ArtifactAppReference implements AppReference {
 

@@ -30,7 +30,7 @@ import static java.lang.Integer.signum;
 /**
  * Test cases for URI pattern.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public class UriPattenTest {
 

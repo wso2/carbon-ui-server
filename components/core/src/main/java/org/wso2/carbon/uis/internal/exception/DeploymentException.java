@@ -23,7 +23,7 @@ import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 /**
  * Indicates an error occurred when deploying UUF apps and components.
  *
- * @since 1.0.0
+ * @since 0.8.0
  */
 public class DeploymentException extends UISRuntimeException {
 
