@@ -251,4 +251,9 @@ public class HttpResponse {
     public Map<String, String> getCookies() {
         return cookies;
     }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{status=" + status + ", content=" + content + ", contentType='" + contentType + "'}";
+    }
 }
