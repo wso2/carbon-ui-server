@@ -20,26 +20,53 @@ package org.wso2.carbon.uis.api;
 
 import java.util.Objects;
 
+/**
+ * Represents an extension of a web app.
+ *
+ * @since 0.8.0
+ */
 public class Extension {
 
     private final String name;
     private final String type;
     private final String path;
 
+    /**
+     * Creates a new extension which can be located in the specified path.
+     *
+     * @param name name of the extension
+     * @param type type of the extension
+     * @param path path to the extension
+     */
     public Extension(String name, String type, String path) {
         this.name = name;
         this.type = type;
         this.path = path;
     }
 
+    /**
+     * Returns the name of this extension.
+     *
+     * @return name of this extension
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the type of this extension.
+     *
+     * @return type of the extension
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * Returns the path of this extension.
+     *
+     * @return path of the extension
+     */
     public String getPath() {
         return path;
     }
