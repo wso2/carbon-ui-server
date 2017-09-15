@@ -25,6 +25,7 @@ import org.wso2.carbon.uis.api.I18nResources;
 import org.wso2.carbon.uis.api.Page;
 import org.wso2.carbon.uis.api.Theme;
 import org.wso2.carbon.uis.api.UriPatten;
+import org.wso2.carbon.uis.internal.exception.AppCreationException;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 import org.wso2.carbon.uis.internal.reference.ExtensionReference;
 import org.wso2.carbon.uis.internal.reference.FileReference;
@@ -37,9 +38,22 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+/**
+ * A creator that creates web apps.
+ *
+ * @since 0.8.0
+ */
 public class AppCreator {
 
-    public static App createApp(AppReference appReference, String appContext) {
+    /**
+     * Creates an app.
+     *
+     * @param appReference reference to the app
+     * @param appContext   context path of the app
+     * @return created app
+     * @throws AppCreationException if an error occurred when creating the app
+     */
+    public static App createApp(AppReference appReference, String appContext) throws AppCreationException {
         SortedSet<Page> pages = createPages(appReference);
         Set<Extension> extensions = appReference.getExtensionReferences().stream()
                 .map(AppCreator::createExtension)
