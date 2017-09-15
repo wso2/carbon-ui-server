@@ -52,6 +52,7 @@ public class Theme {
 
     /**
      * Returns the path of this theme.
+     *
      * @return path of the theme
      */
     public String getPath() {
