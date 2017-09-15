@@ -22,13 +22,41 @@ package org.wso2.carbon.uis.api.http;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * HTTP connector bridges the HTTP transport to the web app server.
+ *
+ * @since 0.8.0
+ */
 public interface HttpConnector {
 
+    /**
+     * Registers a web app to the transport.
+     *
+     * @param appName        name of the app
+     * @param appContextPath context path of the app
+     * @param httpListener   HTTP requests listener that handles the incoming HTTP requests for the registering app
+     */
     void registerApp(String appName, String appContextPath, Function<HttpRequest, HttpResponse> httpListener);
 
+    /**
+     * Registers multiple web apps.
+     *
+     * @param appNamesContextPaths names and context paths of the apps.
+     * @param httpListener         HTTP requests listener that handles the incoming HTTP requests for the registering
+     *                             apps
+     */
+    @Deprecated
     void registerApps(Map<String, String> appNamesContextPaths, Function<HttpRequest, HttpResponse> httpListener);
 
+    /**
+     * Unregisters the specified app from the transport.
+     *
+     * @param appName name of the app to be unregister
+     */
     void unregisterApp(String appName);
 
+    /**
+     * Unregisters all registered apps from the transport.
+     */
     void unregisterAllApps();
 }
