@@ -92,6 +92,18 @@ public class App {
     }
 
     /**
+     * Returns extensions of the given type in this app.
+     *
+     * @param extensionType type of the extension
+     * @return extensions of the given type in the app
+     */
+    public Set<Extension> getExtensions(String extensionType) {
+        return extensions.values().stream()
+                .filter(extension -> Objects.equals(extension.getType(), extensionType))
+                .collect(Collectors.toSet());
+    }
+
+    /**
      * Returns the extension in this app specified by the given type and name.
      *
      * @param extensionType type of the extension
