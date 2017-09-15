@@ -20,13 +20,42 @@ package org.wso2.carbon.uis.internal.reference;
 
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
 
+/**
+ * A reference to a file in a web app.
+ *
+ * @since 0.8.0
+ */
 public interface FileReference {
 
+    /**
+     * Returns the name of the file represented by this reference.
+     *
+     * @return name of the file
+     * @throws FileOperationException if cannot read file name
+     */
     String getName() throws FileOperationException;
 
+    /**
+     * Returns the extension of the file represented by this reference.
+     *
+     * @return extension of the file
+     * @throws FileOperationException if cannot read file extension
+     */
     String getExtension() throws FileOperationException;
 
+    /**
+     * Returns the content of the file represented by this reference.
+     *
+     * @return content of the file
+     * @throws FileOperationException if cannot read file content
+     */
     String getContent() throws FileOperationException;
 
+    /**
+     * Returns the absolute path to the file represented by this reference.
+     *
+     * @return absolute path to the file
+     * @throws FileOperationException if cannot obtain the path
+     */
     String getFilePath() throws FileOperationException;
 }
