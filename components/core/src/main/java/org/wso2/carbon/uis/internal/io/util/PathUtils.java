@@ -23,15 +23,32 @@ import org.apache.commons.io.FilenameUtils;
 import java.nio.file.Path;
 
 /**
- * Created by sajith on 8/30/17.
+ * Utility methods for {@link Path}s.
+ *
+ * @since 0.8.0
  */
 public class PathUtils {
 
+    private PathUtils() {
+    }
+
+    /**
+     * Returns the file name of the given path.
+     *
+     * @param path file/directory path
+     * @return file name (never {@code null})
+     */
     public static String getName(Path path) {
         Path fileName = path.getFileName();
         return (fileName == null) ? "" : fileName.toString();
     }
 
+    /**
+     * Returns the file extension of the given path.
+     *
+     * @param filePath file path
+     * @return file extension (never {@code null})
+     */
     public static String getExtension(Path filePath) {
         return FilenameUtils.getExtension(filePath.getFileName().toString());
     }
