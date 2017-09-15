@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 /**
  * Represents a web app.
+ *
  * @since 0.8.0
  */
 public class App {
@@ -44,7 +45,7 @@ public class App {
     private final String path;
 
     /**
-     * Creates a new app.
+     * Creates a new app which can be located in the specified path.
      *
      * @param name          name of the app
      * @param contextPath   context path of the app
@@ -82,6 +83,7 @@ public class App {
 
     /**
      * Returns the context path of this app.
+     *
      * @return context path of the app
      */
     public String getContextPath() {
@@ -90,6 +92,7 @@ public class App {
 
     /**
      * Returns the extension in this app specified by the given type and name.
+     *
      * @param extensionType type of the extension
      * @param extensionName name of the extension
      * @return extension in the app
@@ -100,6 +103,7 @@ public class App {
 
     /**
      * Returns the theme in this app specified by the given name.
+     *
      * @param themeName name of the theme
      * @return theme in the app
      */
@@ -109,6 +113,7 @@ public class App {
 
     /**
      * Returns i18n resources of this app.
+     *
      * @return i18n resources of the app
      */
     public I18nResources getI18nResources() {
@@ -117,6 +122,7 @@ public class App {
 
     /**
      * Returns the configurations of this app.
+     *
      * @return configurations of the app
      */
     public Configuration getConfiguration() {
@@ -125,6 +131,7 @@ public class App {
 
     /**
      * Returns the path of this app.
+     *
      * @return path of the app
      */
     public String getPath() {
@@ -138,7 +145,7 @@ public class App {
      * @return HTML content of the page
      * @throws PageNotFoundException if there is no page matching for the HTTP request
      */
-    public String renderPage(HttpRequest request) throws PageNotFoundException{
+    public String renderPage(HttpRequest request) throws PageNotFoundException {
         for (Page page : pages) {
             if (page.getUriPatten().matches(request.getUriWithoutContextPath())) {
                 return page.getContent();
