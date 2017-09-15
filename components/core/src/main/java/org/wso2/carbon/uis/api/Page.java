@@ -20,20 +20,41 @@ package org.wso2.carbon.uis.api;
 
 import java.util.Objects;
 
+/**
+ * Represents a page of a web app.
+ *
+ * @since 0.8.0
+ */
 public class Page implements Comparable<Page> {
 
     private final UriPatten uriPatten;
     private final String content;
 
+    /**
+     * Creates a new page.
+     *
+     * @param uriPatten URI pattern of the page
+     * @param content   content of the page
+     */
     public Page(UriPatten uriPatten, String content) {
         this.uriPatten = uriPatten;
         this.content = content;
     }
 
+    /**
+     * Returns the URI pattern of this page.
+     *
+     * @return URI pattern of this page
+     */
     public UriPatten getUriPatten() {
         return uriPatten;
     }
 
+    /**
+     * Returns the content of this page.
+     *
+     * @return content of the page
+     */
     public String getContent() {
         return content;
     }
@@ -55,8 +76,6 @@ public class Page implements Comparable<Page> {
 
     @Override
     public String toString() {
-        return "Page{" +
-               "uriPatten=" + uriPatten +
-               '}';
+        return "Page{uriPatten=" + uriPatten + ", content='" + content + "'}";
     }
 }
