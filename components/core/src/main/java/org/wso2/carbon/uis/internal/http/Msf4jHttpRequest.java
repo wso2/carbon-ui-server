@@ -62,10 +62,22 @@ public class Msf4jHttpRequest implements HttpRequest {
     private final Map<String, Object> files;
     private final boolean isGetRequest;
 
+    /**
+     * Creates a new GET {@link HttpRequest} from the MSF4J request.
+     *
+     * @param request MSF4J request
+     */
     public Msf4jHttpRequest(Request request) {
         this(request, null, null);
     }
 
+    /**
+     * Creates a new POST {@link HttpRequest} from the MSF4J request.
+     *
+     * @param request    MSF4J request
+     * @param formParams HTML form params
+     * @param postParams POST data
+     */
     public Msf4jHttpRequest(Request request, MultivaluedMap<String, ?> formParams, Object postParams) {
 
         this.msf4jRequest = request;
@@ -122,7 +134,7 @@ public class Msf4jHttpRequest implements HttpRequest {
                 } else {
                     throw new NotSupportedException(
                             "Unsupported JSON data type. Expected Map or List. Instead found '" +
-                                    postParams.getClass().getName() + "'.");
+                            postParams.getClass().getName() + "'.");
                 }
             }
         } else {
@@ -247,6 +259,6 @@ public class Msf4jHttpRequest implements HttpRequest {
     @Override
     public String toString() {
         return "{\"method\": \"" + method + "\", \"uri\": \"" + uri + "\", \"query\": \"" + queryString +
-                "\", \"protocol\": \"" + getProtocol() + "\"}";
+               "\", \"protocol\": \"" + getProtocol() + "\"}";
     }
 }
