@@ -44,7 +44,7 @@ public class ArtifactAppReference implements AppReference {
     private final Path appDirectory;
 
     /**
-     * Creates an app reference to the app which resides in the specified directory.
+     * Creates a reference to the app which resides in the specified directory.
      *
      * @param appDirectory directory that contains the app
      */
@@ -52,17 +52,11 @@ public class ArtifactAppReference implements AppReference {
         this.appDirectory = appDirectory.normalize().toAbsolutePath();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() throws FileOperationException {
         return PathUtils.getName(appDirectory);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<PageReference> getPageReferences() throws FileOperationException {
         Path pages = getPagesDirectory();
@@ -79,9 +73,6 @@ public class ArtifactAppReference implements AppReference {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<ExtensionReference> getExtensionReferences() throws FileOperationException {
         Path extensions = appDirectory.resolve(DIR_NAME_EXTENSIONS);
@@ -124,9 +115,6 @@ public class ArtifactAppReference implements AppReference {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<I18nResourceReference> getI18nResourceReferences() throws FileOperationException {
         Path lang = appDirectory.resolve(DIR_NAME_I18N);
@@ -143,9 +131,6 @@ public class ArtifactAppReference implements AppReference {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public FileReference getConfiguration() throws FileOperationException {
         Path configuration = appDirectory.resolve(FILE_NAME_CONFIGURATION);
@@ -157,14 +142,16 @@ public class ArtifactAppReference implements AppReference {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getPath() throws FileOperationException {
         return appDirectory.toString();
     }
 
+    /**
+     * Returns the path to the pages directory of the app represented by this reference.
+     *
+     * @return path to the pages directory
+     */
     Path getPagesDirectory() {
         return appDirectory.resolve(DIR_NAME_PAGES);
     }
