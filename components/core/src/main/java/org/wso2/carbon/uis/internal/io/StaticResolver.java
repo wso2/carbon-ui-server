@@ -60,6 +60,11 @@ import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_NOT_FOUND;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_NOT_MODIFIED;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_OK;
 
+/**
+ * Dispatches HTTP requests for static resources.
+ *
+ * @since 0.8.0
+ */
 public class StaticResolver {
 
     private static final DateTimeFormatter HTTP_DATE_FORMATTER;
@@ -75,7 +80,7 @@ public class StaticResolver {
     }
 
     /**
-     * The constructor of StaticResolver class
+     * Constructs a new static request dispatcher.
      */
     public StaticResolver() {
         if (false) {
@@ -100,6 +105,12 @@ public class StaticResolver {
         }
     }
 
+    /**
+     * Serves the default favicon.
+     *
+     * @param request  HTTP request to be served
+     * @param response HTTP response to be written
+     */
     public void serveDefaultFavicon(HttpRequest request, HttpResponse response) {
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("/default-favicon.png");
         if (inputStream == null) {
@@ -111,6 +122,13 @@ public class StaticResolver {
         }
     }
 
+    /**
+     * Serves a static resource inside the specified app.
+     *
+     * @param app      app to be served
+     * @param request  HTTP request to be served
+     * @param response HTTP response to be written
+     */
     public void serve(App app, HttpRequest request, HttpResponse response) {
         Path resourcePath;
         ZonedDateTime lastModifiedDate;
