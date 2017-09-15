@@ -40,20 +40,36 @@ import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_BAD_REQUEST;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_INTERNAL_SERVER_ERROR;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_OK;
 
+/**
+ * Dispatches HTTP requests.
+ *
+ * @since 0.8.0
+ */
 public class RequestDispatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestDispatcher.class);
 
     private final StaticResolver staticResolver;
 
+    /**
+     * Creates a new request dispatcher.
+     */
     public RequestDispatcher() {
         this(new StaticResolver());
     }
 
-    public RequestDispatcher(StaticResolver staticResolver) {
+    RequestDispatcher(StaticResolver staticResolver) {
         this.staticResolver = staticResolver;
     }
 
+    /**
+     * Serves the specified HTTP request.
+     *
+     * @param request     HTTP request to be served
+     * @param appRegistry app registry
+     * @param appName     name of the relevant app
+     * @return HTTP response
+     */
     public HttpResponse serve(HttpRequest request, AppRegistry appRegistry, String appName) {
         HttpResponse response = new HttpResponse();
 
