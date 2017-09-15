@@ -221,7 +221,7 @@ public class Msf4jHttpConnector implements HttpConnector {
          * @return URL for the given app through the represented HTTP trasport
          */
         public String getAppUrl(String appContextPath) {
-            return scheme + "://" + host + ":" + port + appContextPath + "/";
+            return scheme + "://" + host + ":" + port + appContextPath;
         }
 
         @Override
