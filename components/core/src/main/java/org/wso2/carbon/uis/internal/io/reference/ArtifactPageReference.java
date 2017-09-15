@@ -26,13 +26,21 @@ import org.wso2.carbon.uis.internal.reference.PageReference;
 import java.nio.file.Path;
 
 /**
- * Created by sajith on 8/29/17.
+ * A reference to a page inside a web app artifact.
+ *
+ * @since 0.8.0
  */
 public class ArtifactPageReference implements PageReference {
 
     private final Path pageFile;
     private final ArtifactAppReference appReference;
 
+    /**
+     * Creates a reference to the page specified by the path.
+     *
+     * @param pageFile     path to the page
+     * @param appReference reference to the belonging app
+     */
     public ArtifactPageReference(Path pageFile, ArtifactAppReference appReference) {
         this.pageFile = pageFile;
         this.appReference = appReference;
