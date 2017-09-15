@@ -20,6 +20,7 @@ package org.wso2.carbon.uis.api;
 
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.internal.exception.PageNotFoundException;
+import org.wso2.carbon.uis.internal.exception.PageRedirectException;
 
 import java.util.Map;
 import java.util.Objects;
@@ -146,13 +147,39 @@ public class App {
      * @throws PageNotFoundException if there is no page matching for the HTTP request
      */
     public String renderPage(HttpRequest request) throws PageNotFoundException {
-        for (Page page : pages) {
-            if (page.getUriPatten().matches(request.getUriWithoutContextPath())) {
-                return page.getContent();
-            }
+        String uriWithoutContextPath = request.getUriWithoutContextPath();
+        Page matchingPage = getMatchingPage(uriWithoutContextPath);
+        if (matchingPage != null) {
+            return matchingPage.getContent();
         }
 
-        throw new PageNotFoundException("Requested page '" + request.getUriWithoutContextPath() + "' does not exists.");
+        /* URL correction:
+         * See https://googlewebmastercentral.blogspot.com/2010/04/to-slash-or-not-to-slash.html
+         * If the tailing '/' is extra or a it is missing, then send 301 with corrected URL.
+         */
+        String correctedUriWithoutContextPath = (uriWithoutContextPath.endsWith("/") ?
+                uriWithoutContextPath.substring(0, (uriWithoutContextPath.length() - 1)) :
+                uriWithoutContextPath + "/");
+        matchingPage = getMatchingPage(correctedUriWithoutContextPath);
+        if (matchingPage != null) {
+            // Redirecting to the correct page.
+            String correctedUri = request.getContextPath() + correctedUriWithoutContextPath;
+            if (request.getQueryString() != null) {
+                correctedUri = correctedUri + '?' + request.getQueryString();
+            }
+            throw new PageRedirectException(correctedUri);
+        }
+
+        throw new PageNotFoundException("Requested page '" + uriWithoutContextPath + "' does not exists.");
+    }
+
+    private Page getMatchingPage(String uriWithoutContextPath) {
+        for (Page page : pages) {
+            if (page.getUriPatten().matches(uriWithoutContextPath)) {
+                return page;
+            }
+        }
+        return null;
     }
 
     @Override
