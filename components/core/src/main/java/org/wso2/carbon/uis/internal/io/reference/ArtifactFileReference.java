@@ -29,7 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * A reference to a file in the file system.
+ * A reference to a file inside a web app artifact..
  *
  * @since 0.8.0
  */
@@ -38,7 +38,7 @@ public class ArtifactFileReference implements FileReference {
     private final Path filePath;
 
     /**
-     * Creates a file reference to the file specified by the path.
+     * Creates a reference to the file specified by the path.
      *
      * @param filePath path to the file
      */
@@ -46,25 +46,16 @@ public class ArtifactFileReference implements FileReference {
         this.filePath = filePath;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() throws FileOperationException {
         return PathUtils.getName(filePath);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getExtension() throws FileOperationException {
         return FilenameUtils.getExtension(getName());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getContent() throws FileOperationException {
         try {
@@ -74,9 +65,6 @@ public class ArtifactFileReference implements FileReference {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getFilePath() throws FileOperationException {
         return filePath.toString();
