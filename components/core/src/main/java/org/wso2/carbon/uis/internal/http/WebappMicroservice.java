@@ -35,7 +35,9 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 /**
- * Created by sajith on 8/28/17.
+ * Microservice that acts as the HTTP transport for a web app.
+ *
+ * @since 0.8.0
  */
 public class WebappMicroservice implements Microservice {
 
@@ -44,6 +46,11 @@ public class WebappMicroservice implements Microservice {
 
     private final Function<HttpRequest, HttpResponse> httpListener;
 
+    /**
+     * Creates a new microservice.
+     *
+     * @param httpListener HTTP requests listener that handles the incoming HTTP requests
+     */
     public WebappMicroservice(Function<HttpRequest, HttpResponse> httpListener) {
         this.httpListener = httpListener;
     }
