@@ -30,10 +30,20 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Properties;
 
+/**
+ * A reference to an i18n resource inside a web app artifact.
+ *
+ * @since 0.8.0
+ */
 public class ArtifactI18nResourceReference implements I18nResourceReference {
 
     private final Path propertiesFile;
 
+    /**
+     * Creates a reference to the i18n resource specified by the path.
+     *
+     * @param propertiesFile path to the i18n resource
+     */
     public ArtifactI18nResourceReference(Path propertiesFile) {
         this.propertiesFile = propertiesFile;
     }
