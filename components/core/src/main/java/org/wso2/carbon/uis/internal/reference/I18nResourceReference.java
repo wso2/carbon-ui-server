@@ -24,11 +24,25 @@ import java.util.Locale;
 import java.util.Properties;
 
 /**
- * Created by sajith on 8/22/17.
+ * A reference to an i18n resource in a web app artifact.
+ *
+ * @since 0.8.0
  */
 public interface I18nResourceReference {
 
+    /**
+     * Returns the locale of the i18n resource represented by this reference.
+     *
+     * @return locale of the i18n resource
+     * @throws FileOperationException if cannot read the locale
+     */
     Locale getLocale() throws FileOperationException;
 
+    /**
+     * Returns the messages of the i18n resource represented by this reference.
+     *
+     * @return messages of the i18n resource
+     * @throws FileOperationException if cannot read the messages
+     */
     Properties getMessages() throws FileOperationException;
 }
