@@ -34,7 +34,7 @@ import java.util.Properties;
 public class MimeMapper {
 
     private static final String MIME_PROPERTY_FILE = "mime-map.properties";
-    private static volatile Properties MIME_MAP = null;
+    private static volatile Properties mimeMap = null;
 
     private MimeMapper() {
     }
@@ -64,15 +64,15 @@ public class MimeMapper {
      * @throws ConfigurationException if MIME types property file is invalid
      */
     public static Optional<String> getMimeType(String extension) throws ConfigurationException, FileOperationException {
-        if (MIME_MAP == null) {
+        if (mimeMap == null) {
             /* Here, class object 'MimeMapper.class' is used as the synchronization lock because 'getMimeType()' is
             the only is public method. */
             synchronized (MimeMapper.class) {
-                if (MIME_MAP == null) {
-                    MIME_MAP = loadMimeMap();
+                if (mimeMap == null) {
+                    mimeMap = loadMimeMap();
                 }
             }
         }
-        return Optional.ofNullable(MIME_MAP.getProperty(extension));
+        return Optional.ofNullable(mimeMap.getProperty(extension));
     }
 }
