@@ -19,7 +19,7 @@
 package org.wso2.carbon.uis.api.exception;
 
 /**
- * Indicates a generic runtime exception occurred in UUF.
+ * Indicates a generic runtime exception occurred in Carbon UI Server.
  *
  * @since 0.8.0
  */
