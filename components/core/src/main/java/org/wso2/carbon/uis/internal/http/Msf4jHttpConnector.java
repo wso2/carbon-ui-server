@@ -55,6 +55,7 @@ import java.util.function.Function;
            service = HttpConnector.class,
            immediate = true
 )
+@SuppressWarnings("unused")
 public class Msf4jHttpConnector implements HttpConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Msf4jHttpConnector.class);
@@ -63,6 +64,9 @@ public class Msf4jHttpConnector implements HttpConnector {
     private final SetMultimap<String, ServiceRegistration<Microservice>> microserviceRegistrations;
     private BundleContext bundleContext;
 
+    /**
+     * Creates a new MSF4J HTTP connector.
+     */
     public Msf4jHttpConnector() {
         this.httpTransports = new HashSet<>();
         this.microserviceRegistrations = HashMultimap.create();
@@ -81,7 +85,7 @@ public class Msf4jHttpConnector implements HttpConnector {
             HttpTransport httpTransport = HttpTransport.toHttpTransport(httpServerConnector);
             httpTransports.add(httpTransport);
             LOGGER.debug("HTTP transport '{}' registered via '{}' to Microservices HTTP connector.",
-                        httpTransport.getId(), serverConnector.getClass().getName());
+                         httpTransport.getId(), serverConnector.getClass().getName());
         }
     }
 
@@ -91,7 +95,7 @@ public class Msf4jHttpConnector implements HttpConnector {
             HttpTransport httpTransport = HttpTransport.toHttpTransport(httpServerConnector);
             httpTransports.remove(httpTransport);
             LOGGER.debug("HTTP transport '{}' unregistered via '{}' from Microservices HTTP connector.",
-                        httpTransport.getId(), serverConnector.getClass().getName());
+                         httpTransport.getId(), serverConnector.getClass().getName());
         }
     }
 
@@ -107,9 +111,6 @@ public class Msf4jHttpConnector implements HttpConnector {
         LOGGER.debug("MSF4J HTTP connector deactivated.");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void registerApp(String appName, String appContextPath, Function<HttpRequest, HttpResponse> httpListener) {
         for (HttpTransport httpTransport : httpTransports) {
@@ -124,9 +125,6 @@ public class Msf4jHttpConnector implements HttpConnector {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void registerApps(Map<String, String> appNamesContextPaths,
                              Function<HttpRequest, HttpResponse> httpListener) {
@@ -135,9 +133,6 @@ public class Msf4jHttpConnector implements HttpConnector {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void unregisterApp(String appName) {
         Set<ServiceRegistration<Microservice>> registrations = microserviceRegistrations.get(appName);
@@ -155,6 +150,11 @@ public class Msf4jHttpConnector implements HttpConnector {
         microserviceRegistrations.keySet().forEach(this::unregisterApp);
     }
 
+    /**
+     * Modal class that holds information about a HTTP transport.
+     *
+     * @since 0.8.2
+     */
     private static class HttpTransport {
 
         private final String id;
@@ -169,26 +169,57 @@ public class Msf4jHttpConnector implements HttpConnector {
             this.port = port;
         }
 
+        /**
+         * Returns the ID of the represented HTTP transport.
+         *
+         * @return ID of the HTTP transport
+         */
         public String getId() {
             return id;
         }
 
+        /**
+         * Returns the scheme of the represented HTTP transport.
+         *
+         * @return scheme of the HTTP transport
+         */
         public String getScheme() {
             return scheme;
         }
 
+        /**
+         * Returns the host of the represented HTTP transport.
+         *
+         * @return host of the HTTP transport
+         */
         public String getHost() {
             return host;
         }
 
+        /**
+         * Returns the port of the represented HTTP transport.
+         *
+         * @return port of the HTTP transport
+         */
         public int getPort() {
             return port;
         }
 
+        /**
+         * Returns whether the represented HTTP transport is secured or not
+         *
+         * @return {@code true} if the {@link #getScheme() scheme} is HTTPS, otherwise {@code false}
+         */
         public boolean isSecured() {
             return host.equalsIgnoreCase("https");
         }
 
+        /**
+         * Returns the full URL for the given web app context path
+         *
+         * @param appContextPath context path of the app
+         * @return URL for the given app through the represented HTTP trasport
+         */
         public String getAppUrl(String appContextPath) {
             return scheme + "://" + host + ":" + port + appContextPath + "/";
         }
@@ -208,6 +239,12 @@ public class Msf4jHttpConnector implements HttpConnector {
             return "HttpTransport{id='" + id + "', scheme='" + scheme + "', host='" + host + "', port='" + port + "'}";
         }
 
+        /**
+         * Returns the HTTP transport information of the specified HTTP server connector.
+         *
+         * @param httpServerConnector HTTP server connector to be represented
+         * @return HTTP transport information
+         */
         public static HttpTransport toHttpTransport(HTTPServerConnector httpServerConnector) {
             ListenerConfiguration config = httpServerConnector.getListenerConfiguration();
             return new HttpTransport(config.getId(), config.getScheme(), config.getHost(), config.getPort());
