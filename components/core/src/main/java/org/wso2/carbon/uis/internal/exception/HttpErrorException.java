@@ -20,24 +20,52 @@ package org.wso2.carbon.uis.internal.exception;
 
 import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 
+/**
+ * Indicates a HTTP error.
+ *
+ * @since 0.8.0
+ */
 public class HttpErrorException extends UISRuntimeException {
 
     private final int httpStatusCode;
 
+    /**
+     * Constructs a new exception with the specified HTTP status code and {@code null} as its detail message.
+     *
+     * @param httpStatusCode HTTP error status code
+     */
     public HttpErrorException(int httpStatusCode) {
         this.httpStatusCode = httpStatusCode;
     }
 
+    /**
+     * Constructs a new exception with the specified HTTP status code and detail message.
+     *
+     * @param httpStatusCode HTTP error status code
+     * @param message        detail message
+     */
     public HttpErrorException(int httpStatusCode, String message) {
         super(message);
         this.httpStatusCode = httpStatusCode;
     }
 
+    /**
+     * Constructs a new exception with the specified HTTP status code, detail message, and cause.
+     *
+     * @param httpStatusCode HTTP error status code
+     * @param message        detail message
+     * @param cause          the cause of the exception
+     */
     public HttpErrorException(int httpStatusCode, String message, Throwable cause) {
         super(message, cause);
         this.httpStatusCode = httpStatusCode;
     }
 
+    /**
+     * Returns the HTTP status error code of this HTTP exception.
+     *
+     * @return HTTP status code of the HTTP exception
+     */
     public int getHttpStatusCode() {
         return this.httpStatusCode;
     }

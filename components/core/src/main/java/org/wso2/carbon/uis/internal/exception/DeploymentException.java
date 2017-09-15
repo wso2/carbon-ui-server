@@ -21,7 +21,7 @@ package org.wso2.carbon.uis.internal.exception;
 import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 
 /**
- * Indicates an error occurred when deploying UUF apps and components.
+ * Indicates an error occurred when deploying a web app.
  *
  * @since 0.8.0
  */

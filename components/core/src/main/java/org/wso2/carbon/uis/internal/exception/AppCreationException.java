@@ -19,7 +19,7 @@
 package org.wso2.carbon.uis.internal.exception;
 
 /**
- * Indicates an error occurred when creating an app.
+ * Indicates an error occurred when creating a web app.
  *
  * @since 0.8.0
  */
