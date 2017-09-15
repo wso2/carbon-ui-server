@@ -32,7 +32,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Note: this class has a natural ordering that is inconsistent with equals.
+ * Represents an URI pattern.
+ *
+ * @since 0.8.0
  */
 public class UriPatten implements Comparable<UriPatten> {
 
@@ -44,6 +46,11 @@ public class UriPatten implements Comparable<UriPatten> {
     private final Pattern pattern;
     private final List<String> variableNames;
 
+    /**
+     * Creates a new {@code UriPatten} instance that represents the specified URI pattern.
+     *
+     * @param uriPattern URI pattern
+     */
     public UriPatten(String uriPattern) {
         Pair<Boolean, List<String>> analyseResult = analyse(uriPattern);
         String indexPathRegex = null;
@@ -120,10 +127,23 @@ public class UriPatten implements Comparable<UriPatten> {
         return Pair.of(hasPlusMarkedVariable, variableNames);
     }
 
+    /**
+     * Checks whether this URI patterns matches tto the given URI.
+     *
+     * @param uri URI to be matched
+     * @return {@code true} iff macthes, otherwise {@code false}
+     */
     public boolean matches(String uri) {
         return pattern.matcher(uri).matches();
     }
 
+    /**
+     * Matches the specified URI with this URI pattern and returns values that matches the variables in the URI pattern.
+     *
+     * @param uri URI to be matched
+     * @return {@link Optional#empty() empty optional} if URi doesn't match, otherwise map of matching variable names
+     * and matched values
+     */
     public Optional<Map<String, String>> match(String uri) {
         Matcher matcher = this.pattern.matcher(uri);
         if (matcher.matches()) {
@@ -176,6 +196,6 @@ public class UriPatten implements Comparable<UriPatten> {
 
     @Override
     public String toString() {
-        return "{\"pattern\": \"" + patternString + "\", \"regex\": \"" + pattern.pattern() + "\"}";
+        return "UriPatten{patternString='" + patternString + "', pattern=" + pattern + "'}";
     }
 }
