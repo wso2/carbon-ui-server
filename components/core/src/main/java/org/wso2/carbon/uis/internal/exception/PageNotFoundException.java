@@ -20,16 +20,35 @@ package org.wso2.carbon.uis.internal.exception;
 
 import org.wso2.carbon.uis.api.http.HttpResponse;
 
+/**
+ * Indicates a page not found error.
+ *
+ * @since 0.8.0
+ */
 public class PageNotFoundException extends HttpErrorException {
 
+    /**
+     * Constructs a new exception with {@code null} as its detail message.
+     */
     public PageNotFoundException() {
         super(HttpResponse.STATUS_NOT_FOUND);
     }
 
+    /**
+     * Constructs a new exception with the specified detail message.
+     *
+     * @param message detail message
+     */
     public PageNotFoundException(String message) {
         super(HttpResponse.STATUS_NOT_FOUND, message);
     }
 
+    /**
+     * Constructs a new exception with the specified detail message and cause.
+     *
+     * @param message details message
+     * @param cause   the cause of the exception
+     */
     public PageNotFoundException(String message, Throwable cause) {
         super(HttpResponse.STATUS_NOT_FOUND, message, cause);
     }

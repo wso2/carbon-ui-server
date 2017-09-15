@@ -19,7 +19,7 @@
 package org.wso2.carbon.uis.internal.exception;
 
 /**
- * Indicates an error happens when reading or parsing or loading or processing configuration.
+ * Indicates an error happens when reading or parsing or loading or processing configuration of a web app.
  *
  * @since 0.8.0
  */
