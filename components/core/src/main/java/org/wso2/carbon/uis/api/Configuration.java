@@ -134,6 +134,7 @@ public class Configuration {
 
         /**
          * Creates a new empty response headers.
+         *
          * @return empty response headers
          */
         static ResponseHeaders emptyResponseHeaders() {
