@@ -21,11 +21,24 @@ package org.wso2.carbon.uis.internal.reference;
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
 
 /**
- * Created by sajith on 8/28/17.
+ * A reference to a page in a web app.
+ *
+ * @since 0.8.0
  */
 public interface PageReference {
 
+    /**
+     * Returns the path pattern of the page represented by this reference.
+     *
+     * @return path pattern of the page
+     * @throws FileOperationException if cannot get the path pattern
+     */
     String getPathPattern() throws FileOperationException;
 
+    /**
+     * Returns a reference to the HTMl if of the page represented by this reference.
+     *
+     * @return reference to the HTML file of the page
+     */
     FileReference getHtmlFile();
 }
