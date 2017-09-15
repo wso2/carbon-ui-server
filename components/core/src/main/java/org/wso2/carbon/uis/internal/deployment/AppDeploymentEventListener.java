@@ -32,10 +32,15 @@ public interface AppDeploymentEventListener {
     /**
      * Invoked when an app is deployed.
      *
-     * @param appReference a reference to the app
+     * @param appReference a reference to the deployed app
      */
     void appDeploymentEvent(AppReference appReference);
 
+    /**
+     * Invoked when apps are deployed
+     *
+     * @param appReferences references to deployed apps
+     */
     @Deprecated
     void appsDeploymentEvents(Set<AppReference> appReferences);
 
