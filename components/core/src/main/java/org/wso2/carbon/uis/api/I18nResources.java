@@ -51,8 +51,8 @@ public class I18nResources {
     /**
      * Returns the best matching locale chosen from the available locales for the given language ranges.
      *
-     * @param languageRanges a list of comma-separated language ranges or a list of language ranges in the form of
-     *                       the "Accept-Language" header defined in
+     * @param languageRanges a list of comma-separated language ranges or a list of language ranges in the form of the
+     *                       "Accept-Language" header defined in
      *                       <a href="https://tools.ietf.org/html/rfc2616#section-14.4">RFC 2616</a>
      * @return Locale the best matching locale, or {@code null} if nothing matches
      */
@@ -72,11 +72,12 @@ public class I18nResources {
     /**
      * Returns the formatted message of the given message key in the given locale. If no message is found for the
      * given message key in the given locale, then the specified default message will be returned.
-     * @param locale locale of the message
-     * @param messageKey key of the message
-     * @param messageParams parameters to format the message, or {@code null} if there are no parameters
-     * @param defaultMessage default message, which will be returned if no message is found for the given message key
-     *                       in the given locale
+     *
+     * @param locale         locale of the message
+     * @param messageKey     key of the message
+     * @param messageParams  parameters to format the message, or {@code null} if there are no parameters
+     * @param defaultMessage default message, which will be returned if no message is found for the given message key in
+     *                       the given locale
      * @return the formatted message or the default message if no message was found for the given message key in the
      * given locale
      */
