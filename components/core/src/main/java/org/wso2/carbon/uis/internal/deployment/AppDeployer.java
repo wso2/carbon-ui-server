@@ -19,10 +19,9 @@
 package org.wso2.carbon.uis.internal.deployment;
 
 /**
- * A locator that finds web apps.
+ * A deployer that locates and deploys web apps.
  *
  * @since 0.8.3
  */
 public interface AppDeployer {
-
 }
