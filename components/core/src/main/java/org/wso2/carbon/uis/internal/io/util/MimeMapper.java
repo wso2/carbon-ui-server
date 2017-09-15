@@ -26,9 +26,8 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.Properties;
 
-
 /**
- * his class lazily loads the 'mime-map.properties' file and maps file extension to mime type using the file.
+ * This class lazily loads the 'mime-map.properties' file and maps file extension to mime type using the file.
  *
  * @since 0.8.0
  */
@@ -40,7 +39,7 @@ public class MimeMapper {
     private MimeMapper() {
     }
 
-    private static Properties loadMimeMap() {
+    private static Properties loadMimeMap() throws ConfigurationException, FileOperationException {
         Properties mimeMap = new Properties();
         try (InputStream inputStream = MimeMapper.class.getClassLoader().getResourceAsStream(MIME_PROPERTY_FILE)) {
             if (inputStream == null) {
@@ -64,7 +63,7 @@ public class MimeMapper {
      * @throws FileOperationException if cannot find or read the MIME types property file
      * @throws ConfigurationException if MIME types property file is invalid
      */
-    public static Optional<String> getMimeType(String extension) {
+    public static Optional<String> getMimeType(String extension) throws ConfigurationException, FileOperationException {
         if (MIME_MAP == null) {
             /* Here, class object 'MimeMapper.class' is used as the synchronization lock because 'getMimeType()' is
             the only is public method. */
