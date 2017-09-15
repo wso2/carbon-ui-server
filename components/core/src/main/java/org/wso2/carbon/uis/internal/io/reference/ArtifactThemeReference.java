@@ -25,27 +25,28 @@ import org.wso2.carbon.uis.internal.reference.ThemeReference;
 import java.nio.file.Path;
 
 /**
- * Created by sajith on 8/29/17.
+ * A reference to a theme in a directory inside a web app artifact.
+ *
+ * @since 0.8.0
  */
 public class ArtifactThemeReference implements ThemeReference {
 
     private final Path themeDirectory;
 
+    /**
+     * Creates a reference to the theme which resides in the specified directory.
+     *
+     * @param themeDirectory directory that contains the theme
+     */
     public ArtifactThemeReference(Path themeDirectory) {
         this.themeDirectory = themeDirectory;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getName() throws FileOperationException {
         return PathUtils.getName(themeDirectory);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getPath() throws FileOperationException {
         return themeDirectory.toString();
