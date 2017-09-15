@@ -27,16 +27,19 @@ import org.wso2.carbon.uis.api.http.HttpResponse;
 import org.wso2.carbon.uis.internal.deployment.AppRegistry;
 import org.wso2.carbon.uis.internal.exception.AppCreationException;
 import org.wso2.carbon.uis.internal.exception.HttpErrorException;
+import org.wso2.carbon.uis.internal.exception.PageRedirectException;
 import org.wso2.carbon.uis.internal.io.StaticResolver;
 
 import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_TEXT_HTML;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_CACHE_CONTROL;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_EXPIRES;
+import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_LOCATION;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_PRAGMA;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_CONTENT_TYPE_OPTIONS;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_FRAME_OPTIONS;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_XSS_PROTECTION;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_BAD_REQUEST;
+import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_FOUND;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_INTERNAL_SERVER_ERROR;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_OK;
 
@@ -103,6 +106,9 @@ public class RequestDispatcher {
             } else {
                 servePage(app, request, response);
             }
+        } catch (PageRedirectException e) {
+            response.setStatus(STATUS_FOUND);
+            response.setHeader(HEADER_LOCATION, e.getRedirectUrl());
         } catch (HttpErrorException e) {
             serveDefaultErrorPage(e.getHttpStatusCode(), e.getMessage(), response);
         } catch (UISRuntimeException e) {
