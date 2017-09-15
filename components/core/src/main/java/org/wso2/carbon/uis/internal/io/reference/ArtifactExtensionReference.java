@@ -25,12 +25,19 @@ import org.wso2.carbon.uis.internal.reference.ExtensionReference;
 import java.nio.file.Path;
 
 /**
- * Created by sajith on 8/29/17.
+ * A reference to an extension in a directory inside a web app artifact.
+ *
+ * @since 0.8.0
  */
 public class ArtifactExtensionReference implements ExtensionReference {
 
     private final Path extensionDirectory;
 
+    /**
+     * Creates a reference to the extension which resides in the specified directory.
+     *
+     * @param extensionDirectory directory that contains the extension
+     */
     public ArtifactExtensionReference(Path extensionDirectory) {
         this.extensionDirectory = extensionDirectory;
     }
