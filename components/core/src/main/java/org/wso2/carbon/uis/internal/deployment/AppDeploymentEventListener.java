@@ -40,6 +40,7 @@ public interface AppDeploymentEventListener {
      * Invoked when apps are deployed
      *
      * @param appReferences references to deployed apps
+     * @deprecated used as a workaround
      */
     @Deprecated
     void appsDeploymentEvents(Set<AppReference> appReferences);

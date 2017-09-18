@@ -109,12 +109,13 @@ public class CarbonUiServer implements Server, AppDeploymentEventListener {
 
     @Override
     public void appsDeploymentEvents(Set<AppReference> appReferences) {
-        appReferences.forEach(this::appDeploymentEvent);
-
         // Register CapabilityProvider to give number of Microservice capabilities provided by this bundle.
         Dictionary<String, String> properties = new Hashtable<>();
         properties.put("capabilityName", Microservice.class.getName());
-        bundleContext.registerService(CapabilityProvider.class, () -> appReferences.size() * 2, properties);
+        bundleContext.registerService(CapabilityProvider.class,
+                                      () -> appReferences.size() * httpConnector.getHttpTransportCount(), properties);
+
+        appReferences.forEach(this::appDeploymentEvent);
     }
 
     @Override
