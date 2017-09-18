@@ -47,6 +47,10 @@
             <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
         </dependency>
 
+        <!--Deployment-->
+
+        <!--Config-->
+
         <!--MSF4J-->
         <dependency>
             <groupId>org.wso2.msf4j</groupId>
