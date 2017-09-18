@@ -41,12 +41,6 @@
             <artifactId>org.wso2.carbon.core</artifactId>
         </dependency>
 
-        <!--Transport-->
-        <dependency>
-            <groupId>org.wso2.carbon.transport</groupId>
-            <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
-        </dependency>
-
         <!--Deployment-->
 
         <!--Config-->
@@ -56,10 +50,10 @@
             <groupId>org.wso2.msf4j</groupId>
             <artifactId>msf4j-core</artifactId>
         </dependency>
-        <!--Netty-->
+        <!--Transport-->
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-http</artifactId>
+            <groupId>org.wso2.carbon.transport</groupId>
+            <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
         </dependency>
 
         <!--OSGi-->
@@ -83,6 +77,10 @@
         </dependency>
 
         <!--Other-->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
