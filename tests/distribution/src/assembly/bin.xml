@@ -17,9 +17,10 @@
   -->
 
 <assembly>
+    <id>cuis</id>
+
     <includeBaseDirectory>true</includeBaseDirectory>
     <baseDirectory>wso2-cuis-${project.version}</baseDirectory>
-    <id>cuis</id>
 
     <formats>
         <format>zip</format>
@@ -27,50 +28,38 @@
 
     <fileSets>
         <fileSet>
-            <directory>target/wso2carbon-kernel-${carbon.kernel.version}</directory>
+            <directory>target/WSO2Carbon</directory>
             <outputDirectory>.</outputDirectory>
+            <fileMode>644</fileMode>
             <excludes>
-                <exclude>README.txt</exclude>
-                <exclude>**/*.ipr</exclude>
-                <exclude>**/*.iwr</exclude>
-                <exclude>**/*.eclipse</exclude>
-                <exclude>**/netty-transports.yml</exclude>
+                <exclude>**/*.lock</exclude>
+                <exclude>**/.data</exclude>
+                <exclude>**/.settings</exclude>
+                <exclude>libcairo-swt.so</exclude>
+                <exclude>eclipse</exclude>
+                <exclude>**/*.sh</exclude>
+                <exclude>**/native/*</exclude>
             </excludes>
         </fileSet>
 
         <fileSet>
-            <directory>carbon-home/conf/transports</directory>
-            <outputDirectory>conf/transports</outputDirectory>
-            <fileMode>644</fileMode>
+            <directory>target/WSO2Carbon</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>**/*.sh</include>
+                <include>**/native/*</include>
+            </includes>
+            <fileMode>755</fileMode>
         </fileSet>
 
         <fileSet>
-            <directory>carbon-home/conf/osgi</directory>
-            <outputDirectory>conf/wso2</outputDirectory>
-            <fileMode>644</fileMode>
-        </fileSet>
-
-        <fileSet>
-            <directory>carbon-home/conf/data-bridge</directory>
-            <outputDirectory>conf/data-bridge</outputDirectory>
-            <fileMode>644</fileMode>
-        </fileSet>
-
-        <fileSet>
-            <directory>carbon-home/deployment/</directory>
-            <outputDirectory>deployment/</outputDirectory>
-            <fileMode>644</fileMode>
-        </fileSet>
-
-        <fileSet>
-            <directory>carbon-home/resources/</directory>
-            <outputDirectory>resources/</outputDirectory>
-            <fileMode>644</fileMode>
-        </fileSet>
-
-        <fileSet>
-            <directory>carbon-home/datasources/</directory>
-            <outputDirectory>conf/datasources/</outputDirectory>
+            <directory>carbon-home</directory>
+            <outputDirectory></outputDirectory>
+            <excludes>
+                <exclude>**/*.ipr</exclude>
+                <exclude>**/*.iwr</exclude>
+                <exclude>**/*.eclipse</exclude>
+            </excludes>
             <fileMode>644</fileMode>
         </fileSet>
     </fileSets>
