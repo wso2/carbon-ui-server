@@ -44,7 +44,7 @@
 
     <modules>
         <module>components/org.wso2.carbon.uis</module>
-        <module>features/org.wso2.carbon.uis</module>
+        <module>features/org.wso2.carbon.uis.feature</module>
         <module>tests</module>
     </modules>
 
