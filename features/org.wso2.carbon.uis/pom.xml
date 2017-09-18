@@ -20,7 +20,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>org.wso2.carbon.uis.core.feature</artifactId>
+    <artifactId>org.wso2.carbon.uis.feature</artifactId>
     <packaging>carbon-feature</packaging>
 
     <name>WSO2 Carbon UI Server - Core - Feature</name>
@@ -37,7 +37,7 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.uis</groupId>
-            <artifactId>org.wso2.carbon.uis.core</artifactId>
+            <artifactId>org.wso2.carbon.uis</artifactId>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -71,7 +71,7 @@
                             </adviceFileContents>
                             <bundles>
                                 <bundle>
-                                    <symbolicName>org.wso2.carbon.uis.core</symbolicName>
+                                    <symbolicName>org.wso2.carbon.uis</symbolicName>
                                     <version>${carbon.uis.version}</version>
                                 </bundle>
                                 <bundle>
