@@ -150,6 +150,11 @@ public class Msf4jHttpConnector implements HttpConnector {
         microserviceRegistrations.keySet().forEach(this::unregisterApp);
     }
 
+    @Override
+    public int getHttpTransportCount() {
+        return httpTransports.size();
+    }
+
     /**
      * Modal class that holds information about a HTTP transport.
      *
