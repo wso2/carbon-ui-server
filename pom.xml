@@ -168,11 +168,6 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.transport</groupId>
-                <artifactId>org.wso2.carbon.connector.framework</artifactId>
-                <version>${carbon.transport.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.transport</groupId>
                 <artifactId>org.wso2.carbon.connector.framework.feature</artifactId>
                 <version>${carbon.transport.version}</version>
                 <type>zip</type>
