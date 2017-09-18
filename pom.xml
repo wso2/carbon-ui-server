@@ -52,7 +52,7 @@
         <dependencies>
             <dependency>
                 <groupId>org.wso2.carbon.uis</groupId>
-                <artifactId>org.wso2.carbon.uis.core</artifactId>
+                <artifactId>org.wso2.carbon.uis</artifactId>
                 <version>${carbon.uis.version}</version>
             </dependency>
 
