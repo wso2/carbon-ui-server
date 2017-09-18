@@ -43,7 +43,7 @@
     </scm>
 
     <modules>
-        <module>components/core</module>
+        <module>components/org.wso2.carbon.uis</module>
         <module>features/org.wso2.carbon.uis</module>
         <module>tests</module>
     </modules>
