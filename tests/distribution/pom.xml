@@ -31,7 +31,7 @@
     <parent>
         <groupId>org.wso2.carbon.uis.tests</groupId>
         <artifactId>tests-parent</artifactId>
-        <version>0.8.8-SNAPSHOT</version>
+        <version>0.9.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
