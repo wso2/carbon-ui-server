@@ -334,10 +334,11 @@
 
         <!--Deployment-->
         <carbon.deployment.version>5.1.3</carbon.deployment.version>
-        <carbon.deployment.version.range>[5.0.0,, 6.0.0)</carbon.deployment.version.range>
+        <carbon.deployment.version.range>[5.0.0, 6.0.0)</carbon.deployment.version.range>
 
         <!--Config-->
         <carbon.config.version>2.0.3</carbon.config.version>
+        <carbon.config.version.range>[2.0.0, 3.0.0)</carbon.config.version.range>
         <carbon.securevault.version>5.0.8</carbon.securevault.version>
         <carbon.utils.version>2.0.2</carbon.utils.version>
 
