@@ -119,48 +119,35 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Import-Package>
-                            org.wso2.carbon.kernel.startupresolver.*; version="${carbon.kernel.version.range}",
-                            org.wso2.msf4j; version="${msf4j.version.range}",
-                            javax.ws.rs.*; version="${javax.ws.rs.version.range}",
-                            org.wso2.carbon.messaging; version="${carbon.messaging.version.range}",
-                            org.wso2.carbon.transport.http.netty.*;version="${carbon.transport.version.range}",
-                            org.osgi.framework; version="${org.osgi.framework.version.range}",
-                            org.osgi.framework.wiring; version="${org.osgi.framework.wiring.version.range}",
-                            org.osgi.service.component.annotations.*;
-                            version="${org.osgi.service.component.annotations.version.range}",
-                            org.slf4j.*; version="${slf4j.version.range}",
-                            io.netty.handler.*; version="${netty.version.range}",
-                            com.google.common.*; version="${guava.version.range}",
-                            com.google.gson.*; version="${gson.version.range}",
-                            org.yaml.snakeyaml.*; version="${orbit.org.yaml.version.range}",
-                            org.apache.commons.lang3.*; version="${org.apache.commons.commons-lang3.version.range}",
-                            org.apache.commons.io; version="${commons-io.wso2.version.range}"
-                        </Import-Package>
-                        <Private-Package>org.wso2.carbon.uis.internal.*</Private-Package>
-                        <Export-Package>
-                            !org.wso2.carbon.uis.internal*,
-                            org.wso2.carbon.uis.api.*;version="${project.version}",
-                            org.wso2.carbon.uis.spi.*;version="${project.version}"
-                        </Export-Package>
-                        <Carbon-Component>
-                            osgi.service;objectClass="org.wso2.carbon.uis.api.http.HttpConnector",
-                            osgi.service;objectClass="org.wso2.carbon.uis.spi.Server",
-                            osgi.service;objectClass="org.wso2.carbon.kernel.startupresolver.CapabilityProvider";
-                            capabilityName="org.wso2.msf4j.Microservice"
-                        </Carbon-Component>
-                        <Include-Resource>src/main/resources</Include-Resource>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <properties>
+        <import.package>
+            org.wso2.carbon.kernel.startupresolver.*; version="${carbon.kernel.version.range}",
+            org.wso2.carbon.config.*; version="${carbon.config.version.range}",
+            org.wso2.msf4j; version="${msf4j.version.range}",
+            javax.ws.rs.*; version="${javax.ws.rs.version.range}",
+            org.wso2.carbon.messaging; version="${carbon.messaging.version.range}",
+            org.wso2.carbon.transport.http.netty.*;version="${carbon.transport.version.range}",
+            org.osgi.framework; version="${org.osgi.framework.version.range}",
+            org.osgi.framework.wiring; version="${org.osgi.framework.wiring.version.range}",
+            org.osgi.service.component.annotations.*; version="${org.osgi.service.component.annotations.version.range}",
+            org.slf4j.*; version="${slf4j.version.range}",
+            io.netty.handler.*; version="${netty.version.range}",
+            com.google.common.*; version="${guava.version.range}",
+            com.google.gson.*; version="${gson.version.range}",
+            org.yaml.snakeyaml.*; version="${orbit.org.yaml.version.range}",
+            org.apache.commons.lang3.*; version="${org.apache.commons.commons-lang3.version.range}",
+            org.apache.commons.io; version="${commons-io.wso2.version.range}"
+        </import.package>
+        <private.package>org.wso2.carbon.uis.internal.*</private.package>
+        <export.package>
+            !org.wso2.carbon.uis.internal*,
+            org.wso2.carbon.uis.api.*;version="${project.version}",
+            org.wso2.carbon.uis.spi.*;version="${project.version}"
+        </export.package>
+        <carbon.component>
+            osgi.service;objectClass="org.wso2.carbon.kernel.startupresolver.CapabilityProvider";
+            capabilityName="org.wso2.msf4j.Microservice"
+        </carbon.component>
+    </properties>
 
 </project>
