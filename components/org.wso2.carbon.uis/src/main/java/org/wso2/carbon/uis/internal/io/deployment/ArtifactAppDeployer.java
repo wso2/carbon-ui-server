@@ -32,7 +32,6 @@ import org.wso2.carbon.uis.internal.deployment.AppDeploymentEventListener;
 import org.wso2.carbon.uis.internal.exception.DeploymentException;
 import org.wso2.carbon.uis.internal.io.reference.ArtifactAppReference;
 import org.wso2.carbon.uis.internal.reference.AppReference;
-import org.wso2.carbon.uis.spi.Server;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,7 +47,7 @@ import java.util.stream.Collectors;
  * @since 0.8.3
  */
 @Component(name = "org.wso2.carbon.uis.internal.io.deployment.ArtifactAppDeployer",
-           service = Server.class,
+           service = AppDeployer.class,
            immediate = true,
            property = {
                    "componentName=wso2-carbon-ui-server-deployer"
