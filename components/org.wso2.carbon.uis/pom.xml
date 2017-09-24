@@ -144,10 +144,6 @@
             org.wso2.carbon.uis.api.*;version="${project.version}",
             org.wso2.carbon.uis.spi.*;version="${project.version}"
         </export.package>
-        <carbon.component>
-            osgi.service;objectClass="org.wso2.carbon.kernel.startupresolver.CapabilityProvider";
-            capabilityName="org.wso2.msf4j.Microservice"
-        </carbon.component>
     </properties>
 
 </project>
