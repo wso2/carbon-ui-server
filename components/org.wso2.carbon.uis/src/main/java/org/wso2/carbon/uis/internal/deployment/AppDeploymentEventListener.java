@@ -18,9 +18,7 @@
 
 package org.wso2.carbon.uis.internal.deployment;
 
-import org.wso2.carbon.uis.internal.reference.AppReference;
-
-import java.util.Set;
+import org.wso2.carbon.uis.api.App;
 
 /**
  * A listener that observes web app deployments.
@@ -32,18 +30,9 @@ public interface AppDeploymentEventListener {
     /**
      * Invoked when an app is deployed.
      *
-     * @param appReference a reference to the deployed app
+     * @param app the deployed app
      */
-    void appDeploymentEvent(AppReference appReference);
-
-    /**
-     * Invoked when apps are deployed
-     *
-     * @param appReferences references to deployed apps
-     * @deprecated used as a workaround
-     */
-    @Deprecated
-    void appsDeploymentEvents(Set<AppReference> appReferences);
+    void appDeploymentEvent(App app);
 
     /**
      * Invoked when an app is undeployed.

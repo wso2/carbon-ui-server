@@ -24,8 +24,6 @@ import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
-import org.wso2.carbon.uis.internal.deployment.AppRegistry;
-import org.wso2.carbon.uis.internal.exception.AppCreationException;
 import org.wso2.carbon.uis.internal.exception.HttpErrorException;
 import org.wso2.carbon.uis.internal.exception.PageRedirectException;
 import org.wso2.carbon.uis.internal.io.StaticResolver;
@@ -52,16 +50,20 @@ public class RequestDispatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestDispatcher.class);
 
+    private final App app;
     private final StaticResolver staticResolver;
 
     /**
      * Creates a new request dispatcher.
+     *
+     * @param app web app to be served
      */
-    public RequestDispatcher() {
-        this(new StaticResolver());
+    public RequestDispatcher(App app) {
+        this(app, new StaticResolver());
     }
 
-    RequestDispatcher(StaticResolver staticResolver) {
+    RequestDispatcher(App app, StaticResolver staticResolver) {
+        this.app = app;
         this.staticResolver = staticResolver;
     }
 
@@ -69,11 +71,9 @@ public class RequestDispatcher {
      * Serves the specified HTTP request.
      *
      * @param request     HTTP request to be served
-     * @param appRegistry app registry
-     * @param appName     name of the relevant app
      * @return HTTP response
      */
-    public HttpResponse serve(HttpRequest request, AppRegistry appRegistry, String appName) {
+    public HttpResponse serve(HttpRequest request) {
         HttpResponse response = new HttpResponse();
 
         if (!request.isValid()) {
@@ -82,16 +82,6 @@ public class RequestDispatcher {
         }
         if (request.isDefaultFaviconRequest()) {
             serveDefaultFavicon(request, response);
-            return response;
-        }
-
-        App app;
-        try {
-            app = appRegistry.getApp(appName);
-        } catch (AppCreationException e) {
-            String msg = "Cannot create app '" + appName + "'.";
-            LOGGER.error(msg, e);
-            serveDefaultErrorPage(STATUS_INTERNAL_SERVER_ERROR, msg, response);
             return response;
         }
 
