@@ -45,8 +45,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -70,8 +68,8 @@ public class ArtifactAppDeployer implements Deployer {
 
     private final ArtifactType<String> artifactType;
     private final URL deploymentLocation;
-    private final Set<AppDeploymentEventListener> eventListeners = new HashSet<>();
-    private final ConcurrentMap<String, App> deployedApps = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, App> deployedApps;
+    private AppDeploymentEventListener appDeploymentEventListener;
 
     /**
      * Creates a new app deployer.
@@ -85,21 +83,22 @@ public class ArtifactAppDeployer implements Deployer {
             LOGGER.error("Invalid URL '{}' as app deployment location.", DEPLOYMENT_LOCATION);
         }
         this.deploymentLocation = deploymentLocationUrl;
+        this.deployedApps = new ConcurrentHashMap<>();
     }
 
     @Reference(name = "deploymentListener",
                service = AppDeploymentEventListener.class,
-               cardinality = ReferenceCardinality.AT_LEAST_ONE,
+               cardinality = ReferenceCardinality.MANDATORY,
                policy = ReferencePolicy.DYNAMIC,
                unbind = "unregisterListener")
     protected void registerListener(AppDeploymentEventListener listener) {
-        this.eventListeners.add(listener);
+        this.appDeploymentEventListener = listener;
         LOGGER.debug("An instance of class '{}' registered as an app deployment listener.",
                      listener.getClass().getName());
     }
 
     protected void unregisterListener(AppDeploymentEventListener listener) {
-        this.eventListeners.remove(listener);
+        this.appDeploymentEventListener = null;
         LOGGER.debug("An instance of class '{}' unregistered as an app deployment listener.",
                      listener.getClass().getName());
     }
@@ -136,7 +135,7 @@ public class ArtifactAppDeployer implements Deployer {
         App app = createApp(appPath);
         String artifactKey = "webapp:" + app.getName();
 
-        eventListeners.forEach(listener -> listener.appDeploymentEvent(app));
+        appDeploymentEventListener.appDeploymentEvent(app);
         deployedApps.put(artifactKey, app);
         LOGGER.debug("Web app '{}' deployed for context path '{}'.", app.getName(), app.getContextPath());
         return artifactKey;
@@ -149,7 +148,7 @@ public class ArtifactAppDeployer implements Deployer {
             throw new CarbonDeploymentException("Web app for key '{}' cannot be found to undeploy.");
         }
 
-        eventListeners.forEach(listener -> listener.appUndeploymentEvent(app.getName()));
+        appDeploymentEventListener.appUndeploymentEvent(app.getName());
         LOGGER.debug("Web app '{}' undeployed from context path '{}'.", app.getName(), app.getContextPath());
     }
 
