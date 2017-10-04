@@ -62,8 +62,8 @@ import java.util.concurrent.ConcurrentMap;
 )
 public class ArtifactAppDeployer implements Deployer {
 
-    private static final String ARTIFACT_TYPE = "reactapp";
-    private static final String DEPLOYMENT_LOCATION = "file:reactapps";
+    private static final String ARTIFACT_TYPE = "web-ui-app";
+    private static final String DEPLOYMENT_LOCATION = "file:web-ui-apps";
     private static final Logger LOGGER = LoggerFactory.getLogger(ArtifactAppDeployer.class);
 
     private final ArtifactType<String> artifactType;
