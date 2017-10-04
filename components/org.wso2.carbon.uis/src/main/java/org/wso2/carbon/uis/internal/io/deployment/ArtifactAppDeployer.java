@@ -181,7 +181,7 @@ public class ArtifactAppDeployer implements Deployer {
 
     private App createApp(Path appPath) throws CarbonDeploymentException {
         AppReference appReference = new ArtifactAppReference(appPath);
-        String appContextPath = getAppContextPath(appReference);
+        String appContextPath = createAppContextPath(appReference);
         try {
             return AppCreator.createApp(appReference, appContextPath);
         } catch (AppCreationException e) {
@@ -191,7 +191,7 @@ public class ArtifactAppDeployer implements Deployer {
         }
     }
 
-    private String getAppContextPath(AppReference appReference) {
+    private String createAppContextPath(AppReference appReference) {
         return "/" + appReference.getName();
     }
 }
