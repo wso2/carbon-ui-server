@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.uis.api.http;
 
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -38,17 +37,6 @@ public interface HttpConnector {
     void registerApp(String appName, String appContextPath, Function<HttpRequest, HttpResponse> httpListener);
 
     /**
-     * Registers multiple web apps.
-     *
-     * @param appNamesContextPaths names and context paths of the apps.
-     * @param httpListener         HTTP requests listener that handles the incoming HTTP requests for the registering
-     *                             apps
-     * @deprecated used as a workaround
-     */
-    @Deprecated
-    void registerApps(Map<String, String> appNamesContextPaths, Function<HttpRequest, HttpResponse> httpListener);
-
-    /**
      * Unregisters the specified app from the transport.
      *
      * @param appName name of the app to be unregister
@@ -59,13 +47,4 @@ public interface HttpConnector {
      * Unregisters all registered apps from the transport.
      */
     void unregisterAllApps();
-
-    /**
-     * Returns the number of registered HTTP transport to this HTTP connector.
-     *
-     * @return number of registered HTTP transports
-     * @deprecated used as a workaround
-     */
-    @Deprecated
-    int getHttpTransportCount();
 }

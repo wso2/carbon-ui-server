@@ -41,7 +41,6 @@ import org.wso2.msf4j.Microservice;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -126,14 +125,6 @@ public class Msf4jHttpConnector implements HttpConnector {
     }
 
     @Override
-    public void registerApps(Map<String, String> appNamesContextPaths,
-                             Function<HttpRequest, HttpResponse> httpListener) {
-        for (Map.Entry<String, String> appNameContextPath : appNamesContextPaths.entrySet()) {
-            registerApp(appNameContextPath.getKey(), appNameContextPath.getValue(), httpListener);
-        }
-    }
-
-    @Override
     public void unregisterApp(String appName) {
         Set<ServiceRegistration<Microservice>> registrations = microserviceRegistrations.get(appName);
         if (registrations.isEmpty()) {
@@ -148,11 +139,6 @@ public class Msf4jHttpConnector implements HttpConnector {
     @Override
     public void unregisterAllApps() {
         microserviceRegistrations.keySet().forEach(this::unregisterApp);
-    }
-
-    @Override
-    public int getHttpTransportCount() {
-        return httpTransports.size();
     }
 
     /**
