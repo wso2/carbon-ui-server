@@ -143,7 +143,7 @@ public class ArtifactAppDeployer implements Deployer {
 
     @Override
     public void undeploy(Object key) throws CarbonDeploymentException {
-        App app = deployedApps.remove(key.toString());
+        App app = deployedApps.remove(key);
         if (app == null) {
             throw new CarbonDeploymentException("Web app for key '{}' cannot be found to undeploy.");
         }
