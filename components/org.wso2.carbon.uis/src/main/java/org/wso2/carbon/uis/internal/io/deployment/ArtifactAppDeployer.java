@@ -158,6 +158,7 @@ public class ArtifactAppDeployer implements Deployer {
     @Override
     public Object update(Artifact artifact) throws CarbonDeploymentException {
         // when an app artifact gets updated, we just re-deploy it
+        LOGGER.debug("Updating web app for key '{}'.", artifact.getKey());
         undeploy(artifact.getKey());
         return deploy(artifact);
     }
