@@ -191,6 +191,7 @@ public class ArtifactAppDeployer implements Deployer {
     }
 
     private String createAppContextPath(AppReference appReference) {
+        // TODO: 10/7/17 Get the context path of the app from the deployment.yaml, if not return below default value.
         return "/" + appReference.getName();
     }
 }
