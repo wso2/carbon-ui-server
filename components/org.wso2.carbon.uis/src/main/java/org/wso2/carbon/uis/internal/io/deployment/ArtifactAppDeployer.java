@@ -68,6 +68,9 @@ public class ArtifactAppDeployer implements Deployer {
 
     private final ArtifactType<String> artifactType;
     private final URL deploymentLocation;
+    /**
+     * Contains created apps. Here key is the artifact ID and value is corresponding created app.
+     */
     private final ConcurrentMap<String, App> deployedApps;
     private AppDeploymentEventListener appDeploymentEventListener;
 
