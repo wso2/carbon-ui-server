@@ -145,7 +145,7 @@ public class ArtifactAppDeployer implements Deployer {
     public void undeploy(Object key) throws CarbonDeploymentException {
         App app = deployedApps.remove(key);
         if (app == null) {
-            throw new CarbonDeploymentException("Web app for key '{}' cannot be found to undeploy.");
+            throw new CarbonDeploymentException("Web app for key '" + key + "' cannot be found to undeploy.");
         }
 
         appDeploymentEventListener.appUndeploymentEvent(app.getName());
