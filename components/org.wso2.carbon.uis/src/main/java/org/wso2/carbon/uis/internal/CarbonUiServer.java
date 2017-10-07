@@ -53,6 +53,9 @@ public class CarbonUiServer implements Server, AppDeploymentEventListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(CarbonUiServer.class);
 
     private HttpConnector httpConnector;
+    /**
+     * Contains deployed apps. Here key is the app name and value is the deployed app.
+     */
     private final ConcurrentMap<String, App> deployedApps = new ConcurrentHashMap<>();
 
     @Reference(name = "httpConnector",
