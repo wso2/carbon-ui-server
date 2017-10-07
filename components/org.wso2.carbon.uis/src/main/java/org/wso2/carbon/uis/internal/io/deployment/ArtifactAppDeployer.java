@@ -113,12 +113,13 @@ public class ArtifactAppDeployer implements Deployer {
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
-        try {
-            for (String artifactKey : deployedApps.keySet()) {
+        for (String artifactKey : deployedApps.keySet()) {
+            try {
                 undeploy(artifactKey);
+            } catch (CarbonDeploymentException e) {
+                throw new UISRuntimeException("An error occurred when undeploying web app for key '" + artifactKey +
+                                              "' during deactivation of app deployer.", e);
             }
-        } catch (CarbonDeploymentException e) {
-            throw new UISRuntimeException("An error occurred during deactivation of app deployer.", e);
         }
         LOGGER.debug("Carbon UI server app deployer deactivated.");
     }
