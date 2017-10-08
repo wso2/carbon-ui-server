@@ -107,16 +107,26 @@ public class UriPattenTest {
     @DataProvider
     public Object[][] orderedUriPatterns() {
         return new Object[][]{
-                {"/a", "/{a}"},
-                {"/a/b", "/{a}/b"},
-                {"/a/b", "/a/{b}"},
-                {"/a/b/", "/a/{b}/"},
-                {"/a/b", "/{a}/{b}"},
-                {"/a/b/", "/{a}/{b}/"},
-                {"/{a}/b", "/{a}/{b}"},
-                {"/a/{b}", "/{a}/{b}"},
-                {"/ab", "/a{b}"},
-                {"/ab", "/{a}b"}
+                {"/a", "/"},
+                {"/a", "/index"},
+                {"/a", "/b"},
+                {"/a/", "/a"},
+                {"/a/", "/b/"},
+                {"/a/index", "/b/index"},
+                {"/a/b", "/a"},
+                {"/a/b/c", "/a/b"},
+                {"/abc", "/a"},
+                {"/abc", "/ab"},
+                {"/a", "/{x}"},
+                {"/a/b", "/{x}/b"},
+                {"/a/b", "/a/{x}"},
+                {"/a/b/", "/a/{x}/"},
+                {"/a/b", "/{x}/{y}"},
+                {"/a/b/", "/{x}/{y}/"},
+                {"/{x}/b", "/{x}/{y}"},
+                {"/a/{x}", "/{x}/{y}"},
+                {"/ab", "/a{x}"},
+                {"/ab", "/{x}b"}
         };
     }
 
@@ -150,6 +160,18 @@ public class UriPattenTest {
         };
     }
 
+    @DataProvider
+    public Object[][] tripleUriPatterns() {
+        return new Object[][]{
+                {"/", "/", "/"},
+                {"/a", "/a", "/a"},
+                {"/a/", "/a/", "/a/"},
+                {"/a/index", "/a/index", "/a/index"},
+                {"/a", "/b", "/c"},
+                {"/a", "/a{x}", "/ab{x}"},
+        };
+    }
+
     @Test(dataProvider = "invalidUriPatterns")
     public void testInvalidUriPatterns(String uriPattern, String message) {
         try {
@@ -173,10 +195,8 @@ public class UriPattenTest {
     public void testOrdering(String a, String b) {
         UriPatten aPatten = new UriPatten(a);
         UriPatten bPatten = new UriPatten(b);
-        int i = aPatten.compareTo(bPatten);
-        int j = bPatten.compareTo(aPatten);
-        Assert.assertTrue(i < 0, a + " should be more specific than " + b);
-        Assert.assertTrue(j > 0, a + " should be more specific than " + b);
+        Assert.assertTrue(aPatten.compareTo(bPatten) < 0, a + " should be more specific than " + b);
+        Assert.assertTrue(bPatten.compareTo(aPatten) > 0, a + " should be more specific than " + b);
     }
 
     @Test(dataProvider = "matchingUriPatterns")
@@ -201,38 +221,38 @@ public class UriPattenTest {
         Assert.assertFalse(new UriPatten(uriPattern).match(uri).isPresent());
     }
 
-    @Test
-    public void testInvariants() {
-        UriPatten[] pattens = new UriPatten[]{
-                new UriPatten("/"),
-                new UriPatten("/a"),
-                new UriPatten("/ab"),
-                new UriPatten("/a{b}"),
-                new UriPatten("/{a}/{b}"),
-                new UriPatten("/{a}"),
-                new UriPatten("/{a}"),
-                new UriPatten("/a/{b}"),
-                new UriPatten("/ab/{b}"),
-                new UriPatten("/{a}/b"),
-        };
-        // following invariants are specified in java.lang.Comparable
-        for (int x = 0; x < pattens.length; x++) {
-            for (int y = x + 1; y < pattens.length; y++) {
-                int xy = pattens[x].compareTo(pattens[y]);
-                int yx = pattens[y].compareTo(pattens[x]);
-                Assert.assertTrue(signum(xy) == -signum(yx));
-                for (int z = y + 1; z < pattens.length; z++) {
-                    int xz = pattens[x].compareTo(pattens[z]);
-                    int yz = pattens[y].compareTo(pattens[z]);
-                    if (xy > 0 && yz > 0) {
-                        Assert.assertTrue(xz > 0);
-                    } else if (yx > 0 && yz > 0) {
-                        Assert.assertTrue(yz > 0);
-                    } else if (xy == 0) {
-                        Assert.assertTrue(signum(xz) == signum(yz));
-                    }
-                }
-            }
+    @Test(dataProvider = "tripleUriPatterns",
+          description = "Tests invariants specified in java.lang.Comparable interface")
+    public void testInvariants(String a, String b, String c) {
+        UriPatten patternA = new UriPatten(a), patternB = new UriPatten(b), patternC = new UriPatten(c);
+
+        // sgn(A.compareTo(B)) == -sgn(B.compareTo(A))
+        Assert.assertEquals(signum(patternA.compareTo(patternB)), -1 * signum(patternB.compareTo(patternA)),
+                            "sgn(A.compareTo(B)) == -sgn(B.compareTo(A)) should be true.");
+
+        // (A.compareTo(B)>0 && B.compareTo(C)>0) implies A.compareTo(C)>0
+        if ((patternA.compareTo(patternB) > 0) && (patternB.compareTo(patternC) > 0)) {
+            Assert.assertTrue(patternA.compareTo(patternC) > 0,
+                              "If (A.compareTo(B)>0 && B.compareTo(C)>0) then A.compareTo(C)>0 should be true.");
+        }
+        // (A.compareTo(B)<0 && B.compareTo(C)<0) implies A.compareTo(C)<0
+        if ((patternA.compareTo(patternB) < 0) && (patternB.compareTo(patternC) < 0)) {
+            Assert.assertTrue(patternA.compareTo(patternC) < 0,
+                              "If (A.compareTo(B)<0 && B.compareTo(C)<0) then A.compareTo(C)<0 should be true.");
+        }
+
+        // A.compareTo(B)==0 implies that sgn(A.compareTo(C)) == sgn(B.compareTo(C)), for all C
+        if (patternA.compareTo(patternB) == 0) {
+            Assert.assertEquals(signum(patternA.compareTo(patternC)), signum(patternB.compareTo(patternC)),
+                                "If A.compareTo(B)==0 then sgn(A.compareTo(C)) == sgn(B.compareTo(C)) should be true.");
+        }
+
+        // (A.compareTo(B)==0) == (A.equals(B))
+        if (patternA.compareTo(patternB) == 0) {
+            Assert.assertTrue(patternA.equals(patternB), "If A.compareTo(B)==0 then A.equals(B) should be true.");
+        }
+        if (patternB.compareTo(patternC) == 0) {
+            Assert.assertTrue(patternB.equals(patternC), "If B.compareTo(C)==0 then B.equals(C) should be true.");
         }
     }
 }
