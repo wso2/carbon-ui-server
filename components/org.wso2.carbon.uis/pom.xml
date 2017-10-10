@@ -123,6 +123,15 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
     <properties>
         <import.package>
             org.wso2.carbon.kernel.startupresolver.*; version="${carbon.kernel.version.range}",
