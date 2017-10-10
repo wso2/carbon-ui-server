@@ -59,9 +59,19 @@ public class Page implements Comparable<Page> {
         return content;
     }
 
+    /**
+     * Checks whether this page matches to the given URI.
+     *
+     * @param uri URI to be matched
+     * @return {@code true} iff matches, otherwise {@code false}
+     */
+    public boolean matches(String uri) {
+        return uriPatten.matches(uri);
+    }
+
     @Override
     public int compareTo(Page otherPage) {
-        return (otherPage == null) ? 1 : this.getUriPatten().compareTo(otherPage.getUriPatten());
+        return (otherPage == null) ? 1 : this.uriPatten.compareTo(otherPage.uriPatten);
     }
 
     @Override
