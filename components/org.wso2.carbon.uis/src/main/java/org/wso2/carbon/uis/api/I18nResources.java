@@ -20,6 +20,7 @@ package org.wso2.carbon.uis.api;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -61,17 +62,19 @@ public class I18nResources {
             return null;
         }
 
+        List<Locale> matchingLocales;
         try {
-            return Locale.lookup(Locale.LanguageRange.parse(languageRanges), i18nResources.keySet());
+            matchingLocales = Locale.filter(Locale.LanguageRange.parse(languageRanges), i18nResources.keySet());
         } catch (IllegalArgumentException e) {
             // languageRanges is ill formed
             return null;
         }
+        return matchingLocales.isEmpty() ? null : matchingLocales.get(0);
     }
 
     /**
-     * Returns the formatted message of the given message key in the given locale. If no message is found for the
-     * given message key in the given locale, then the specified default message will be returned.
+     * Returns the formatted message of the given message key in the given locale. If no message is found for the given
+     * message key in the given locale, then the specified default message will be returned.
      *
      * @param locale         locale of the message
      * @param messageKey     key of the message
