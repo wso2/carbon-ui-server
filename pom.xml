@@ -335,6 +335,9 @@
                             <goals>
                                 <goal>check</goal>
                             </goals>
+                            <configuration>
+                                <rules><!--no rules--></rules>
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
