@@ -58,6 +58,8 @@ public class UriPatten implements Comparable<UriPatten> {
         if (uriPattern.endsWith("/index")) {
             uriPattern = uriPattern.substring(0, (uriPattern.length() - "index".length()));
             indexPathRegex = "(index)?";
+        } else if (uriPattern.endsWith("/")) {
+            indexPathRegex = "(index)?";
         }
         this.patternString = uriPattern;
         boolean hasPlusMarkedVariable = analyseResult.getLeft();
@@ -128,17 +130,18 @@ public class UriPatten implements Comparable<UriPatten> {
     }
 
     /**
-     * Checks whether this URI patterns matches tto the given URI.
+     * Checks whether this URI patterns matches to the given URI.
      *
      * @param uri URI to be matched
-     * @return {@code true} iff macthes, otherwise {@code false}
+     * @return {@code true} iff matches, otherwise {@code false}
      */
     public boolean matches(String uri) {
         return pattern.matcher(uri).matches();
     }
 
     /**
-     * Matches the specified URI with this URI pattern and returns values that matches the variables in the URI pattern.
+     * Matches the specified URI with this URI pattern and returns values that matches the variables in the URI
+     * pattern.
      *
      * @param uri URI to be matched
      * @return {@link Optional#empty() empty optional} if URi doesn't match, otherwise map of matching variable names
