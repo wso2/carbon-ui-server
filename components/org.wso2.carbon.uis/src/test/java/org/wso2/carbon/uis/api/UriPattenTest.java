@@ -59,6 +59,7 @@ public class UriPattenTest {
     public Object[][] matchingUriPatterns() {
         return new Object[][]{
                 {"/", "/"},
+                {"/", "/index"},
                 {"/a", "/a"},
                 {"/-._~?#[]@!$&'()+,;=", "/-._~?#[]@!$&'()+,;="},
                 {"/{x}", "/a"},
