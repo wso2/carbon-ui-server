@@ -187,7 +187,7 @@ public class App {
 
     private Page getMatchingPage(String uriWithoutContextPath) {
         for (Page page : pages) {
-            if (page.getUriPatten().matches(uriWithoutContextPath)) {
+            if (page.matches(uriWithoutContextPath)) {
                 return page;
             }
         }
