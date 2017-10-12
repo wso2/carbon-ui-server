@@ -20,6 +20,7 @@ package org.wso2.carbon.uis.internal.reference;
 
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -102,10 +103,9 @@ public interface AppReference {
     /**
      * Returns a reference to the configuration file of the app represented by this reference.
      *
-     * @return reference to the configuration file of this app
-     * @throws FileOperationException if cannot find or read configuration file
+     * @return if exists a reference to the configuration file of this app, otherwise {@link Optional#empty() empty}.
      */
-    FileReference getConfiguration() throws FileOperationException;
+    Optional<FileReference> getConfiguration() throws FileOperationException;
 
     /**
      * Returns the absolute path to the app represented by this reference.
