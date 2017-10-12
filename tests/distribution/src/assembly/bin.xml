@@ -28,7 +28,7 @@
 
     <fileSets>
         <fileSet>
-            <directory>target/WSO2Carbon</directory>
+            <directory>target/wso2carbon-kernel-${carbon.kernel.version}</directory>
             <outputDirectory>.</outputDirectory>
             <fileMode>644</fileMode>
             <excludes>
@@ -43,7 +43,7 @@
         </fileSet>
 
         <fileSet>
-            <directory>target/WSO2Carbon</directory>
+            <directory>target/wso2carbon-kernel-${carbon.kernel.version}</directory>
             <outputDirectory>.</outputDirectory>
             <includes>
                 <include>**/*.sh</include>
@@ -54,7 +54,7 @@
 
         <fileSet>
             <directory>carbon-home</directory>
-            <outputDirectory></outputDirectory>
+            <outputDirectory>.</outputDirectory>
             <excludes>
                 <exclude>**/*.ipr</exclude>
                 <exclude>**/*.iwr</exclude>
