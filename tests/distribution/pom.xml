@@ -435,7 +435,7 @@
                                 <delete dir="target/p2-repo" />
                                 <!-- TODO: Figure out a way to delete tmp.* files -->
                                 <delete file="target/tmp" />
-                                <delete dir="target/wso2carbon-kernel-${carbon.kernel.version}foo" />
+                                <delete dir="target/wso2carbon-kernel-${carbon.kernel.version}" />
                                 <delete dir="target/antrun" />
                                 <delete dir="target/director" />
                             </target>
