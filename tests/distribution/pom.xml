@@ -314,7 +314,9 @@
                         </goals>
                         <configuration>
                             <repositoryURL>file:${basedir}/target/p2-repo</repositoryURL>
-                            <targetPath>file:${basedir}/target/WSO2Carbon/wso2</targetPath>
+                            <targetPath>
+                                file:${basedir}/target/wso2carbon-kernel-${carbon.kernel.version}/wso2
+                            </targetPath>
                             <runtime>default</runtime>
                         </configuration>
                     </execution>
@@ -327,7 +329,7 @@
                         <configuration>
                             <runtime>default</runtime>
                             <repositoryURL>file:${basedir}/target/p2-repo</repositoryURL>
-                            <destination>${basedir}/target/WSO2Carbon/wso2</destination>
+                            <destination>${basedir}/target/wso2carbon-kernel-${carbon.kernel.version}/wso2</destination>
                             <deleteOldRuntimeFiles>true</deleteOldRuntimeFiles>
                             <features>
                                 <!--Carbon UI Server features-->
@@ -413,7 +415,7 @@
                         <phase>package</phase>
                         <configuration>
                             <tasks>
-                                <replace dir="target/WSO2Carbon" token="false" value="true">
+                                <replace dir="target/wso2carbon-kernel-${carbon.kernel.version}" token="false" value="true">
                                     <include name="**/bundles.info" />
                                 </replace>
                             </tasks>
@@ -433,7 +435,7 @@
                                 <delete dir="target/p2-repo" />
                                 <!-- TODO: Figure out a way to delete tmp.* files -->
                                 <delete file="target/tmp" />
-                                <delete dir="target/WSO2Carbon" />
+                                <delete dir="target/wso2carbon-kernel-${carbon.kernel.version}foo" />
                                 <delete dir="target/antrun" />
                                 <delete dir="target/director" />
                             </target>
