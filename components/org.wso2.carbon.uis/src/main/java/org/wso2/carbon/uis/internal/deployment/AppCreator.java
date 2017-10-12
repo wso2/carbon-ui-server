@@ -61,7 +61,9 @@ public class AppCreator {
         Set<Theme> themes = appReference.getThemeReferences().stream()
                 .map(AppCreator::createTheme)
                 .collect(Collectors.toSet());
-        Configuration configuration = createConfiguration(appReference.getConfiguration());
+        Configuration configuration = appReference.getConfiguration()
+                .map(AppCreator::createConfiguration)
+                .orElse(new Configuration());
         I18nResources i18nResources = createI18nResources(appReference);
         return new App(appReference.getName(), appContext, pages, extensions, themes, i18nResources, configuration,
                        appReference.getPath());

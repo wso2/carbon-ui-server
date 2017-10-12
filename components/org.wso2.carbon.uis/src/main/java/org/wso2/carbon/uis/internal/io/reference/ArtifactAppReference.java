@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -132,14 +133,9 @@ public class ArtifactAppReference implements AppReference {
     }
 
     @Override
-    public FileReference getConfiguration() throws FileOperationException {
+    public Optional<FileReference> getConfiguration() throws FileOperationException {
         Path configuration = appDirectory.resolve(FILE_NAME_CONFIGURATION);
-        if (Files.exists(configuration)) {
-            return new ArtifactFileReference(configuration);
-        } else {
-            throw new FileOperationException("Cannot find app's configuration file '" + FILE_NAME_CONFIGURATION +
-                                             "' in app '" + appDirectory + "'.");
-        }
+        return Files.exists(configuration) ? Optional.of(new ArtifactFileReference(configuration)) : Optional.empty();
     }
 
     @Override
