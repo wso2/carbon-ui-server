@@ -1,1 +1,0 @@
-This directory contains ReactJS based web apps that will be served by the Carbon UI Server.
