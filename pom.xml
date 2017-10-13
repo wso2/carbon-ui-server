@@ -259,6 +259,29 @@
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.wso2.version}</version>
             </dependency>
+            <!-- Handlebars -->
+            <dependency>
+                <groupId>org.wso2.orbit.com.github.jknack</groupId>
+                <artifactId>handlebars</artifactId>
+                <version>${orbit.com.github.jknack.handlebars.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.mozilla</groupId>
+                        <artifactId>rhino</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>${antlr-version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.abego.treelayout</groupId>
+                        <artifactId>org.abego.treelayout.core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
             <!--Test-->
             <dependency>
@@ -413,6 +436,10 @@
         <org.apache.commons.commons-lang3.version.range>[3.1, 4.0)</org.apache.commons.commons-lang3.version.range>
         <commons-io.wso2.version>2.4.0.wso2v1</commons-io.wso2.version>
         <commons-io.wso2.version.range>[2.4.0, 3.0.0)</commons-io.wso2.version.range>
+        <!-- Handlebars -->
+        <orbit.com.github.jknack.handlebars.version>4.0.3.wso2v1</orbit.com.github.jknack.handlebars.version>
+        <orbit.com.github.jknack.handlebars.version.range>[4.0.3, 5.0.0)</orbit.com.github.jknack.handlebars.version.range>
+        <antlr-version>4.5.1-1</antlr-version>
 
         <!--Test-->
         <testng.version>6.9.10</testng.version>
