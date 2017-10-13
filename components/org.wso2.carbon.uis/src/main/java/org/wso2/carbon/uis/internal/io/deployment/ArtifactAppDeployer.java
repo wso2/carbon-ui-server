@@ -36,7 +36,6 @@ import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 import org.wso2.carbon.uis.internal.deployment.AppCreator;
 import org.wso2.carbon.uis.internal.deployment.AppDeploymentEventListener;
 import org.wso2.carbon.uis.internal.exception.AppCreationException;
-import org.wso2.carbon.uis.internal.exception.DeploymentException;
 import org.wso2.carbon.uis.internal.io.reference.ArtifactAppReference;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 
@@ -133,7 +132,7 @@ public class ArtifactAppDeployer implements Deployer {
     public Object deploy(Artifact artifact) throws CarbonDeploymentException {
         Path appPath = artifact.getFile().toPath();
         if (!isValidAppArtifact(appPath)) {
-            throw new DeploymentException("Artifact located in '" + appPath + "'is not a valid web app.");
+            throw new CarbonDeploymentException("Artifact located in '" + appPath + "'is not a valid web app.");
         }
 
         App app = createApp(appPath);
