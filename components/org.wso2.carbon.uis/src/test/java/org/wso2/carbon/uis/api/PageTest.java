@@ -21,6 +21,8 @@ package org.wso2.carbon.uis.api;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.wso2.carbon.uis.api.exception.RenderingException;
+import org.wso2.carbon.uis.api.http.HttpRequest;
 
 import static java.lang.Integer.signum;
 
@@ -112,6 +114,13 @@ public class PageTest {
     }
 
     private static Page createPage(String uriPattern) {
-        return new Page(new UriPatten(uriPattern), null);
+        return new Page(new UriPatten(uriPattern)) {
+
+            @Override
+            public String render(HttpRequest request,
+                                 Configuration configuration) throws RenderingException {
+                return null;
+            }
+        };
     }
 }
