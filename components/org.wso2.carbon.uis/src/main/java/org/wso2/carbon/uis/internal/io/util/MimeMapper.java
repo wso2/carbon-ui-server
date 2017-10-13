@@ -18,8 +18,7 @@
 
 package org.wso2.carbon.uis.internal.io.util;
 
-import org.wso2.carbon.uis.internal.exception.ConfigurationException;
-import org.wso2.carbon.uis.internal.exception.FileOperationException;
+import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,18 +38,17 @@ public class MimeMapper {
     private MimeMapper() {
     }
 
-    private static Properties loadMimeMap() throws ConfigurationException, FileOperationException {
+    private static Properties loadMimeMap() throws UISRuntimeException {
         Properties mimeMap = new Properties();
         try (InputStream inputStream = MimeMapper.class.getClassLoader().getResourceAsStream(MIME_PROPERTY_FILE)) {
             if (inputStream == null) {
-                throw new FileOperationException("Cannot find MIME types property file '" + MIME_PROPERTY_FILE + "'");
+                throw new UISRuntimeException("Cannot find MIME types property file '" + MIME_PROPERTY_FILE + "'");
             }
             mimeMap.load(inputStream);
         } catch (IllegalArgumentException e) {
-            throw new ConfigurationException(
-                    "MIME types property file is '" + MIME_PROPERTY_FILE + "' is invalid.", e);
+            throw new UISRuntimeException("MIME types property file is '" + MIME_PROPERTY_FILE + "' is invalid.", e);
         } catch (IOException e) {
-            throw new FileOperationException("Cannot read MIME types property file '" + MIME_PROPERTY_FILE + "'.", e);
+            throw new UISRuntimeException("Cannot read MIME types property file '" + MIME_PROPERTY_FILE + "'.", e);
         }
         return mimeMap;
     }
@@ -60,10 +58,9 @@ public class MimeMapper {
      *
      * @param extension file extension
      * @return MIME type for the given file extension
-     * @throws FileOperationException if cannot find or read the MIME types property file
-     * @throws ConfigurationException if MIME types property file is invalid
+     * @throws UISRuntimeException if cannot find or read the MIME types property file, or it is invalid
      */
-    public static Optional<String> getMimeType(String extension) throws ConfigurationException, FileOperationException {
+    public static Optional<String> getMimeType(String extension) throws UISRuntimeException {
         if (mimeMap == null) {
             /* Here, class object 'MimeMapper.class' is used as the synchronization lock because 'getMimeType()' is
             the only is public method. */
