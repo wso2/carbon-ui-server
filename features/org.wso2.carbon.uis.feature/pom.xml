@@ -90,6 +90,14 @@
                                     <symbolicName>com.google.guava</symbolicName>
                                     <version>${guava.version}.0</version>
                                 </bundle>
+                                <bundle>
+                                    <symbolicName>handlebars</symbolicName>
+                                    <version>${orbit.com.github.jknack.handlebars.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.antlr.antlr4-runtime-osgi</symbolicName>
+                                    <version>${antlr-version}</version>
+                                </bundle>
                             </bundles>
                         </configuration>
                     </execution>

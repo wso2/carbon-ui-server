@@ -109,6 +109,15 @@
             <groupId>commons-io.wso2</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
+        <!-- Handlebars -->
+        <dependency>
+            <groupId>org.wso2.orbit.com.github.jknack</groupId>
+            <artifactId>handlebars</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+        </dependency>
 
         <!--Test-->
         <dependency>
@@ -149,7 +158,8 @@
             com.google.gson.*; version="${gson.version.range}",
             org.yaml.snakeyaml.*; version="${orbit.org.yaml.version.range}",
             org.apache.commons.lang3.*; version="${org.apache.commons.commons-lang3.version.range}",
-            org.apache.commons.io; version="${commons-io.wso2.version.range}"
+            org.apache.commons.io; version="${commons-io.wso2.version.range}",
+            com.github.jknack.handlebars.*;version="${orbit.com.github.jknack.handlebars.version.range}",
         </import.package>
         <private.package>org.wso2.carbon.uis.internal.*</private.package>
         <export.package>
