@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.uis.api;
 
+import org.wso2.carbon.uis.api.exception.RenderingException;
+import org.wso2.carbon.uis.api.http.HttpRequest;
+
 import java.util.Objects;
 
 /**
@@ -25,20 +28,17 @@ import java.util.Objects;
  *
  * @since 0.8.0
  */
-public class Page implements Comparable<Page> {
+public abstract class Page implements Comparable<Page> {
 
     private final UriPatten uriPatten;
-    private final String content;
 
     /**
      * Creates a new page.
      *
      * @param uriPatten URI pattern of the page
-     * @param content   content of the page
      */
-    public Page(UriPatten uriPatten, String content) {
+    public Page(UriPatten uriPatten) {
         this.uriPatten = uriPatten;
-        this.content = content;
     }
 
     /**
@@ -51,15 +51,6 @@ public class Page implements Comparable<Page> {
     }
 
     /**
-     * Returns the content of this page.
-     *
-     * @return content of the page
-     */
-    public String getContent() {
-        return content;
-    }
-
-    /**
      * Checks whether this page matches to the given URI.
      *
      * @param uri URI to be matched
@@ -68,6 +59,17 @@ public class Page implements Comparable<Page> {
     public boolean matches(String uri) {
         return uriPatten.matches(uri);
     }
+
+    /**
+     * Renders this page and returns a HTML document.
+     *
+     *
+     * @param request
+     * @param configuration
+     * @return html
+     * @throws RenderingException if an error occurred during page rendering
+     */
+    public abstract String render(HttpRequest request, Configuration configuration) throws RenderingException;
 
     @Override
     public int compareTo(Page otherPage) {
@@ -81,11 +83,11 @@ public class Page implements Comparable<Page> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(uriPatten, content);
+        return Objects.hash(uriPatten);
     }
 
     @Override
     public String toString() {
-        return "Page{uriPatten=" + uriPatten + ", content='" + content + "'}";
+        return "Page{uriPatten=" + uriPatten + "}";
     }
 }
