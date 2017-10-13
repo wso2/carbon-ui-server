@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.internal.exception.PageNotFoundException;
 import org.wso2.carbon.uis.internal.exception.PageRedirectException;
+import org.wso2.carbon.uis.internal.impl.HtmlPage;
 
 import java.util.Set;
 import java.util.SortedSet;
@@ -104,7 +105,7 @@ public class AppTest {
     }
 
     private static Page createPage(String uriPattern, String content) {
-        return new Page(new UriPatten(uriPattern), content);
+        return new HtmlPage(new UriPatten(uriPattern), content);
     }
 
     private static HttpRequest createRequest(String uriWithoutContextPath) {
