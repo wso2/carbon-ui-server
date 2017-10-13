@@ -25,7 +25,11 @@ import org.wso2.carbon.uis.api.I18nResources;
 import org.wso2.carbon.uis.api.Page;
 import org.wso2.carbon.uis.api.Theme;
 import org.wso2.carbon.uis.api.UriPatten;
+import org.wso2.carbon.uis.api.exception.RenderingException;
+import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.internal.exception.AppCreationException;
+import org.wso2.carbon.uis.internal.impl.HbsPage;
+import org.wso2.carbon.uis.internal.impl.HtmlPage;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 import org.wso2.carbon.uis.internal.reference.ExtensionReference;
 import org.wso2.carbon.uis.internal.reference.FileReference;
@@ -73,15 +77,32 @@ public class AppCreator {
         List<Page> pages = appReference.getPageReferences().stream()
                 .map(AppCreator::createPage)
                 .collect(Collectors.toList());
+        // TODO: 10/13/17 remove following workaround after adding support for URI patterns with * in UriPatten class
         if ((pages.size() == 1) && (pages.get(0).getUriPatten().matches("/index"))) {
-            pages.add(new Page(new UriPatten("/{+index}"), pages.get(0).getContent()));
+            final Page indexPage = pages.get(0);
+            pages.add(new Page(new UriPatten("/{+index}")) {
+                @Override
+                public String render(HttpRequest request, Configuration configuration) throws RenderingException {
+                    return indexPage.render(request, configuration);
+                }
+            });
         }
 
         return new TreeSet<>(pages);
     }
 
     private static Page createPage(PageReference pageReference) {
-        return new Page(new UriPatten(pageReference.getPathPattern()), pageReference.getHtmlFile().getContent());
+        FileReference fileReference = pageReference.getHtmlFile();
+        switch (fileReference.getExtension()) {
+            case "html":
+                return new HtmlPage(new UriPatten(pageReference.getPathPattern()), fileReference.getContent());
+            case "hbs":
+                return new HbsPage(new UriPatten(pageReference.getPathPattern()), fileReference.getContent());
+            default:
+                throw new AppCreationException("Found unsupported extension '" + fileReference.getExtension() +
+                                               "' when creating a page for file '" + fileReference.getFilePath() +
+                                               "'.");
+        }
     }
 
     private static Extension createExtension(ExtensionReference extensionReference) {
