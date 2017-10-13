@@ -162,7 +162,7 @@ public class App {
         String uriWithoutContextPath = request.getUriWithoutContextPath();
         Page matchingPage = getMatchingPage(uriWithoutContextPath);
         if (matchingPage != null) {
-            return matchingPage.getContent();
+            return matchingPage.render(request, configuration);
         }
 
         /* URL correction:
