@@ -18,12 +18,14 @@
 
 package org.wso2.carbon.uis.internal.exception;
 
+import org.wso2.carbon.uis.api.exception.UISRuntimeException;
+
 /**
  * Indicates an error occurred when creating a web app.
  *
  * @since 0.8.0
  */
-public class AppCreationException extends DeploymentException {
+public class AppCreationException extends UISRuntimeException {
 
     /**
      * Constructs a new exception with {@code null} as its detail message. The cause is not initialized, and may
@@ -33,8 +35,8 @@ public class AppCreationException extends DeploymentException {
     }
 
     /**
-     * Constructs a new exception with the specified detail message. The cause is not initialized, and may
-     * subsequently be initialized by a call to {@link #initCause}.
+     * Constructs a new exception with the specified detail message. The cause is not initialized, and may subsequently
+     * be initialized by a call to {@link #initCause}.
      *
      * @param message the detail message of the exception
      */
