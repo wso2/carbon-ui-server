@@ -61,19 +61,12 @@ public class Theme {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof Theme)) {
-            return false;
-        }
-        Theme theme = (Theme) obj;
-        return Objects.equals(name, theme.name) && Objects.equals(path, theme.path);
+        return (this == obj) || ((obj instanceof Theme) && Objects.equals(name, ((Theme) obj).name));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, path);
+        return Objects.hash(name);
     }
 
     @Override
