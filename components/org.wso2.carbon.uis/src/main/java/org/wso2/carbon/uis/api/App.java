@@ -22,6 +22,7 @@ import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.internal.exception.PageNotFoundException;
 import org.wso2.carbon.uis.internal.exception.PageRedirectException;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public class App {
     private final SortedSet<Page> pages;
     private final Map<String, Extension> extensions;
     private final Map<String, Theme> themes;
-    private final I18nResources i18nResources;
+    private final Map<Locale, I18nResource> i18nResources;
     private final Configuration configuration;
     private final String path;
 
@@ -58,8 +59,8 @@ public class App {
      * @param path          path to the app
      */
     public App(String name, String contextPath,
-               SortedSet<Page> pages, Set<Extension> extensions, Set<Theme> themes,
-               I18nResources i18nResources, Configuration configuration,
+               SortedSet<Page> pages, Set<Extension> extensions, Set<Theme> themes, Set<I18nResource> i18nResources,
+               Configuration configuration,
                String path) {
         this.name = name;
         this.contextPath = contextPath;
@@ -68,7 +69,8 @@ public class App {
                 .collect(Collectors.toMap(ext -> (ext.getType() + ":" + ext.getName()), ext -> ext));
         this.themes = themes.stream()
                 .collect(Collectors.toMap(Theme::getName, t -> t));
-        this.i18nResources = i18nResources;
+        this.i18nResources = i18nResources.stream()
+                .collect(Collectors.toMap(I18nResource::getLocale, i18nResource -> i18nResource));
         this.configuration = configuration;
         this.path = path;
     }
@@ -125,12 +127,13 @@ public class App {
     }
 
     /**
-     * Returns i18n resources of this app.
+     * Returns the i18n resource in this app specified by the given local.
      *
-     * @return i18n resources of the app
+     * @param locale locale of the i18n resource
+     * @return i18n resource in the app
      */
-    public I18nResources getI18nResources() {
-        return i18nResources;
+    public Optional<I18nResource> getI18nResource(Locale locale) {
+        return Optional.ofNullable(i18nResources.get(locale));
     }
 
     /**
