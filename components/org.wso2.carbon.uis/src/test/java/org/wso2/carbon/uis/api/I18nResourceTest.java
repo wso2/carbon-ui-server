@@ -20,6 +20,7 @@ package org.wso2.carbon.uis.api;
 
 import com.google.common.collect.ImmutableSet;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Locale;
@@ -59,5 +60,84 @@ public class I18nResourceTest {
                                                            availableLocales), Locale.FRENCH);
         Assert.assertEquals(I18nResource.getMatchingLocale("si, en;q=0.9, en-GB;q=0.8, en-US;q=0.7, en-CA;q=0.5",
                                                            availableLocales), Locale.US);
+    }
+
+    @DataProvider
+    public Object[][] mergeableI18nResources() {
+        return new Object[][]{
+                {new I18nResource(Locale.ENGLISH, null), new I18nResource(Locale.ENGLISH, null)},
+                {new I18nResource(Locale.ENGLISH, new Properties()), new I18nResource(Locale.ENGLISH, null)},
+                {new I18nResource(Locale.ENGLISH, null), new I18nResource(Locale.ENGLISH, new Properties())},
+                {new I18nResource(Locale.ENGLISH, new Properties()), new I18nResource(Locale.ENGLISH, new Properties())}
+        };
+    }
+
+    @Test(dataProvider = "mergeableI18nResources")
+    public void testMergeability(I18nResource i18nResource1, I18nResource i18nResource2) {
+        Assert.assertTrue(i18nResource1.isMergeable(i18nResource2),
+                          i18nResource1 + " should be able to merge with " + i18nResource2 + ".");
+        Assert.assertTrue(i18nResource2.isMergeable(i18nResource1),
+                          i18nResource2 + " should be able to merge with " + i18nResource1 + ".");
+    }
+
+    @DataProvider
+    public Object[][] unmergeableI18nResources() {
+        return new Object[][]{
+                {new I18nResource(Locale.ENGLISH, null), new I18nResource(Locale.FRENCH, null)},
+                {new I18nResource(Locale.ENGLISH, new Properties()), new I18nResource(Locale.FRENCH, new Properties())}
+        };
+    }
+
+    @Test(dataProvider = "unmergeableI18nResources")
+    public void testUnmergeability(I18nResource i18nResource1, I18nResource i18nResource2) {
+        Assert.assertFalse(i18nResource1.isMergeable(i18nResource2),
+                           i18nResource1 + " shouldn't be able to merge with " + i18nResource2 + ".");
+        Assert.assertFalse(i18nResource2.isMergeable(i18nResource1),
+                           i18nResource2 + " shouldn't be able to merge with " + i18nResource1 + ".");
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> i18nResource1.merge(i18nResource2));
+        Assert.assertThrows(IllegalArgumentException.class, () -> i18nResource2.merge(i18nResource1));
+    }
+
+    @DataProvider
+    public Object[][] mergingI18nResources() {
+        Properties messages1 = new Properties();
+        messages1.put("hello", "Hello!");
+        Properties messages2 = new Properties();
+        messages2.put("hello", "Welcome!");
+        Properties mergedMessages = new Properties();
+        mergedMessages.put("hello", "Welcome!");
+
+        return new Object[][]{
+                {new I18nResource(Locale.UK, new Properties()), new I18nResource(Locale.UK, new Properties()),
+                        new I18nResource(Locale.UK, new Properties())},
+                {new I18nResource(Locale.US, messages1), new I18nResource(Locale.US, messages2),
+                        new I18nResource(Locale.US, mergedMessages)}
+        };
+    }
+
+    @Test(dataProvider = "mergingI18nResources")
+    public void testMerge(I18nResource i18nResource, I18nResource otherI18nResource, I18nResource mergedI18nResource) {
+        Assert.assertEquals(i18nResource.merge(otherI18nResource), mergedI18nResource);
+    }
+
+    @DataProvider
+    public Object[][] equalI18nResources() {
+        I18nResource i18nResource = new I18nResource(Locale.US, null);
+        Properties messages1 = new Properties();
+        messages1.put("hello", "Welcome!");
+        Properties messages2 = new Properties();
+        messages2.put("hello", "Welcome!");
+        return new Object[][]{
+                {i18nResource, i18nResource},
+                {new I18nResource(Locale.US, null), new I18nResource(Locale.US, null)},
+                {new I18nResource(Locale.US, new Properties()), new I18nResource(Locale.US, new Properties())},
+                {new I18nResource(Locale.US, messages1), new I18nResource(Locale.US, messages2)}
+        };
+    }
+
+    @Test(dataProvider = "equalI18nResources")
+    public void testEqual(I18nResource i18nResource1, I18nResource i18nResource2) {
+        Assert.assertEquals(i18nResource1, i18nResource2);
     }
 }
