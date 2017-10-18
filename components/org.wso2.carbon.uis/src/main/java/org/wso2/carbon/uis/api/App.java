@@ -22,12 +22,15 @@ import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.internal.exception.PageNotFoundException;
 import org.wso2.carbon.uis.internal.exception.PageRedirectException;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -35,7 +38,7 @@ import java.util.stream.Collectors;
  *
  * @since 0.8.0
  */
-public class App {
+public class App implements Mergeable<App> {
 
     private final String name;
     private final String contextPath;
@@ -198,6 +201,27 @@ public class App {
     }
 
     @Override
+    public App merge(App other) {
+        if (!isMergeable(other)) {
+            throw new IllegalArgumentException(this + " cannot merge with " + other + ".");
+        }
+
+        String name = other.name;
+        String contextPath = other.contextPath;
+        SortedSet<Page> pages = new TreeSet<>(other.pages);
+        pages.addAll(this.pages);
+        Collection<Extension> extensions = Mergeable.mergeAll(this.extensions.values(), other.extensions.values());
+        Collection<Theme> themes = Mergeable.mergeAll(this.themes.values(), other.themes.values());
+        Collection<I18nResource> i18nResources = Mergeable.mergeAll(this.i18nResources.values(),
+                                                                    other.i18nResources.values());
+        Configuration configuration = other.configuration;
+        String path = other.path + this.path;
+
+        return new App(name, contextPath, pages, new HashSet<>(extensions), new HashSet<>(themes),
+                       new HashSet<>(i18nResources), configuration, path);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -205,8 +229,9 @@ public class App {
         if (!(obj instanceof App)) {
             return false;
         }
-        App app = (App) obj;
-        return Objects.equals(name, app.name) && Objects.equals(contextPath, app.contextPath);
+        App other = (App) obj;
+        return Objects.equals(name, other.name) && Objects.equals(contextPath, other.contextPath) &&
+               Objects.equals(path, other.path);
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.wso2.carbon.uis.internal.exception.PageNotFoundException;
 import org.wso2.carbon.uis.internal.exception.PageRedirectException;
 import org.wso2.carbon.uis.internal.impl.HtmlPage;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -101,7 +102,7 @@ public class AppTest {
         Set<Extension> extensions = ImmutableSet.of(new Extension("ext1", "type1", null),
                                                     new Extension("ext2", "type2", null));
         Set<Theme> themes = ImmutableSet.of(new Theme("theme1", null), new Theme("theme2", null));
-        return new App(null, null, pages, extensions, themes, null, null, null);
+        return new App(null, null, pages, extensions, themes, Collections.emptySet(), null, null);
     }
 
     private static Page createPage(String uriPattern, String content) {
