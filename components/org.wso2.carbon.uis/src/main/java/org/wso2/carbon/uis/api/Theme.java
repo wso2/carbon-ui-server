@@ -25,7 +25,7 @@ import java.util.Objects;
  *
  * @since 0.8.0
  */
-public class Theme {
+public class Theme implements Mergeable<Theme> {
 
     private final String name;
     private final String path;
@@ -60,8 +60,23 @@ public class Theme {
     }
 
     @Override
+    public Theme merge(Theme other) {
+        if (!isMergeable(other)) {
+            throw new IllegalArgumentException(this + " cannot merge with " + other + ".");
+        }
+        return new Theme(other.name, other.path);
+    }
+
+    @Override
     public boolean equals(Object obj) {
-        return (this == obj) || ((obj instanceof Theme) && Objects.equals(name, ((Theme) obj).name));
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Theme)) {
+            return false;
+        }
+        Theme other = (Theme) obj;
+        return Objects.equals(name, other.name) && Objects.equals(path, other.path);
     }
 
     @Override
