@@ -25,7 +25,7 @@ import java.util.Objects;
  *
  * @since 0.8.0
  */
-public class Extension {
+public class Extension implements Mergeable<Extension> {
 
     private final String name;
     private final String type;
@@ -72,6 +72,14 @@ public class Extension {
     }
 
     @Override
+    public Extension merge(Extension other) {
+        if (!isMergeable(other)) {
+            throw new IllegalArgumentException(this + " cannot merge with " + other + ".");
+        }
+        return new Extension(other.name, other.type, other.path);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -79,8 +87,8 @@ public class Extension {
         if (!(obj instanceof Extension)) {
             return false;
         }
-        Extension otherExtension = (Extension) obj;
-        return Objects.equals(name, otherExtension.name) && Objects.equals(type, otherExtension.type);
+        Extension other = (Extension) obj;
+        return Objects.equals(name, other.name) && Objects.equals(type, other.type) && Objects.equals(path, other.path);
     }
 
     @Override
