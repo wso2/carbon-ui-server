@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.uis.api;
 
+import com.google.common.collect.ImmutableList;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,7 +32,7 @@ import java.util.Objects;
 public class Theme implements Mergeable<Theme> {
 
     private final String name;
-    private final String path;
+    private final List<String> paths;
 
     /**
      * Creates a new theme which can be located in the specified path.
@@ -37,8 +41,18 @@ public class Theme implements Mergeable<Theme> {
      * @param path path to the theme
      */
     public Theme(String name, String path) {
+        this(name, Collections.singletonList(path));
+    }
+
+    /**
+     * Creates a new theme.
+     *
+     * @param name  name of the theme
+     * @param paths paths of the theme
+     */
+    Theme(String name, List<String> paths) {
         this.name = name;
-        this.path = path;
+        this.paths = paths;
     }
 
     /**
@@ -51,12 +65,12 @@ public class Theme implements Mergeable<Theme> {
     }
 
     /**
-     * Returns the path of this theme.
+     * Returns paths that this theme can be located.
      *
-     * @return path of the theme
+     * @return paths of the theme
      */
-    public String getPath() {
-        return path;
+    public List<String> getPaths() {
+        return paths;
     }
 
     @Override
@@ -64,7 +78,8 @@ public class Theme implements Mergeable<Theme> {
         if (!isMergeable(other)) {
             throw new IllegalArgumentException(this + " cannot merge with " + other + ".");
         }
-        return new Theme(other.name, other.path);
+
+        return new Theme(other.name, ImmutableList.<String>builder().addAll(other.paths).addAll(this.paths).build());
     }
 
     @Override
@@ -76,7 +91,7 @@ public class Theme implements Mergeable<Theme> {
             return false;
         }
         Theme other = (Theme) obj;
-        return Objects.equals(name, other.name) && Objects.equals(path, other.path);
+        return Objects.equals(name, other.name) && Objects.equals(paths, other.paths);
     }
 
     @Override
@@ -86,6 +101,6 @@ public class Theme implements Mergeable<Theme> {
 
     @Override
     public String toString() {
-        return "Theme{name='" + name + "', path='" + path + "'}";
+        return "Theme{name='" + name + "', paths=" + paths + "}";
     }
 }

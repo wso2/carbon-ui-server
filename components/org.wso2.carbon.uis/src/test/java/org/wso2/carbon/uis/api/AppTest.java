@@ -101,7 +101,7 @@ public class AppTest {
                                                       createPage("/b/", "page B"));
         Set<Extension> extensions = ImmutableSet.of(new Extension("ext1", "type1", null),
                                                     new Extension("ext2", "type2", null));
-        Set<Theme> themes = ImmutableSet.of(new Theme("theme1", null), new Theme("theme2", null));
+        Set<Theme> themes = ImmutableSet.of(new Theme("theme1", "p1"), new Theme("theme2", "p1"));
         return new App(null, null, pages, extensions, themes, Collections.emptySet(), null, null);
     }
 

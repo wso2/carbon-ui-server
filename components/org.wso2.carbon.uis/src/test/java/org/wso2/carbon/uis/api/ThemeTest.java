@@ -22,6 +22,10 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
 /**
  * Test cases for {@link Theme} class.
  *
@@ -32,10 +36,11 @@ public class ThemeTest {
     @DataProvider
     public Object[][] mergeableThemes() {
         return new Object[][]{
-                {new Theme("t1", null), new Theme("t1", null)},
-                {new Theme("t1", "p1"), new Theme("t1", null)},
-                {new Theme("t1", null), new Theme("t1", "p2")},
-                {new Theme("t1", "p1"), new Theme("t1", "p2")}
+                {new Theme("t1", "p1"), new Theme("t1", "p2")},
+                {new Theme("t1", emptyList()), new Theme("t1", emptyList())},
+                {new Theme("t1", singletonList("p1")), new Theme("t1", singletonList("p2"))},
+                {new Theme("t1", "p1"), new Theme("t1", emptyList())},
+                {new Theme("t1", singletonList("p1")), new Theme("t1", "p2")}
         };
     }
 
@@ -48,8 +53,10 @@ public class ThemeTest {
     @DataProvider
     public Object[][] unmergeableThemes() {
         return new Object[][]{
-                {new Theme("t1", null), new Theme("t2", null)},
-                {new Theme("t1", "p1"), new Theme("t2", "p1")}
+                {new Theme("t1", "p1"), new Theme("t2", "p1")},
+                {new Theme("t1", emptyList()), new Theme("t2", emptyList())},
+                {new Theme("t1", singletonList("p1")), new Theme("t2", singletonList("p1"))},
+                {new Theme("t1", "p1"), new Theme("t2", "p2")}
         };
     }
 
@@ -65,10 +72,12 @@ public class ThemeTest {
     @DataProvider
     public Object[][] mergingThemes() {
         return new Object[][]{
-                {new Theme("t1", null), new Theme("t1", null), new Theme("t1", null)},
-                {new Theme("t1", "p1"), new Theme("t1", null), new Theme("t1", null)},
-                {new Theme("t1", null), new Theme("t1", "p2"), new Theme("t1", "p2")},
-                {new Theme("t1", "p1"), new Theme("t1", "p2"), new Theme("t1", "p2")}
+                {new Theme("t1", "p1"), new Theme("t1", "p2"), new Theme("t1", asList("p2", "p1"))},
+                {new Theme("t1", emptyList()), new Theme("t1", emptyList()), new Theme("t1", emptyList())},
+                {new Theme("t1", singletonList("p1")), new Theme("t1", singletonList("p2")),
+                        new Theme("t1", asList("p2", "p1"))},
+                {new Theme("t1", asList("p1", "p11")), new Theme("t1", asList("p2", "p22")),
+                        new Theme("t1", asList("p2", "p22", "p1", "p11"))}
         };
     }
 
@@ -79,11 +88,13 @@ public class ThemeTest {
 
     @DataProvider
     public Object[][] equalThemes() {
-        Theme theme = new Theme("t1", null);
+        Theme theme = new Theme("t0", "p0");
         return new Object[][]{
                 {theme, theme},
-                {new Theme("t1", null), new Theme("t1", null)},
                 {new Theme("t1", "p1"), new Theme("t1", "p1")},
+                {new Theme("t1", emptyList()), new Theme("t1", emptyList())},
+                {new Theme("t1", singletonList("p1")), new Theme("t1", singletonList("p1"))},
+                {new Theme("t1", asList("p1", "p11")), new Theme("t1", asList("p1", "p11"))}
         };
     }
 
