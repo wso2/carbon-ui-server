@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.uis.api;
 
+import com.google.common.collect.ImmutableList;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -29,7 +33,7 @@ public class Extension implements Mergeable<Extension> {
 
     private final String name;
     private final String type;
-    private final String path;
+    private final List<String> paths;
 
     /**
      * Creates a new extension which can be located in the specified path.
@@ -39,9 +43,20 @@ public class Extension implements Mergeable<Extension> {
      * @param path path to the extension
      */
     public Extension(String name, String type, String path) {
+        this(name, type, Collections.singletonList(path));
+    }
+
+    /**
+     * Creates a new extension.
+     *
+     * @param name  name of the extension
+     * @param type  type of the extension
+     * @param paths paths to the extension
+     */
+    Extension(String name, String type, List<String> paths) {
         this.name = name;
         this.type = type;
-        this.path = path;
+        this.paths = paths;
     }
 
     /**
@@ -63,12 +78,12 @@ public class Extension implements Mergeable<Extension> {
     }
 
     /**
-     * Returns the path of this extension.
+     * Returns paths that this extension can be located.
      *
-     * @return path of the extension
+     * @return paths of the theme
      */
-    public String getPath() {
-        return path;
+    public List<String> getPaths() {
+        return paths;
     }
 
     @Override
@@ -76,7 +91,8 @@ public class Extension implements Mergeable<Extension> {
         if (!isMergeable(other)) {
             throw new IllegalArgumentException(this + " cannot merge with " + other + ".");
         }
-        return new Extension(other.name, other.type, other.path);
+        return new Extension(other.name, other.type,
+                             ImmutableList.<String>builder().addAll(other.paths).addAll(this.paths).build());
     }
 
     @Override
@@ -88,7 +104,8 @@ public class Extension implements Mergeable<Extension> {
             return false;
         }
         Extension other = (Extension) obj;
-        return Objects.equals(name, other.name) && Objects.equals(type, other.type) && Objects.equals(path, other.path);
+        return Objects.equals(name, other.name) && Objects.equals(type, other.type) &&
+               Objects.equals(paths, other.paths);
     }
 
     @Override
@@ -98,6 +115,6 @@ public class Extension implements Mergeable<Extension> {
 
     @Override
     public String toString() {
-        return "Extension{" + "type='" + type + '\'' + ", name='" + name + '\'' + '}';
+        return "Extension{name='" + name + "', type='" + type + "', paths=" + paths + "}";
     }
 }

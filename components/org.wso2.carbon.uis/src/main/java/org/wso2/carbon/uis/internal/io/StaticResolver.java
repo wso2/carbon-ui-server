@@ -244,9 +244,9 @@ public class StaticResolver {
                         uriWithoutContextPath + "' does not exists."));
 
         // {rest-of-the-path}
-        String relativePathString = uriWithoutContextPath.substring(fifthSlashIndex + 1,
+        String relativeFilePath = uriWithoutContextPath.substring(fifthSlashIndex + 1,
                                                                     uriWithoutContextPath.length());
-        return Paths.get(extension.getPath(), relativePathString);
+        return selectPath(extension.getPaths(), relativeFilePath);
     }
 
     private Path resolveResourceInTheme(App app, String uriWithoutContextPath) {

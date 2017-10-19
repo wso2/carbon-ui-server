@@ -99,9 +99,9 @@ public class AppTest {
         SortedSet<Page> pages = ImmutableSortedSet.of(createPage("/", "index page"),
                                                       createPage("/a", "page A"),
                                                       createPage("/b/", "page B"));
-        Set<Extension> extensions = ImmutableSet.of(new Extension("ext1", "type1", null),
-                                                    new Extension("ext2", "type2", null));
-        Set<Theme> themes = ImmutableSet.of(new Theme("theme1", "p1"), new Theme("theme2", "p1"));
+        Set<Extension> extensions = ImmutableSet.of(new Extension("ext1", "type1", "p1"),
+                                                    new Extension("ext2", "type2", "p2"));
+        Set<Theme> themes = ImmutableSet.of(new Theme("theme1", "p1"), new Theme("theme2", "p2"));
         return new App(null, null, pages, extensions, themes, Collections.emptySet(), null, null);
     }
 

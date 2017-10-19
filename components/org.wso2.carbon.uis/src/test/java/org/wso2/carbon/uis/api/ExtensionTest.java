@@ -22,6 +22,10 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
 /**
  * Test cases for {@link Extension} class.
  *
@@ -32,10 +36,11 @@ public class ExtensionTest {
     @DataProvider
     public Object[][] mergeableExtensions() {
         return new Object[][]{
-                {new Extension("e1", "t1", null), new Extension("e1", "t1", null)},
-                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", null)},
-                {new Extension("e1", "t1", null), new Extension("e1", "t1", "p2")},
-                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", "p2")}
+                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", "p2")},
+                {new Extension("e1", "t1", emptyList()), new Extension("e1", "t1", emptyList())},
+                {new Extension("e1", "t1", singletonList("p1")), new Extension("e1", "t1", singletonList("p2"))},
+                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", emptyList())},
+                {new Extension("e1", "t1", singletonList("p1")), new Extension("e1", "t1", "p2")}
         };
     }
 
@@ -50,9 +55,9 @@ public class ExtensionTest {
     @DataProvider
     public Object[][] unmergeableExtension() {
         return new Object[][]{
-                {new Extension("e1", "t1", null), new Extension("e1", "t2", null)},
-                {new Extension("e1", "t1", null), new Extension("e2", "t2", null)},
                 {new Extension("e1", "t1", "p1"), new Extension("e1", "t2", "p1")},
+                {new Extension("e1", "t1", emptyList()), new Extension("e2", "t2", emptyList())},
+                {new Extension("e1", "t1", singletonList("p1")), new Extension("e1", "t2", singletonList("p1"))},
                 {new Extension("e1", "t1", "p1"), new Extension("e2", "t2", "p2")}
         };
     }
@@ -71,10 +76,14 @@ public class ExtensionTest {
     @DataProvider
     public Object[][] mergingExtensions() {
         return new Object[][]{
-                {new Extension("e1", "t1", null), new Extension("e1", "t1", null), new Extension("e1", "t1", null)},
-                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", null), new Extension("e1", "t1", null)},
-                {new Extension("e1", "t1", null), new Extension("e1", "t1", "p2"), new Extension("e1", "t1", "p2")},
-                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", "p2"), new Extension("e1", "t1", "p2")}
+                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", "p2"),
+                        new Extension("e1", "t1", asList("p2", "p1"))},
+                {new Extension("e1", "t1", emptyList()), new Extension("e1", "t1", emptyList()),
+                        new Extension("e1", "t1", emptyList())},
+                {new Extension("e1", "t1", singletonList("p1")), new Extension("e1", "t1", singletonList("p2")),
+                        new Extension("e1", "t1", asList("p2", "p1"))},
+                {new Extension("e1", "t1", asList("p1", "p11")), new Extension("e1", "t1", asList("p2", "p22")),
+                        new Extension("e1", "t1", asList("p2", "p22", "p1", "p11"))}
         };
     }
 
@@ -85,11 +94,13 @@ public class ExtensionTest {
 
     @DataProvider
     public Object[][] equalExtensions() {
-        Extension theme = new Extension("e1", "t1", null);
+        Extension theme = new Extension("e0", "t0", "p0");
         return new Object[][]{
                 {theme, theme},
-                {new Extension("e1", "t1", null), new Extension("e1", "t1", null)},
                 {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", "p1")},
+                {new Extension("e1", "t1", emptyList()), new Extension("e1", "t1", emptyList())},
+                {new Extension("e1", "t1", singletonList("p1")), new Extension("e1", "t1", singletonList("p1"))},
+                {new Extension("e1", "t1", asList("p1", "p11")), new Extension("e1", "t1", asList("p1", "p11"))}
         };
     }
 
