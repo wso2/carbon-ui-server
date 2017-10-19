@@ -18,12 +18,15 @@
 
 package org.wso2.carbon.uis.api;
 
+import com.google.common.collect.ImmutableList;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.internal.exception.PageNotFoundException;
 import org.wso2.carbon.uis.internal.exception.PageRedirectException;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -47,7 +50,7 @@ public class App implements Mergeable<App> {
     private final Map<String, Theme> themes;
     private final Map<Locale, I18nResource> i18nResources;
     private final Configuration configuration;
-    private final String path;
+    private final List<String> paths;
 
     /**
      * Creates a new app which can be located in the specified path.
@@ -65,6 +68,25 @@ public class App implements Mergeable<App> {
                SortedSet<Page> pages, Set<Extension> extensions, Set<Theme> themes, Set<I18nResource> i18nResources,
                Configuration configuration,
                String path) {
+        this(name, contextPath, pages, extensions, themes, i18nResources, configuration,
+             Collections.singletonList(path));
+    }
+
+    /**
+     * Creates a new app.
+     *
+     * @param name          name of the app
+     * @param contextPath   context path of the app
+     * @param pages         pages of the app
+     * @param extensions    extensions of the app
+     * @param themes        themes of the app
+     * @param i18nResources i18n resources of the app
+     * @param configuration configurations of the app
+     * @param paths         paths to the app
+     */
+    App(String name, String contextPath,
+        SortedSet<Page> pages, Set<Extension> extensions, Set<Theme> themes, Set<I18nResource> i18nResources,
+        Configuration configuration, List<String> paths) {
         this.name = name;
         this.contextPath = contextPath;
         this.pages = pages;
@@ -75,7 +97,7 @@ public class App implements Mergeable<App> {
         this.i18nResources = i18nResources.stream()
                 .collect(Collectors.toMap(I18nResource::getLocale, i18nResource -> i18nResource));
         this.configuration = configuration;
-        this.path = path;
+        this.paths = paths;
     }
 
     /**
@@ -149,12 +171,12 @@ public class App implements Mergeable<App> {
     }
 
     /**
-     * Returns the path of this app.
+     * Returns paths that this app can be located.
      *
-     * @return path of the app
+     * @return paths of the theme
      */
-    public String getPath() {
-        return path;
+    public List<String> getPaths() {
+        return paths;
     }
 
     /**
@@ -215,10 +237,10 @@ public class App implements Mergeable<App> {
         Collection<I18nResource> i18nResources = Mergeable.mergeAll(this.i18nResources.values(),
                                                                     other.i18nResources.values());
         Configuration configuration = other.configuration;
-        String path = other.path + this.path;
+        ImmutableList<String> paths = ImmutableList.<String>builder().addAll(other.paths).addAll(this.paths).build();
 
         return new App(name, contextPath, pages, new HashSet<>(extensions), new HashSet<>(themes),
-                       new HashSet<>(i18nResources), configuration, path);
+                       new HashSet<>(i18nResources), configuration, paths);
     }
 
     @Override
@@ -231,7 +253,7 @@ public class App implements Mergeable<App> {
         }
         App other = (App) obj;
         return Objects.equals(name, other.name) && Objects.equals(contextPath, other.contextPath) &&
-               Objects.equals(path, other.path);
+               Objects.equals(paths, other.paths);
     }
 
     @Override
@@ -241,6 +263,6 @@ public class App implements Mergeable<App> {
 
     @Override
     public String toString() {
-        return "App{name='" + name + "', contextPath='" + contextPath + "', path='" + path + "'}";
+        return "App{name='" + name + "', contextPath='" + contextPath + "', paths=" + paths + "}";
     }
 }

@@ -102,7 +102,7 @@ public class AppTest {
         Set<Extension> extensions = ImmutableSet.of(new Extension("ext1", "type1", "p1"),
                                                     new Extension("ext2", "type2", "p2"));
         Set<Theme> themes = ImmutableSet.of(new Theme("theme1", "p1"), new Theme("theme2", "p2"));
-        return new App(null, null, pages, extensions, themes, Collections.emptySet(), null, null);
+        return new App(null, null, pages, extensions, themes, Collections.emptySet(), null, "p0");
     }
 
     private static Page createPage(String uriPattern, String content) {

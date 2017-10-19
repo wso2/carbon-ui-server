@@ -207,9 +207,8 @@ public class StaticResolver {
         }
 
         // {sub-directory}/{rest-of-the-path}
-        String relativePathString = uriWithoutContextPath.substring(thirdSlashIndex + 1,
-                                                                    uriWithoutContextPath.length());
-        return Paths.get(app.getPath(), AppReference.DIR_NAME_PUBLIC_RESOURCES, relativePathString);
+        String relativeFilePath = uriWithoutContextPath.substring(thirdSlashIndex + 1, uriWithoutContextPath.length());
+        return selectPath(app.getPaths(), AppReference.DIR_NAME_PUBLIC_RESOURCES, relativeFilePath);
     }
 
     private Path resolveResourceInExtension(App app, String uriWithoutContextPath) {
@@ -244,8 +243,7 @@ public class StaticResolver {
                         uriWithoutContextPath + "' does not exists."));
 
         // {rest-of-the-path}
-        String relativeFilePath = uriWithoutContextPath.substring(fifthSlashIndex + 1,
-                                                                    uriWithoutContextPath.length());
+        String relativeFilePath = uriWithoutContextPath.substring(fifthSlashIndex + 1, uriWithoutContextPath.length());
         return selectPath(extension.getPaths(), relativeFilePath);
     }
 
@@ -347,7 +345,7 @@ public class StaticResolver {
         return MimeMapper.getMimeType(extensionFromPath).orElse(CONTENT_TYPE_WILDCARD);
     }
 
-    private Path selectPath(List<String> parentDirectories, String relativeFilePath) {
+    private Path selectPath(List<String> parentDirectories, String... relativeFilePath) {
         Path path = null;
         for (String parentDirectory : parentDirectories) {
             path = Paths.get(parentDirectory, relativeFilePath);
