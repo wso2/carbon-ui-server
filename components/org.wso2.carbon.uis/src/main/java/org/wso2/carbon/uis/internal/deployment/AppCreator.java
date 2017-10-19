@@ -116,7 +116,7 @@ public class AppCreator {
         return new Theme(themeReference.getName(), themeReference.getPath());
     }
 
-    private static I18nResource createI18nResource(I18nResourceReference i18nResourceReference){
+    private static I18nResource createI18nResource(I18nResourceReference i18nResourceReference) {
         return new I18nResource(i18nResourceReference.getLocale(), i18nResourceReference.getMessages());
     }
 
