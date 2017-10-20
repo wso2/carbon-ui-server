@@ -32,9 +32,9 @@ import org.wso2.carbon.deployment.engine.ArtifactType;
 import org.wso2.carbon.deployment.engine.Deployer;
 import org.wso2.carbon.deployment.engine.exception.CarbonDeploymentException;
 import org.wso2.carbon.uis.api.App;
-import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 import org.wso2.carbon.uis.internal.deployment.AppCreator;
 import org.wso2.carbon.uis.internal.deployment.AppDeploymentEventListener;
+import org.wso2.carbon.uis.internal.deployment.AppRegistry;
 import org.wso2.carbon.uis.internal.exception.AppCreationException;
 import org.wso2.carbon.uis.internal.io.reference.ArtifactAppReference;
 import org.wso2.carbon.uis.internal.reference.AppReference;
@@ -44,8 +44,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * An app deployer that finds web apps from a directory.
@@ -67,10 +65,7 @@ public class ArtifactAppDeployer implements Deployer {
 
     private final ArtifactType<String> artifactType;
     private final URL deploymentLocation;
-    /**
-     * Contains created apps. Here key is the artifact ID and value is corresponding created app.
-     */
-    private final ConcurrentMap<String, App> deployedApps;
+    private final AppRegistry appRegistry;
     private AppDeploymentEventListener appDeploymentEventListener;
 
     /**
@@ -85,7 +80,7 @@ public class ArtifactAppDeployer implements Deployer {
             LOGGER.error("Invalid URL '{}' as app deployment location.", DEPLOYMENT_LOCATION);
         }
         this.deploymentLocation = deploymentLocationUrl;
-        this.deployedApps = new ConcurrentHashMap<>();
+        this.appRegistry = new AppRegistry();
     }
 
     @Reference(name = "deploymentListener",
@@ -112,14 +107,8 @@ public class ArtifactAppDeployer implements Deployer {
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
-        for (String artifactKey : deployedApps.keySet()) {
-            try {
-                undeploy(artifactKey);
-            } catch (CarbonDeploymentException e) {
-                throw new UISRuntimeException("An error occurred when undeploying web app for key '" + artifactKey +
-                                              "' during deactivation of app deployer.", e);
-            }
-        }
+        appRegistry.getAll().forEach(this::publishAppUndeploymentEvent);
+        appRegistry.clear();
         LOGGER.debug("Carbon UI server app deployer deactivated.");
     }
 
@@ -135,32 +124,29 @@ public class ArtifactAppDeployer implements Deployer {
             throw new CarbonDeploymentException("Artifact located in '" + appPath + "'is not a valid web app.");
         }
 
-        App app = createApp(appPath);
-        String artifactKey = "webapp:" + app.getName();
-
-        appDeploymentEventListener.appDeploymentEvent(app);
-        deployedApps.put(artifactKey, app);
-        LOGGER.debug("Web app '{}' deployed for context path '{}'.", app.getName(), app.getContextPath());
-        return artifactKey;
+        App createdApp = createApp(appPath);
+        App mergedApp = appRegistry.find(createdApp::isMergeable)
+                .map(previouslyCreatedMergeableApp -> {
+                    publishAppUndeploymentEvent(previouslyCreatedMergeableApp);
+                    appRegistry.remove(previouslyCreatedMergeableApp);
+                    LOGGER.debug("Undeployed {} in order to merge it with {} and re-deploy the merged web app.",
+                                 previouslyCreatedMergeableApp, createdApp);
+                    return createdApp.merge(previouslyCreatedMergeableApp);
+                })
+                .orElse(createdApp);
+        publishAppDeploymentEvent(mergedApp);
+        return appRegistry.add(mergedApp);
     }
 
     @Override
     public void undeploy(Object key) throws CarbonDeploymentException {
-        App app = deployedApps.remove(key);
-        if (app == null) {
-            throw new CarbonDeploymentException("Web app for key '" + key + "' cannot be found to undeploy.");
-        }
-
-        appDeploymentEventListener.appUndeploymentEvent(app.getName());
-        LOGGER.debug("Web app '{}' undeployed from context path '{}'.", app.getName(), app.getContextPath());
+        appRegistry.remove(key.toString()).ifPresent(this::publishAppUndeploymentEvent);
     }
 
     @Override
     public Object update(Artifact artifact) throws CarbonDeploymentException {
-        // when an app artifact gets updated, we just re-deploy it
-        LOGGER.debug("Updating web app for key '{}'.", artifact.getKey());
-        undeploy(artifact.getKey());
-        return deploy(artifact);
+        LOGGER.debug("Ignored update of web app artifact at '{}'.", artifact.getPath());
+        return artifact.getKey();
     }
 
     @Override
@@ -173,7 +159,17 @@ public class ArtifactAppDeployer implements Deployer {
         return artifactType;
     }
 
-    private boolean isValidAppArtifact(Path appPath) throws CarbonDeploymentException {
+    private void publishAppDeploymentEvent(App app) {
+        appDeploymentEventListener.appDeploymentEvent(app);
+        LOGGER.debug("Web app '{}' deployed for context path '{}'.", app.getName(), app.getContextPath());
+    }
+
+    private void publishAppUndeploymentEvent(App app) {
+        appDeploymentEventListener.appUndeploymentEvent(app.getName());
+        LOGGER.debug("Web app '{}' undeployed from context path '{}'.", app.getName(), app.getContextPath());
+    }
+
+    private static boolean isValidAppArtifact(Path appPath) throws CarbonDeploymentException {
         try {
             return Files.exists(appPath) && Files.isDirectory(appPath) && Files.isReadable(appPath) &&
                    !Files.isHidden(appPath);
@@ -182,7 +178,7 @@ public class ArtifactAppDeployer implements Deployer {
         }
     }
 
-    private App createApp(Path appPath) throws CarbonDeploymentException {
+    private static App createApp(Path appPath) throws CarbonDeploymentException {
         AppReference appReference = new ArtifactAppReference(appPath);
         String appContextPath = createAppContextPath(appReference);
         try {
@@ -194,7 +190,7 @@ public class ArtifactAppDeployer implements Deployer {
         }
     }
 
-    private String createAppContextPath(AppReference appReference) {
+    private static String createAppContextPath(AppReference appReference) {
         // TODO: 10/7/17 Get the context path of the app from the deployment.yaml, if not return below default value.
         return "/" + appReference.getName();
     }
