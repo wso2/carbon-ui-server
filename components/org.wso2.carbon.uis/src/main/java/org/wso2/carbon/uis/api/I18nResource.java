@@ -30,7 +30,7 @@ import java.util.Set;
  *
  * @since 0.10.5
  */
-public class I18nResource implements Mergeable<I18nResource> {
+public class I18nResource {
 
     private final Locale locale;
     private final Properties messages;
@@ -74,18 +74,6 @@ public class I18nResource implements Mergeable<I18nResource> {
 
         return ((messageParams == null) || (messageParams.length == 0)) ? message :
                 new MessageFormat(message, locale).format(messageParams);
-    }
-
-    @Override
-    public I18nResource merge(I18nResource other) {
-        if (!isMergeable(other)) {
-            throw new IllegalArgumentException(this + " cannot merge with " + other + ".");
-        }
-
-        Properties messages = new Properties();
-        messages.putAll(this.messages);
-        messages.putAll(other.messages);
-        return new I18nResource(other.locale, messages);
     }
 
     @Override
