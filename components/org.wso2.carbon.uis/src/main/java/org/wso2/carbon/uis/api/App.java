@@ -19,6 +19,7 @@
 package org.wso2.carbon.uis.api;
 
 import org.wso2.carbon.uis.api.http.HttpRequest;
+import org.wso2.carbon.uis.api.util.Multilocational;
 import org.wso2.carbon.uis.api.util.Overridable;
 import org.wso2.carbon.uis.internal.exception.PageNotFoundException;
 import org.wso2.carbon.uis.internal.exception.PageRedirectException;
@@ -40,7 +41,7 @@ import java.util.stream.Collectors;
  *
  * @since 0.8.0
  */
-public class App implements Overridable<App> {
+public class App implements Multilocational, Overridable<App> {
 
     private final String name;
     private final String contextPath;
@@ -174,6 +175,7 @@ public class App implements Overridable<App> {
      *
      * @return paths of the theme
      */
+    @Override
     public List<String> getPaths() {
         return paths;
     }
