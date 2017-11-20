@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  * Represents an i18n resource in a web app.
  *
- * @since 0.10.5
+ * @since 0.12.0
  */
 public class I18nResource {
 

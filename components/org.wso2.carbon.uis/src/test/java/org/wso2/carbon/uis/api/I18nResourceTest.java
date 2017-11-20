@@ -30,7 +30,7 @@ import java.util.Set;
 /**
  * Test cases for {@link I18nResource} class.
  *
- * @since 0.10.5
+ * @since 0.12.0
  */
 public class I18nResourceTest {
 
