@@ -29,62 +29,9 @@ import static java.util.Collections.singletonList;
 /**
  * Test cases for {@link Theme} class.
  *
- * @since 0.10.5
+ * @since 0.12.0
  */
 public class ThemeTest {
-
-    @DataProvider
-    public Object[][] mergeableThemes() {
-        return new Object[][]{
-                {new Theme("t1", "p1"), new Theme("t1", "p2")},
-                {new Theme("t1", emptyList()), new Theme("t1", emptyList())},
-                {new Theme("t1", singletonList("p1")), new Theme("t1", singletonList("p2"))},
-                {new Theme("t1", "p1"), new Theme("t1", emptyList())},
-                {new Theme("t1", singletonList("p1")), new Theme("t1", "p2")}
-        };
-    }
-
-    @Test(dataProvider = "mergeableThemes")
-    public void testMergeability(Theme theme1, Theme theme2) {
-        Assert.assertTrue(theme1.isMergeable(theme2), theme1 + " should be able to merge with " + theme2 + ".");
-        Assert.assertTrue(theme2.isMergeable(theme1), theme2 + " should be able to merge with " + theme1 + ".");
-    }
-
-    @DataProvider
-    public Object[][] unmergeableThemes() {
-        return new Object[][]{
-                {new Theme("t1", "p1"), new Theme("t2", "p1")},
-                {new Theme("t1", emptyList()), new Theme("t2", emptyList())},
-                {new Theme("t1", singletonList("p1")), new Theme("t2", singletonList("p1"))},
-                {new Theme("t1", "p1"), new Theme("t2", "p2")}
-        };
-    }
-
-    @Test(dataProvider = "unmergeableThemes")
-    public void testUnmergeability(Theme theme1, Theme theme2) {
-        Assert.assertFalse(theme1.isMergeable(theme2), theme1 + " shouldn't be able to merge with " + theme2 + ".");
-        Assert.assertFalse(theme2.isMergeable(theme1), theme2 + " shouldn't be able to merge with " + theme1 + ".");
-
-        Assert.assertThrows(IllegalArgumentException.class, () -> theme1.merge(theme2));
-        Assert.assertThrows(IllegalArgumentException.class, () -> theme2.merge(theme1));
-    }
-
-    @DataProvider
-    public Object[][] mergingThemes() {
-        return new Object[][]{
-                {new Theme("t1", "p1"), new Theme("t1", "p2"), new Theme("t1", asList("p2", "p1"))},
-                {new Theme("t1", emptyList()), new Theme("t1", emptyList()), new Theme("t1", emptyList())},
-                {new Theme("t1", singletonList("p1")), new Theme("t1", singletonList("p2")),
-                        new Theme("t1", asList("p2", "p1"))},
-                {new Theme("t1", asList("p1", "p11")), new Theme("t1", asList("p2", "p22")),
-                        new Theme("t1", asList("p2", "p22", "p1", "p11"))}
-        };
-    }
-
-    @Test(dataProvider = "mergingThemes")
-    public void testMerge(Theme theme, Theme otherTheme, Theme mergedTheme) {
-        Assert.assertEquals(theme.merge(otherTheme), mergedTheme);
-    }
 
     @DataProvider
     public Object[][] equalThemes() {

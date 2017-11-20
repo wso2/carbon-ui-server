@@ -18,7 +18,8 @@
 
 package org.wso2.carbon.uis.api;
 
-import com.google.common.collect.ImmutableList;
+import org.wso2.carbon.uis.api.util.Overridable;
+import org.wso2.carbon.uis.internal.impl.OverriddenTheme;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.Objects;
  *
  * @since 0.8.0
  */
-public class Theme implements Mergeable<Theme> {
+public class Theme implements Overridable<Theme> {
 
     private final String name;
     private final List<String> paths;
@@ -48,9 +49,9 @@ public class Theme implements Mergeable<Theme> {
      * Creates a new theme.
      *
      * @param name  name of the theme
-     * @param paths paths of the theme
+     * @param paths paths to the theme
      */
-    Theme(String name, List<String> paths) {
+    protected Theme(String name, List<String> paths) {
         this.name = name;
         this.paths = paths;
     }
@@ -74,12 +75,16 @@ public class Theme implements Mergeable<Theme> {
     }
 
     @Override
-    public Theme merge(Theme other) {
-        if (!isMergeable(other)) {
-            throw new IllegalArgumentException(this + " cannot merge with " + other + ".");
+    public Theme override(Theme override) {
+        if (!canOverrideBy(override)) {
+            throw new IllegalArgumentException(this + " cannot be overridden by " + override + " .");
         }
+        return new OverriddenTheme(this, override);
+    }
 
-        return new Theme(other.name, ImmutableList.<String>builder().addAll(other.paths).addAll(this.paths).build());
+    @Override
+    public Theme getBase() {
+        return this;
     }
 
     @Override
