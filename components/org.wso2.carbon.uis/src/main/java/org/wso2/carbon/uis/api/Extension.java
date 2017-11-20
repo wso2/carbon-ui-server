@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.uis.api;
 
+import org.wso2.carbon.uis.api.util.Multilocational;
 import org.wso2.carbon.uis.api.util.Overridable;
 import org.wso2.carbon.uis.internal.impl.OverriddenExtension;
 
@@ -30,7 +31,7 @@ import java.util.Objects;
  *
  * @since 0.8.0
  */
-public class Extension implements Overridable<Extension> {
+public class Extension implements Multilocational, Overridable<Extension> {
 
     private final String name;
     private final String type;
@@ -83,6 +84,7 @@ public class Extension implements Overridable<Extension> {
      *
      * @return paths of the theme
      */
+    @Override
     public List<String> getPaths() {
         return paths;
     }
