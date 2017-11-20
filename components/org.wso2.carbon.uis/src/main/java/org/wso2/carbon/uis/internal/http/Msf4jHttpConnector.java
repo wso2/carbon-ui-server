@@ -126,7 +126,7 @@ public class Msf4jHttpConnector implements HttpConnector {
 
     @Override
     public void unregisterApp(String appName) {
-        Set<ServiceRegistration<Microservice>> registrations = microserviceRegistrations.get(appName);
+        Set<ServiceRegistration<Microservice>> registrations = microserviceRegistrations.removeAll(appName);
         if (registrations.isEmpty()) {
             throw new IllegalArgumentException("Cannot unregister web app '" + appName +
                                                "'. App might be already unregistered or not be registered at all.");
