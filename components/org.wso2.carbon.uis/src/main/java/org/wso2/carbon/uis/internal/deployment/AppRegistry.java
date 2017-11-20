@@ -29,7 +29,7 @@ import java.util.function.Predicate;
 /**
  * Registry that holds create web apps.
  *
- * @since 0.10.5
+ * @since 0.12.0
  */
 public class AppRegistry {
 

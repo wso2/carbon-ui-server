@@ -27,7 +27,7 @@ import java.util.Collections;
 /**
  * Test cases for {@link AppRegistry} class.
  *
- * @since 0.10.5
+ * @since 0.12.0
  */
 public class AppRegistryTest {
 
@@ -84,9 +84,6 @@ public class AppRegistryTest {
 
         Assert.assertTrue(appRegistry.find(app -> a1 == app).isPresent(),
                           "App " + a1 + " should be in the app registry.");
-        App a3 = createApp("a1", "p3");
-        Assert.assertTrue(appRegistry.find(a3::isMergeable).isPresent());
-        Assert.assertEquals(appRegistry.find(a3::isMergeable).orElse(null), a1);
         Assert.assertFalse(appRegistry.find(app -> app.getName().equals("foo")).isPresent());
     }
 
