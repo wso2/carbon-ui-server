@@ -389,8 +389,8 @@
         <carbon.deployment.version.range>[5.0.0, 6.0.0)</carbon.deployment.version.range>
 
         <!--Config-->
-        <carbon.config.version>2.0.3</carbon.config.version>
-        <carbon.config.version.range>[2.0.0, 3.0.0)</carbon.config.version.range>
+        <carbon.config.version>2.1.2</carbon.config.version>
+        <carbon.config.version.range>[2.1.2, 3.0.0)</carbon.config.version.range>
         <carbon.securevault.version>5.0.8</carbon.securevault.version>
         <carbon.utils.version>2.0.2</carbon.utils.version>
 
