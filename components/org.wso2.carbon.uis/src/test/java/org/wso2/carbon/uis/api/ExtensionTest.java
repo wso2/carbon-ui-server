@@ -29,74 +29,15 @@ import static java.util.Collections.singletonList;
 /**
  * Test cases for {@link Extension} class.
  *
- * @since 0.10.5
+ * @since 0.12.0
  */
 public class ExtensionTest {
 
     @DataProvider
-    public Object[][] mergeableExtensions() {
-        return new Object[][]{
-                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", "p2")},
-                {new Extension("e1", "t1", emptyList()), new Extension("e1", "t1", emptyList())},
-                {new Extension("e1", "t1", singletonList("p1")), new Extension("e1", "t1", singletonList("p2"))},
-                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", emptyList())},
-                {new Extension("e1", "t1", singletonList("p1")), new Extension("e1", "t1", "p2")}
-        };
-    }
-
-    @Test(dataProvider = "mergeableExtensions")
-    public void testMergeability(Extension extension1, Extension extension2) {
-        Assert.assertTrue(extension1.isMergeable(extension2),
-                          extension1 + " should be able to merge with " + extension2 + ".");
-        Assert.assertTrue(extension2.isMergeable(extension1),
-                          extension2 + " should be able to merge with " + extension1 + ".");
-    }
-
-    @DataProvider
-    public Object[][] unmergeableExtension() {
-        return new Object[][]{
-                {new Extension("e1", "t1", "p1"), new Extension("e1", "t2", "p1")},
-                {new Extension("e1", "t1", emptyList()), new Extension("e2", "t2", emptyList())},
-                {new Extension("e1", "t1", singletonList("p1")), new Extension("e1", "t2", singletonList("p1"))},
-                {new Extension("e1", "t1", "p1"), new Extension("e2", "t2", "p2")}
-        };
-    }
-
-    @Test(dataProvider = "unmergeableExtension")
-    public void testUnmergeability(Extension extension1, Extension extension2) {
-        Assert.assertFalse(extension1.isMergeable(extension2),
-                           extension1 + " shouldn't be able to merge with " + extension2 + ".");
-        Assert.assertFalse(extension2.isMergeable(extension1),
-                           extension2 + " shouldn't be able to merge with " + extension1 + ".");
-
-        Assert.assertThrows(IllegalArgumentException.class, () -> extension1.merge(extension2));
-        Assert.assertThrows(IllegalArgumentException.class, () -> extension2.merge(extension1));
-    }
-
-    @DataProvider
-    public Object[][] mergingExtensions() {
-        return new Object[][]{
-                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", "p2"),
-                        new Extension("e1", "t1", asList("p2", "p1"))},
-                {new Extension("e1", "t1", emptyList()), new Extension("e1", "t1", emptyList()),
-                        new Extension("e1", "t1", emptyList())},
-                {new Extension("e1", "t1", singletonList("p1")), new Extension("e1", "t1", singletonList("p2")),
-                        new Extension("e1", "t1", asList("p2", "p1"))},
-                {new Extension("e1", "t1", asList("p1", "p11")), new Extension("e1", "t1", asList("p2", "p22")),
-                        new Extension("e1", "t1", asList("p2", "p22", "p1", "p11"))}
-        };
-    }
-
-    @Test(dataProvider = "mergingExtensions")
-    public void testMerge(Extension extension, Extension otherExtension, Extension mergedExtension) {
-        Assert.assertEquals(extension.merge(otherExtension), mergedExtension);
-    }
-
-    @DataProvider
     public Object[][] equalExtensions() {
-        Extension theme = new Extension("e0", "t0", "p0");
+        Extension extension = new Extension("e0", "t0", "p0");
         return new Object[][]{
-                {theme, theme},
+                {extension, extension},
                 {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", "p1")},
                 {new Extension("e1", "t1", emptyList()), new Extension("e1", "t1", emptyList())},
                 {new Extension("e1", "t1", singletonList("p1")), new Extension("e1", "t1", singletonList("p1"))},

@@ -18,7 +18,8 @@
 
 package org.wso2.carbon.uis.api;
 
-import com.google.common.collect.ImmutableList;
+import org.wso2.carbon.uis.api.util.Overridable;
+import org.wso2.carbon.uis.internal.impl.OverriddenExtension;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.Objects;
  *
  * @since 0.8.0
  */
-public class Extension implements Mergeable<Extension> {
+public class Extension implements Overridable<Extension> {
 
     private final String name;
     private final String type;
@@ -53,7 +54,7 @@ public class Extension implements Mergeable<Extension> {
      * @param type  type of the extension
      * @param paths paths to the extension
      */
-    Extension(String name, String type, List<String> paths) {
+    protected Extension(String name, String type, List<String> paths) {
         this.name = name;
         this.type = type;
         this.paths = paths;
@@ -87,12 +88,16 @@ public class Extension implements Mergeable<Extension> {
     }
 
     @Override
-    public Extension merge(Extension other) {
-        if (!isMergeable(other)) {
-            throw new IllegalArgumentException(this + " cannot merge with " + other + ".");
+    public Extension override(Extension override) {
+        if (!canOverrideBy(override)) {
+            throw new IllegalArgumentException(this + " cannot be overridden by " + override + " .");
         }
-        return new Extension(other.name, other.type,
-                             ImmutableList.<String>builder().addAll(other.paths).addAll(this.paths).build());
+        return new OverriddenExtension(this, override);
+    }
+
+    @Override
+    public Extension getBase() {
+        return this;
     }
 
     @Override
