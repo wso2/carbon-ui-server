@@ -36,6 +36,7 @@ import org.wso2.carbon.uis.internal.deployment.AppCreator;
 import org.wso2.carbon.uis.internal.deployment.AppDeploymentEventListener;
 import org.wso2.carbon.uis.internal.deployment.AppRegistry;
 import org.wso2.carbon.uis.internal.exception.AppCreationException;
+import org.wso2.carbon.uis.internal.impl.OverriddenApp;
 import org.wso2.carbon.uis.internal.io.reference.ArtifactAppReference;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 
@@ -44,6 +45,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * An app deployer that finds web apps from a directory.
@@ -125,22 +127,36 @@ public class ArtifactAppDeployer implements Deployer {
         }
 
         App createdApp = createApp(appPath);
-        App mergedApp = appRegistry.find(createdApp::isMergeable)
-                .map(previouslyCreatedMergeableApp -> {
-                    publishAppUndeploymentEvent(previouslyCreatedMergeableApp);
-                    appRegistry.remove(previouslyCreatedMergeableApp);
-                    LOGGER.debug("Undeployed {} in order to merge it with {} and re-deploy the merged web app.",
-                                 previouslyCreatedMergeableApp, createdApp);
-                    return createdApp.merge(previouslyCreatedMergeableApp);
+        App deployingApp = appRegistry.find(createdApp::canOverrideBy)
+                .map(previouslyCreatedApp -> {
+                    LOGGER.info("Undeploying {} in order to merge it with {} and re-deploy the merged web app.",
+                                previouslyCreatedApp, createdApp);
+                    publishAppUndeploymentEvent(previouslyCreatedApp);
+                    return (App) new OverriddenApp(createdApp, previouslyCreatedApp);
                 })
                 .orElse(createdApp);
-        publishAppDeploymentEvent(mergedApp);
-        return appRegistry.add(mergedApp);
+
+        publishAppDeploymentEvent(deployingApp);
+        return appRegistry.add(deployingApp);
     }
 
     @Override
     public void undeploy(Object key) throws CarbonDeploymentException {
-        appRegistry.remove(key.toString()).ifPresent(this::publishAppUndeploymentEvent);
+        Optional<App> removingApp = appRegistry.remove(key.toString());
+        if (removingApp.isPresent()) {
+            Optional<App> overriddenApp = appRegistry.find(app -> app.hasOverriddenBy(removingApp.get()));
+            if (overriddenApp.isPresent()) {
+                LOGGER.info("{} was overridden by the just undeployed {}. " +
+                            "Therefore it will be undeployed and base {} will be restored.",
+                            overriddenApp.get(), removingApp.get(), overriddenApp.get().getBase());
+                publishAppUndeploymentEvent(overriddenApp.get());
+                publishAppDeploymentEvent(overriddenApp.get().getBase());
+            } else {
+                publishAppUndeploymentEvent(removingApp.get());
+            }
+        } else {
+            LOGGER.warn("Cannot find a deployed app for artifact key '{}'.", key);
+        }
     }
 
     @Override
