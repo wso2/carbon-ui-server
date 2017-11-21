@@ -109,7 +109,6 @@ public class ArtifactAppDeployer implements Deployer {
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
-        appRegistry.getAll().forEach(this::publishAppUndeploymentEvent);
         appRegistry.clear();
         LOGGER.debug("Carbon UI server app deployer deactivated.");
     }
@@ -132,6 +131,7 @@ public class ArtifactAppDeployer implements Deployer {
                     LOGGER.info("Undeploying {} in order to merge it with {} and re-deploy the merged web app.",
                                 previouslyCreatedApp, createdApp);
                     publishAppUndeploymentEvent(previouslyCreatedApp);
+                    appRegistry.add(createdApp);
                     return (App) new OverriddenApp(createdApp, previouslyCreatedApp);
                 })
                 .orElse(createdApp);
@@ -145,10 +145,12 @@ public class ArtifactAppDeployer implements Deployer {
         Optional<App> removingApp = appRegistry.remove(key.toString());
         if (removingApp.isPresent()) {
             Optional<App> overriddenApp = appRegistry.find(app -> app.hasOverriddenBy(removingApp.get()));
+
             if (overriddenApp.isPresent()) {
                 LOGGER.info("{} was overridden by the just undeployed {}. " +
                             "Therefore it will be undeployed and base {} will be restored.",
                             overriddenApp.get(), removingApp.get(), overriddenApp.get().getBase());
+                appRegistry.remove(overriddenApp.get());
                 publishAppUndeploymentEvent(overriddenApp.get());
                 publishAppDeploymentEvent(overriddenApp.get().getBase());
             } else {
