@@ -60,10 +60,20 @@ public class OverridableTest {
         return new OverridableImpl(override);
     }
 
+    /**
+     * Implementation of {@link Overridable} for unit tests.
+     *
+     * @since 0.12.0
+     */
     private static class OverridableImpl implements Overridable<Object> {
 
         private final Object override;
 
+        /**
+         * Creates a new instance.
+         *
+         * @param override override
+         */
         public OverridableImpl(Object override) {
             this.override = override;
         }
