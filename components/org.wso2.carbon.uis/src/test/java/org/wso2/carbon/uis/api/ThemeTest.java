@@ -34,6 +34,20 @@ import static java.util.Collections.singletonList;
 public class ThemeTest {
 
     @DataProvider
+    public Object[][] overridableThemes() {
+        return new Object[][]{
+                {new Theme("t1", "p1"), new Theme("t1", "p2")},
+                {new Theme("t1", emptyList()), new Theme("t1", singletonList("p2"))},
+                {new Theme("t1", asList("p1", "p11")), new Theme("t1", asList("p2", "p22"))}
+        };
+    }
+
+    @Test(dataProvider = "overridableThemes")
+    public void testCanOverrideBy(Theme theme1, Theme theme2) {
+        Assert.assertTrue(theme1.canOverrideBy(theme2));
+    }
+
+    @DataProvider
     public Object[][] equalThemes() {
         Theme theme = new Theme("t0", "p0");
         return new Object[][]{

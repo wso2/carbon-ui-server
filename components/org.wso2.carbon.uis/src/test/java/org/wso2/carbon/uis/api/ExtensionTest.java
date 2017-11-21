@@ -34,6 +34,20 @@ import static java.util.Collections.singletonList;
 public class ExtensionTest {
 
     @DataProvider
+    public Object[][] overridableExtensions() {
+        return new Object[][]{
+                {new Extension("e1", "t1", "p1"), new Extension("e1", "t1", "p2")},
+                {new Extension("e1", "t1", emptyList()), new Extension("e1", "t1", singletonList("p2"))},
+                {new Extension("e1", "t1", asList("p1", "p11")), new Extension("e1", "t1", asList("p2", "p22"))}
+        };
+    }
+
+    @Test(dataProvider = "overridableExtensions")
+    public void testCanOverrideBy(Extension extension1, Extension extension2) {
+        Assert.assertTrue(extension1.canOverrideBy(extension2));
+    }
+
+    @DataProvider
     public Object[][] equalExtensions() {
         Extension extension = new Extension("e0", "t0", "p0");
         return new Object[][]{

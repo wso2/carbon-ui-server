@@ -27,7 +27,7 @@ import java.util.Optional;
  * @param <T> the type of the objects that can be use to override this object
  * @since 0.12.0
  */
-public interface Overridable<T extends Overridable<T>> {
+public interface Overridable<T> {
 
     /**
      * Overrides this object (base) by the supplied object (override) and returns a new object that represents the
