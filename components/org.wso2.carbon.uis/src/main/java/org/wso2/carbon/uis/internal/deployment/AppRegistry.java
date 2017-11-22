@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * Registry that holds create web apps.
+ * Registry that holds created web apps.
  *
  * @since 0.12.0
  */
