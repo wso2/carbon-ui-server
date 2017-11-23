@@ -19,9 +19,16 @@
 package org.wso2.carbon.uis.api;
 
 import org.wso2.carbon.uis.api.http.HttpRequest;
+import org.wso2.carbon.uis.api.util.Multilocational;
+import org.wso2.carbon.uis.api.util.Overridable;
 import org.wso2.carbon.uis.internal.exception.PageNotFoundException;
 import org.wso2.carbon.uis.internal.exception.PageRedirectException;
+import org.wso2.carbon.uis.internal.impl.OverriddenApp;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,16 +41,16 @@ import java.util.stream.Collectors;
  *
  * @since 0.8.0
  */
-public class App {
+public class App implements Multilocational, Overridable<App> {
 
     private final String name;
     private final String contextPath;
     private final SortedSet<Page> pages;
     private final Map<String, Extension> extensions;
     private final Map<String, Theme> themes;
-    private final I18nResources i18nResources;
+    private final Map<Locale, I18nResource> i18nResources;
     private final Configuration configuration;
-    private final String path;
+    private final List<String> paths;
 
     /**
      * Creates a new app which can be located in the specified path.
@@ -58,9 +65,28 @@ public class App {
      * @param path          path to the app
      */
     public App(String name, String contextPath,
-               SortedSet<Page> pages, Set<Extension> extensions, Set<Theme> themes,
-               I18nResources i18nResources, Configuration configuration,
+               SortedSet<Page> pages, Set<Extension> extensions, Set<Theme> themes, Set<I18nResource> i18nResources,
+               Configuration configuration,
                String path) {
+        this(name, contextPath, pages, extensions, themes, i18nResources, configuration,
+             Collections.singletonList(path));
+    }
+
+    /**
+     * Creates a new app.
+     *
+     * @param name          name of the app
+     * @param contextPath   context path of the app
+     * @param pages         pages of the app
+     * @param extensions    extensions of the app
+     * @param themes        themes of the app
+     * @param i18nResources i18n resources of the app
+     * @param configuration configurations of the app
+     * @param paths         paths to the app
+     */
+    protected App(String name, String contextPath,
+                  SortedSet<Page> pages, Set<Extension> extensions, Set<Theme> themes, Set<I18nResource> i18nResources,
+                  Configuration configuration, List<String> paths) {
         this.name = name;
         this.contextPath = contextPath;
         this.pages = pages;
@@ -68,9 +94,10 @@ public class App {
                 .collect(Collectors.toMap(ext -> (ext.getType() + ":" + ext.getName()), ext -> ext));
         this.themes = themes.stream()
                 .collect(Collectors.toMap(Theme::getName, t -> t));
-        this.i18nResources = i18nResources;
+        this.i18nResources = i18nResources.stream()
+                .collect(Collectors.toMap(I18nResource::getLocale, i18nResource -> i18nResource));
         this.configuration = configuration;
-        this.path = path;
+        this.paths = paths;
     }
 
     /**
@@ -125,12 +152,13 @@ public class App {
     }
 
     /**
-     * Returns i18n resources of this app.
+     * Returns the i18n resource in this app specified by the given local.
      *
-     * @return i18n resources of the app
+     * @param locale locale of the i18n resource
+     * @return i18n resource in the app
      */
-    public I18nResources getI18nResources() {
-        return i18nResources;
+    public Optional<I18nResource> getI18nResource(Locale locale) {
+        return Optional.ofNullable(i18nResources.get(locale));
     }
 
     /**
@@ -143,12 +171,13 @@ public class App {
     }
 
     /**
-     * Returns the path of this app.
+     * Returns paths that this app can be located.
      *
-     * @return path of the app
+     * @return paths of the theme
      */
-    public String getPath() {
-        return path;
+    @Override
+    public List<String> getPaths() {
+        return paths;
     }
 
     /**
@@ -195,6 +224,20 @@ public class App {
     }
 
     @Override
+    public App override(App override) {
+        if (!canOverrideBy(override)) {
+            throw new IllegalArgumentException(this + " cannot be overridden by " + override + " .");
+        }
+
+        return new OverriddenApp(this, override);
+    }
+
+    @Override
+    public App getBase() {
+        return this;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -202,8 +245,9 @@ public class App {
         if (!(obj instanceof App)) {
             return false;
         }
-        App app = (App) obj;
-        return Objects.equals(name, app.name) && Objects.equals(contextPath, app.contextPath);
+        App other = (App) obj;
+        return Objects.equals(name, other.name) && Objects.equals(contextPath, other.contextPath) &&
+               Objects.equals(paths, other.paths);
     }
 
     @Override
@@ -213,6 +257,22 @@ public class App {
 
     @Override
     public String toString() {
-        return "App{name='" + name + "', contextPath='" + contextPath + "', path='" + path + "'}";
+        return "App{name='" + name + "', contextPath='" + contextPath + "', paths=" + paths + "}";
+    }
+
+    protected static SortedSet<Page> getPagesOf(App app) {
+        return app.pages;
+    }
+
+    protected static Collection<Extension> getExtensionsOf(App app) {
+        return app.extensions.values();
+    }
+
+    protected static Collection<Theme> getThemesOf(App app) {
+        return app.themes.values();
+    }
+
+    protected static Collection<I18nResource> getI18nResourcesOf(App app) {
+        return app.i18nResources.values();
     }
 }

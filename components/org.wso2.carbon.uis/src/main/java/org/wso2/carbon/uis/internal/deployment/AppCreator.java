@@ -21,7 +21,7 @@ package org.wso2.carbon.uis.internal.deployment;
 import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.Configuration;
 import org.wso2.carbon.uis.api.Extension;
-import org.wso2.carbon.uis.api.I18nResources;
+import org.wso2.carbon.uis.api.I18nResource;
 import org.wso2.carbon.uis.api.Page;
 import org.wso2.carbon.uis.api.Theme;
 import org.wso2.carbon.uis.api.UriPatten;
@@ -33,6 +33,7 @@ import org.wso2.carbon.uis.internal.impl.HtmlPage;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 import org.wso2.carbon.uis.internal.reference.ExtensionReference;
 import org.wso2.carbon.uis.internal.reference.FileReference;
+import org.wso2.carbon.uis.internal.reference.I18nResourceReference;
 import org.wso2.carbon.uis.internal.reference.PageReference;
 import org.wso2.carbon.uis.internal.reference.ThemeReference;
 
@@ -65,10 +66,12 @@ public class AppCreator {
         Set<Theme> themes = appReference.getThemeReferences().stream()
                 .map(AppCreator::createTheme)
                 .collect(Collectors.toSet());
+        Set<I18nResource> i18nResources = appReference.getI18nResourceReferences().stream()
+                .map(AppCreator::createI18nResource)
+                .collect(Collectors.toSet());
         Configuration configuration = appReference.getConfiguration()
                 .map(AppCreator::createConfiguration)
                 .orElse(new Configuration());
-        I18nResources i18nResources = createI18nResources(appReference);
         return new App(appReference.getName(), appContext, pages, extensions, themes, i18nResources, configuration,
                        appReference.getPath());
     }
@@ -113,11 +116,8 @@ public class AppCreator {
         return new Theme(themeReference.getName(), themeReference.getPath());
     }
 
-    private static I18nResources createI18nResources(AppReference appReference) {
-        I18nResources i18nResources = new I18nResources();
-        appReference.getI18nResourceReferences()
-                .forEach(i18nRef -> i18nResources.addI18nResource(i18nRef.getLocale(), i18nRef.getMessages()));
-        return i18nResources;
+    private static I18nResource createI18nResource(I18nResourceReference i18nResourceReference) {
+        return new I18nResource(i18nResourceReference.getLocale(), i18nResourceReference.getMessages());
     }
 
     private static Configuration createConfiguration(FileReference fileReference) {

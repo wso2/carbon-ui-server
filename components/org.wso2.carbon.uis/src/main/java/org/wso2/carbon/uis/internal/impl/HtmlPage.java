@@ -45,8 +45,7 @@ public class HtmlPage extends Page {
     }
 
     @Override
-    public String render(HttpRequest request,
-                         Configuration configuration) throws RenderingException {
+    public String render(HttpRequest request, Configuration configuration) throws RenderingException {
         return content;
     }
 }

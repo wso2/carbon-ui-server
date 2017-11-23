@@ -45,6 +45,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.AbstractMap;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -206,9 +207,8 @@ public class StaticResolver {
         }
 
         // {sub-directory}/{rest-of-the-path}
-        String relativePathString = uriWithoutContextPath.substring(thirdSlashIndex + 1,
-                                                                    uriWithoutContextPath.length());
-        return Paths.get(app.getPath(), AppReference.DIR_NAME_PUBLIC_RESOURCES, relativePathString);
+        String relativeFilePath = uriWithoutContextPath.substring(thirdSlashIndex + 1, uriWithoutContextPath.length());
+        return selectPath(app.getPaths(), AppReference.DIR_NAME_PUBLIC_RESOURCES, relativeFilePath);
     }
 
     private Path resolveResourceInExtension(App app, String uriWithoutContextPath) {
@@ -243,9 +243,8 @@ public class StaticResolver {
                         uriWithoutContextPath + "' does not exists."));
 
         // {rest-of-the-path}
-        String relativePathString = uriWithoutContextPath.substring(fifthSlashIndex + 1,
-                                                                    uriWithoutContextPath.length());
-        return Paths.get(extension.getPath(), relativePathString);
+        String relativeFilePath = uriWithoutContextPath.substring(fifthSlashIndex + 1, uriWithoutContextPath.length());
+        return selectPath(extension.getPaths(), relativeFilePath);
     }
 
     private Path resolveResourceInTheme(App app, String uriWithoutContextPath) {
@@ -277,9 +276,8 @@ public class StaticResolver {
                         "Theme '" + themeName + "' found in URI '" + uriWithoutContextPath + "' does not exists."));
 
         // {sub-directory}/{rest-of-the-path}
-        String relativePathString = uriWithoutContextPath.substring(fourthSlashIndex + 1,
-                                                                    uriWithoutContextPath.length());
-        return Paths.get(theme.getPath(), relativePathString);
+        String relativeFilePath = uriWithoutContextPath.substring(fourthSlashIndex + 1, uriWithoutContextPath.length());
+        return selectPath(theme.getPaths(), relativeFilePath);
     }
 
     private ZonedDateTime getLastModifiedDate(Path resourcePath) {
@@ -345,5 +343,16 @@ public class StaticResolver {
         // Here 'resource' never null, thus 'FilenameUtils.getExtension(...)' never return null.
         String extensionFromPath = FilenameUtils.getExtension(resource.getFileName().toString());
         return MimeMapper.getMimeType(extensionFromPath).orElse(CONTENT_TYPE_WILDCARD);
+    }
+
+    private Path selectPath(List<String> parentDirectories, String... relativeFilePath) {
+        Path path = null;
+        for (String parentDirectory : parentDirectories) {
+            path = Paths.get(parentDirectory, relativeFilePath);
+            if (Files.exists(path)) {
+                return path;
+            }
+        }
+        return path;
     }
 }

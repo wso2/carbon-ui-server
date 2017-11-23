@@ -18,6 +18,12 @@
 
 package org.wso2.carbon.uis.api;
 
+import org.wso2.carbon.uis.api.util.Multilocational;
+import org.wso2.carbon.uis.api.util.Overridable;
+import org.wso2.carbon.uis.internal.impl.OverriddenExtension;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,11 +31,11 @@ import java.util.Objects;
  *
  * @since 0.8.0
  */
-public class Extension {
+public class Extension implements Multilocational, Overridable<Extension> {
 
     private final String name;
     private final String type;
-    private final String path;
+    private final List<String> paths;
 
     /**
      * Creates a new extension which can be located in the specified path.
@@ -39,9 +45,20 @@ public class Extension {
      * @param path path to the extension
      */
     public Extension(String name, String type, String path) {
+        this(name, type, Collections.singletonList(path));
+    }
+
+    /**
+     * Creates a new extension.
+     *
+     * @param name  name of the extension
+     * @param type  type of the extension
+     * @param paths paths to the extension
+     */
+    protected Extension(String name, String type, List<String> paths) {
         this.name = name;
         this.type = type;
-        this.path = path;
+        this.paths = paths;
     }
 
     /**
@@ -63,12 +80,26 @@ public class Extension {
     }
 
     /**
-     * Returns the path of this extension.
+     * Returns paths that this extension can be located.
      *
-     * @return path of the extension
+     * @return paths of the theme
      */
-    public String getPath() {
-        return path;
+    @Override
+    public List<String> getPaths() {
+        return paths;
+    }
+
+    @Override
+    public Extension override(Extension override) {
+        if (!canOverrideBy(override)) {
+            throw new IllegalArgumentException(this + " cannot be overridden by " + override + " .");
+        }
+        return new OverriddenExtension(this, override);
+    }
+
+    @Override
+    public Extension getBase() {
+        return this;
     }
 
     @Override
@@ -79,8 +110,9 @@ public class Extension {
         if (!(obj instanceof Extension)) {
             return false;
         }
-        Extension otherExtension = (Extension) obj;
-        return Objects.equals(name, otherExtension.name) && Objects.equals(type, otherExtension.type);
+        Extension other = (Extension) obj;
+        return Objects.equals(name, other.name) && Objects.equals(type, other.type) &&
+               Objects.equals(paths, other.paths);
     }
 
     @Override
@@ -90,6 +122,6 @@ public class Extension {
 
     @Override
     public String toString() {
-        return "Extension{" + "type='" + type + '\'' + ", name='" + name + '\'' + '}';
+        return "Extension{name='" + name + "', type='" + type + "', paths=" + paths + "}";
     }
 }

@@ -18,6 +18,12 @@
 
 package org.wso2.carbon.uis.api;
 
+import org.wso2.carbon.uis.api.util.Multilocational;
+import org.wso2.carbon.uis.api.util.Overridable;
+import org.wso2.carbon.uis.internal.impl.OverriddenTheme;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,10 +31,10 @@ import java.util.Objects;
  *
  * @since 0.8.0
  */
-public class Theme {
+public class Theme implements Multilocational, Overridable<Theme> {
 
     private final String name;
-    private final String path;
+    private final List<String> paths;
 
     /**
      * Creates a new theme which can be located in the specified path.
@@ -37,8 +43,18 @@ public class Theme {
      * @param path path to the theme
      */
     public Theme(String name, String path) {
+        this(name, Collections.singletonList(path));
+    }
+
+    /**
+     * Creates a new theme.
+     *
+     * @param name  name of the theme
+     * @param paths paths to the theme
+     */
+    protected Theme(String name, List<String> paths) {
         this.name = name;
-        this.path = path;
+        this.paths = paths;
     }
 
     /**
@@ -51,12 +67,26 @@ public class Theme {
     }
 
     /**
-     * Returns the path of this theme.
+     * Returns paths that this theme can be located.
      *
-     * @return path of the theme
+     * @return paths of the theme
      */
-    public String getPath() {
-        return path;
+    @Override
+    public List<String> getPaths() {
+        return paths;
+    }
+
+    @Override
+    public Theme override(Theme override) {
+        if (!canOverrideBy(override)) {
+            throw new IllegalArgumentException(this + " cannot be overridden by " + override + " .");
+        }
+        return new OverriddenTheme(this, override);
+    }
+
+    @Override
+    public Theme getBase() {
+        return this;
     }
 
     @Override
@@ -67,17 +97,17 @@ public class Theme {
         if (!(obj instanceof Theme)) {
             return false;
         }
-        Theme theme = (Theme) obj;
-        return Objects.equals(name, theme.name) && Objects.equals(path, theme.path);
+        Theme other = (Theme) obj;
+        return Objects.equals(name, other.name) && Objects.equals(paths, other.paths);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, path);
+        return Objects.hash(name);
     }
 
     @Override
     public String toString() {
-        return "Theme{name='" + name + "', path='" + path + "'}";
+        return "Theme{name='" + name + "', paths=" + paths + "}";
     }
 }
