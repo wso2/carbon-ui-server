@@ -1,9 +1,11 @@
-# Set this to true if you want to deploy this web app in HTTPS
+# Set this to true if you want to deploy this web app *only* in HTTPS.
 httpsOnly: true
 
-#
+# HTTP response headers.
 responseHeaders:
+  # HTTP response headers for static resources.
   resources:
     "Content-Security-Policy": "default-src 'none'; script-src 'self' ssl.google-analytics.com;"
+  # HTTP response headers for pages.
   pages:
     "X-Frame-Options": "DENY"
