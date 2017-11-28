@@ -156,7 +156,7 @@
             io.netty.handler.*; version="${netty.version.range}",
             com.google.common.*; version="${guava.version.range}",
             com.google.gson.*; version="${gson.version.range}",
-            org.yaml.snakeyaml.*; version="${orbit.org.yaml.version.range}",
+            org.yaml.snakeyaml.*; version="${snakeyaml.version.range}",
             org.apache.commons.lang3.*; version="${org.apache.commons.commons-lang3.version.range}",
             org.apache.commons.io; version="${commons-io.wso2.version.range}",
             com.github.jknack.handlebars.*;version="${orbit.com.github.jknack.handlebars.version.range}",
