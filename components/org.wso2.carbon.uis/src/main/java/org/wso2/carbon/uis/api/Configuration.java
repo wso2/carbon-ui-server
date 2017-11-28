@@ -18,9 +18,8 @@
 
 package org.wso2.carbon.uis.api;
 
-import com.google.common.collect.ImmutableMap;
-
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_CACHE_CONTROL;
@@ -95,19 +94,20 @@ public class Configuration {
          * @param staticResources HTTP response headers for static resources
          */
         public HttpResponseHeaders(Map<String, String> pages, Map<String, String> staticResources) {
-            this.pages = ImmutableMap.<String, String>builder()
-                    .put(HEADER_X_CONTENT_TYPE_OPTIONS, "nosniff")
-                    .put(HEADER_X_XSS_PROTECTION, "1; mode=block")
-                    .put(HEADER_CACHE_CONTROL, "no-store, no-cache, must-revalidate, private")
-                    .put(HEADER_EXPIRES, "0")
-                    .put(HEADER_PRAGMA, "no-cache")
-                    .put(HEADER_X_FRAME_OPTIONS, "DENY")
-                    .putAll(pages)
-                    .build();
-            this.staticResources = ImmutableMap.<String, String>builder()
-                    .put(HEADER_CACHE_CONTROL, "public,max-age=2592000")
-                    .putAll(staticResources)
-                    .build();
+            Map<String, String> pagesHttpHeaders = new HashMap<>();
+            pagesHttpHeaders.put(HEADER_X_CONTENT_TYPE_OPTIONS, "nosniff");
+            pagesHttpHeaders.put(HEADER_X_XSS_PROTECTION, "1; mode=block");
+            pagesHttpHeaders.put(HEADER_CACHE_CONTROL, "no-store, no-cache, must-revalidate, private");
+            pagesHttpHeaders.put(HEADER_EXPIRES, "0");
+            pagesHttpHeaders.put(HEADER_PRAGMA, "no-cache");
+            pagesHttpHeaders.put(HEADER_X_FRAME_OPTIONS, "DENY");
+            pagesHttpHeaders.putAll(pages);
+            this.pages = Collections.unmodifiableMap(pagesHttpHeaders);
+
+            Map<String, String> staticResourcesHttpHeaders = new HashMap<>();
+            staticResourcesHttpHeaders.put(HEADER_CACHE_CONTROL, "public,max-age=2592000");
+            staticResourcesHttpHeaders.putAll(staticResources);
+            this.staticResources = Collections.unmodifiableMap(staticResourcesHttpHeaders);
         }
 
         /**
