@@ -326,7 +326,7 @@ public class StaticResolver {
     }
 
     private void setResponseSecurityHeaders(App app, HttpResponse response) {
-        app.getConfiguration().getResponseHeaders().getStaticResources().forEach(response::setHeader);
+        app.getConfiguration().getResponseHeaders().forStaticResources().forEach(response::setHeader);
     }
 
     private void setCacheHeaders(ZonedDateTime lastModifiedDate, HttpResponse response) {

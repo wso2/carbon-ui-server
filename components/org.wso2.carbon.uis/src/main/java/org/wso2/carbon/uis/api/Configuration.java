@@ -18,127 +18,114 @@
 
 package org.wso2.carbon.uis.api;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
+
+import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_CACHE_CONTROL;
+import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_EXPIRES;
+import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_PRAGMA;
+import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_CONTENT_TYPE_OPTIONS;
+import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_FRAME_OPTIONS;
+import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_XSS_PROTECTION;
 
 /**
- * Represents the final configuration of a web App.
+ * Represents a configurations for a web App.
  *
  * @since 0.8.0
  */
 public class Configuration {
 
-    private String contextPath;
-    private ResponseHeaders responseHeaders = ResponseHeaders.emptyResponseHeaders();
-
-    public Configuration() {
-    }
+    private final boolean httpsOnly;
+    private final HttpResponseHeaders responseHeaders;
 
     /**
-     * Returns the configured client-side context path for the app.
+     * Creates a new configuration.
      *
-     * @return client-side context path
+     * @param httpsOnly       whether the associated web app is HTTPS only or not.
+     * @param responseHeaders HTTP response headers configuration
      */
-    public Optional<String> getContextPath() {
-        return Optional.ofNullable(contextPath);
-    }
-
-    /**
-     * Sets the client-side context path for the app.
-     *
-     * @param contextPath client-side context path to be set
-     * @throws IllegalArgumentException if the context path is empty or doesn't start with a '/'
-     * @see #getContextPath()
-     */
-    public void setContextPath(String contextPath) {
-        if (contextPath != null) {
-            if (contextPath.isEmpty()) {
-                throw new IllegalArgumentException("Context path cannot be empty.");
-            } else if (contextPath.charAt(0) != '/') {
-                throw new IllegalArgumentException("Context path must start with a '/'. Instead found '" +
-                                                   contextPath.charAt(0) + "' at the beginning.");
-            }
-        }
-        this.contextPath = contextPath;
-    }
-
-    /**
-     * Returns the configured HTTP headers for the response in the security configuration.
-     *
-     * @return HTTP headers for the response
-     */
-    public ResponseHeaders getResponseHeaders() {
-        return responseHeaders;
-    }
-
-    /**
-     * Sets the HTTP headers for the response in the security configuration.
-     *
-     * @param responseHeaders HTTP headers for the response
-     */
-    public void setResponseHeaders(ResponseHeaders responseHeaders) {
+    public Configuration(boolean httpsOnly, HttpResponseHeaders responseHeaders) {
+        this.httpsOnly = httpsOnly;
         this.responseHeaders = responseHeaders;
     }
 
     /**
-     * Bean class that represents security headers configurations in the app's config file of an UUF App.
+     * Returns whether the associated web app is HTTPS only or not.
+     *
+     * @return {@code true} if the associated web app is HTTPS only, otherwise {@code false}
+     */
+    public boolean isHttpsOnly() {
+        return httpsOnly;
+    }
+
+    /**
+     * Returns HTTP response headers configuration in this app configuration.
+     *
+     * @return HTTP response headers configuration
+     */
+    public HttpResponseHeaders getResponseHeaders() {
+        return responseHeaders;
+    }
+
+    /**
+     * Returns a default configuration for an app.
+     *
+     * @return a default configuration
+     */
+    public static Configuration defaultConfiguration() {
+        return new Configuration(false, new HttpResponseHeaders(Collections.emptyMap(), Collections.emptyMap()));
+    }
+
+    /**
+     * Represents a HTTP response headers configuration.
      *
      * @since 0.8.0
      */
-    public static class ResponseHeaders {
+    public static class HttpResponseHeaders {
 
-        private Map<String, String> staticResources = Collections.emptyMap();
-        private Map<String, String> pages = Collections.emptyMap();
-
-        public ResponseHeaders(Map<String, String> staticResources, Map<String, String> pages) {
-            this.staticResources = staticResources;
-            this.pages = pages;
-        }
+        private final Map<String, String> pages;
+        private final Map<String, String> staticResources;
 
         /**
-         * Returns HTTP response headers for static contents.
+         * Creates a new configuration.
          *
-         * @return HTTP response headers
+         * @param pages           HTTP response headers for pages
+         * @param staticResources HTTP response headers for static resources
          */
-        public Map<String, String> getStaticResources() {
-            return staticResources;
-        }
-
-        /**
-         * Sets the HTTP response headers for static contents.
-         *
-         * @param staticResources HTTP response headers to be set
-         */
-        public void setStaticResources(Map<String, String> staticResources) {
-            this.staticResources = staticResources;
+        public HttpResponseHeaders(Map<String, String> pages, Map<String, String> staticResources) {
+            this.pages = ImmutableMap.<String, String>builder()
+                    .put(HEADER_X_CONTENT_TYPE_OPTIONS, "nosniff")
+                    .put(HEADER_X_XSS_PROTECTION, "1; mode=block")
+                    .put(HEADER_CACHE_CONTROL, "no-store, no-cache, must-revalidate, private")
+                    .put(HEADER_EXPIRES, "0")
+                    .put(HEADER_PRAGMA, "no-cache")
+                    .put(HEADER_X_FRAME_OPTIONS, "DENY")
+                    .putAll(pages)
+                    .build();
+            this.staticResources = ImmutableMap.<String, String>builder()
+                    .put(HEADER_CACHE_CONTROL, "public,max-age=2592000")
+                    .putAll(staticResources)
+                    .build();
         }
 
         /**
          * Returns HTTP response headers for pages.
          *
-         * @return HTTP response headers
+         * @return HTTP response headers for pages
          */
-        public Map<String, String> getPages() {
+        public Map<String, String> forPages() {
             return pages;
         }
 
         /**
-         * Sets the HTTP response headers for pages.
+         * Returns HTTP response headers for static resources.
          *
-         * @param pages HTTP response headers to be set
+         * @return HTTP response headers for static resources
          */
-        public void setPages(Map<String, String> pages) {
-            this.pages = pages;
-        }
-
-        /**
-         * Creates a new empty response headers.
-         *
-         * @return empty response headers
-         */
-        static ResponseHeaders emptyResponseHeaders() {
-            return new ResponseHeaders(Collections.emptyMap(), Collections.emptyMap());
+        public Map<String, String> forStaticResources() {
+            return staticResources;
         }
     }
 }
