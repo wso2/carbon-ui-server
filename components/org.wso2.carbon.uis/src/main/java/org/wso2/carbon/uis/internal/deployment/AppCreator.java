@@ -27,6 +27,7 @@ import org.wso2.carbon.uis.api.Theme;
 import org.wso2.carbon.uis.api.UriPatten;
 import org.wso2.carbon.uis.api.exception.RenderingException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
+import org.wso2.carbon.uis.internal.deployment.parser.YamlFileParser;
 import org.wso2.carbon.uis.internal.exception.AppCreationException;
 import org.wso2.carbon.uis.internal.impl.HbsPage;
 import org.wso2.carbon.uis.internal.impl.HtmlPage;
@@ -121,6 +122,7 @@ public class AppCreator {
     }
 
     private static Configuration createConfiguration(FileReference fileReference) {
-        return Configuration.defaultConfiguration();
+        ConfigurationYaml configurationYaml = YamlFileParser.parse(fileReference, ConfigurationYaml.class);
+        return configurationYaml.toConfiguration();
     }
 }
