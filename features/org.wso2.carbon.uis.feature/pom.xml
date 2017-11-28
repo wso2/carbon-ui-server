@@ -76,7 +76,7 @@
                                 </bundle>
                                 <bundle>
                                     <symbolicName>org.yaml.snakeyaml</symbolicName>
-                                    <version>${org.snakeyaml.version}</version>
+                                    <version>${snakeyaml.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>org.apache.commons.lang3</symbolicName>
