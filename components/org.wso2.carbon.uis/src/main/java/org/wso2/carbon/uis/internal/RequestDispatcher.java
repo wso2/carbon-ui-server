@@ -29,13 +29,7 @@ import org.wso2.carbon.uis.internal.exception.PageRedirectException;
 import org.wso2.carbon.uis.internal.io.StaticResolver;
 
 import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_TEXT_HTML;
-import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_CACHE_CONTROL;
-import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_EXPIRES;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_LOCATION;
-import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_PRAGMA;
-import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_CONTENT_TYPE_OPTIONS;
-import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_FRAME_OPTIONS;
-import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_XSS_PROTECTION;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_BAD_REQUEST;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_FOUND;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_INTERNAL_SERVER_ERROR;
@@ -70,7 +64,7 @@ public class RequestDispatcher {
     /**
      * Serves the specified HTTP request.
      *
-     * @param request     HTTP request to be served
+     * @param request HTTP request to be served
      * @return HTTP response
      */
     public HttpResponse serve(HttpRequest request) {
@@ -142,11 +136,6 @@ public class RequestDispatcher {
     }
 
     private void setResponseSecurityHeaders(App app, HttpResponse httpResponse) {
-        httpResponse.setHeader(HEADER_X_CONTENT_TYPE_OPTIONS, "nosniff");
-        httpResponse.setHeader(HEADER_X_XSS_PROTECTION, "1; mode=block");
-        httpResponse.setHeader(HEADER_CACHE_CONTROL, "no-store, no-cache, must-revalidate, private");
-        httpResponse.setHeader(HEADER_EXPIRES, "0");
-        httpResponse.setHeader(HEADER_PRAGMA, "no-cache");
-        httpResponse.setHeader(HEADER_X_FRAME_OPTIONS, "DENY");
+        app.getConfiguration().getResponseHeaders().forPages().forEach(httpResponse::setHeader);
     }
 }

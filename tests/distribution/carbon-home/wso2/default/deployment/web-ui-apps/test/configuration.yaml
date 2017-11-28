@@ -1,0 +1,9 @@
+# Set this to true if you want to deploy this web app in HTTPS
+httpsOnly: true
+
+#
+responseHeaders:
+  resources:
+    "Content-Security-Policy": "default-src 'none'; script-src 'self' ssl.google-analytics.com;"
+  pages:
+    "X-Frame-Options": "DENY"
