@@ -96,7 +96,7 @@ public class CarbonUiServer implements Server, AppDeploymentEventListener {
     public void appDeploymentEvent(App app) {
         deployedApps.put(app.getName(), app);
         RequestDispatcher requestDispatcher = new RequestDispatcher(app);
-        httpConnector.registerApp(app.getName(), app.getContextPath(), requestDispatcher::serve);
+        httpConnector.registerApp(app, requestDispatcher::serve);
     }
 
     @Override

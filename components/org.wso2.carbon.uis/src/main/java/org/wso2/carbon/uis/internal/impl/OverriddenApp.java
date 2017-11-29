@@ -21,6 +21,7 @@ package org.wso2.carbon.uis.internal.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.wso2.carbon.uis.api.App;
+import org.wso2.carbon.uis.api.Configuration;
 import org.wso2.carbon.uis.api.Extension;
 import org.wso2.carbon.uis.api.I18nResource;
 import org.wso2.carbon.uis.api.Page;
@@ -29,6 +30,7 @@ import org.wso2.carbon.uis.api.Theme;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
@@ -55,7 +57,7 @@ public class OverriddenApp extends App {
     public OverriddenApp(App base, App override) {
         super(override.getName(), override.getContextPath(),
               getPagesFrom(base, override), getExtensionsFrom(base, override), getThemesFrom(base, override),
-              getI18nResourcesFrom(base, override), override.getConfiguration(), getPathsFrom(base, override));
+              getI18nResourcesFrom(base, override), getConfigurationFrom(base, override), getPathsFrom(base, override));
         this.base = base;
         this.override = override;
     }
@@ -100,6 +102,12 @@ public class OverriddenApp extends App {
                 .addAll(getI18nResourcesOf(override))
                 .addAll(getI18nResourcesOf(base))
                 .build();
+    }
+
+    private static Configuration getConfigurationFrom(App base, App override) {
+        return Objects.equals(override.getConfiguration(), Configuration.DEFAULT_CONFIGURATION) ?
+                base.getConfiguration() :
+                override.getConfiguration();
     }
 
     private static List<String> getPathsFrom(App base, App override) {
