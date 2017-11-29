@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.messaging.ServerConnector;
 import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.carbon.transport.http.netty.listener.HTTPServerConnector;
+import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.http.HttpConnector;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
@@ -111,16 +112,17 @@ public class Msf4jHttpConnector implements HttpConnector {
     }
 
     @Override
-    public void registerApp(String appName, String appContextPath, Function<HttpRequest, HttpResponse> httpListener) {
+    public void registerApp(App app, Function<HttpRequest, HttpResponse> httpListener) {
         for (HttpTransport httpTransport : httpTransports) {
             Dictionary<String, String> dictionary = new Hashtable<>();
             dictionary.put("CHANNEL_ID", httpTransport.getId());
-            dictionary.put("contextPath", appContextPath);
+            dictionary.put("contextPath", app.getContextPath());
             ServiceRegistration<Microservice> microserviceServiceRegistration =
                     bundleContext.registerService(Microservice.class, new WebappMicroservice(httpListener), dictionary);
 
-            microserviceRegistrations.put(appName, microserviceServiceRegistration);
-            LOGGER.info("Web app '{}' is available at '{}'.", appName, httpTransport.getAppUrl(appContextPath));
+            microserviceRegistrations.put(app.getName(), microserviceServiceRegistration);
+            LOGGER.info("Web app '{}' is available at '{}'.", app.getName(),
+                        httpTransport.getAppUrl(app.getContextPath()));
         }
     }
 
@@ -202,7 +204,7 @@ public class Msf4jHttpConnector implements HttpConnector {
          * @return {@code true} if the {@link #getScheme() scheme} is HTTPS, otherwise {@code false}
          */
         public boolean isSecured() {
-            return host.equalsIgnoreCase("https");
+            return scheme.equalsIgnoreCase("https");
         }
 
         /**

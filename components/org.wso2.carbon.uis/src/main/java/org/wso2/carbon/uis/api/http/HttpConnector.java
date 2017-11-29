@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.uis.api.http;
 
+import org.wso2.carbon.uis.api.App;
+
 import java.util.function.Function;
 
 /**
@@ -30,11 +32,10 @@ public interface HttpConnector {
     /**
      * Registers a web app to the transport.
      *
-     * @param appName        name of the app
-     * @param appContextPath context path of the app
-     * @param httpListener   HTTP requests listener that handles the incoming HTTP requests for the registering app
+     * @param app          app to be registered
+     * @param httpListener HTTP requests listener that handles the incoming HTTP requests for the registering app
      */
-    void registerApp(String appName, String appContextPath, Function<HttpRequest, HttpResponse> httpListener);
+    void registerApp(App app, Function<HttpRequest, HttpResponse> httpListener);
 
     /**
      * Unregisters the specified app from the transport.
