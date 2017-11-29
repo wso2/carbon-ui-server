@@ -72,7 +72,7 @@ public class AppCreator {
                 .collect(Collectors.toSet());
         Configuration configuration = appReference.getConfiguration()
                 .map(AppCreator::createConfiguration)
-                .orElse(Configuration.defaultConfiguration());
+                .orElse(Configuration.DEFAULT_CONFIGURATION);
         return new App(appReference.getName(), appContext, pages, extensions, themes, i18nResources, configuration,
                        appReference.getPath());
     }

@@ -29,6 +29,8 @@ import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_CONTENT_TYPE_OP
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_FRAME_OPTIONS;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_XSS_PROTECTION;
 
+import static java.util.Collections.emptyMap;
+
 /**
  * Represents a configurations for a web App.
  *
@@ -36,8 +38,17 @@ import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_X_XSS_PROTECTION;
  */
 public class Configuration {
 
+    /**
+     * Default configuration for an app.
+     */
+    public static final Configuration DEFAULT_CONFIGURATION;
+
     private final boolean httpsOnly;
     private final HttpResponseHeaders responseHeaders;
+
+    static {
+        DEFAULT_CONFIGURATION = new Configuration(false, new HttpResponseHeaders(emptyMap(), emptyMap()));
+    }
 
     /**
      * Creates a new configuration.
@@ -66,15 +77,6 @@ public class Configuration {
      */
     public HttpResponseHeaders getResponseHeaders() {
         return responseHeaders;
-    }
-
-    /**
-     * Returns a default configuration for an app.
-     *
-     * @return a default configuration
-     */
-    public static Configuration defaultConfiguration() {
-        return new Configuration(false, new HttpResponseHeaders(Collections.emptyMap(), Collections.emptyMap()));
     }
 
     /**
