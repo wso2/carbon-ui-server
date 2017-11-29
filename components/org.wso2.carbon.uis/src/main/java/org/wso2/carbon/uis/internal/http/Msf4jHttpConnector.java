@@ -113,17 +113,19 @@ public class Msf4jHttpConnector implements HttpConnector {
 
     @Override
     public void registerApp(App app, Function<HttpRequest, HttpResponse> httpListener) {
-        for (HttpTransport httpTransport : httpTransports) {
-            Dictionary<String, String> dictionary = new Hashtable<>();
-            dictionary.put("CHANNEL_ID", httpTransport.getId());
-            dictionary.put("contextPath", app.getContextPath());
-            ServiceRegistration<Microservice> microserviceServiceRegistration =
-                    bundleContext.registerService(Microservice.class, new WebappMicroservice(httpListener), dictionary);
+        httpTransports.stream()
+                .filter(httpTransport -> !app.getConfiguration().isHttpsOnly() || httpTransport.isSecured())
+                .forEach(httpTransport -> {
+                    Dictionary<String, String> properties = new Hashtable<>();
+                    properties.put("CHANNEL_ID", httpTransport.getId());
+                    properties.put("contextPath", app.getContextPath());
+                    ServiceRegistration<Microservice> serviceRegistration = bundleContext.registerService(
+                            Microservice.class, new WebappMicroservice(httpListener), properties);
 
-            microserviceRegistrations.put(app.getName(), microserviceServiceRegistration);
-            LOGGER.info("Web app '{}' is available at '{}'.", app.getName(),
-                        httpTransport.getAppUrl(app.getContextPath()));
-        }
+                    microserviceRegistrations.put(app.getName(), serviceRegistration);
+                    LOGGER.info("Web app '{}' is available at '{}'.", app.getName(),
+                                httpTransport.getAppUrl(app.getContextPath()));
+                });
     }
 
     @Override
