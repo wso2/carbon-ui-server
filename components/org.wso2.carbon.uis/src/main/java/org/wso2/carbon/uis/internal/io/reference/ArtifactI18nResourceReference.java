@@ -18,17 +18,21 @@
 
 package org.wso2.carbon.uis.internal.io.reference;
 
-import org.apache.commons.io.FilenameUtils;
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
 import org.wso2.carbon.uis.internal.io.util.PathUtils;
 import org.wso2.carbon.uis.internal.reference.I18nResourceReference;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
-import java.util.Properties;
+import java.util.Map;
 
 /**
  * A reference to an i18n resource inside a web app artifact.
@@ -37,32 +41,35 @@ import java.util.Properties;
  */
 public class ArtifactI18nResourceReference implements I18nResourceReference {
 
-    private final Path propertiesFile;
+    public static final String I18N_RESOURCE_FILE_EXTENSION = "json";
+    private static final Gson GSON = new Gson();
+    private static final Type GSON_TYPE = new TypeToken<Map<String, String>>() { }.getType();
+
+    private final Path messagesFile;
 
     /**
      * Creates a reference to the i18n resource specified by the path.
      *
-     * @param propertiesFile path to the i18n resource
+     * @param messagesFile path to the i18n resource
      */
-    public ArtifactI18nResourceReference(Path propertiesFile) {
-        this.propertiesFile = propertiesFile;
+    public ArtifactI18nResourceReference(Path messagesFile) {
+        this.messagesFile = messagesFile;
     }
 
     @Override
     public Locale getLocale() throws FileOperationException {
-        String fileName = PathUtils.getName(propertiesFile);
-        String languageTag = FilenameUtils.removeExtension(fileName);
-        return Locale.forLanguageTag(languageTag);
+        return Locale.forLanguageTag(PathUtils.getExtension(messagesFile));
     }
 
     @Override
-    public Properties getMessages() throws FileOperationException {
-        Properties properties = new Properties();
+    public Map<String, String> getMessages() throws FileOperationException {
         try {
-            properties.load(Files.newBufferedReader(propertiesFile, StandardCharsets.UTF_8));
+            BufferedReader bufferedReader = Files.newBufferedReader(messagesFile, StandardCharsets.UTF_8);
+            return GSON.fromJson(bufferedReader, GSON_TYPE);
         } catch (IOException e) {
-            throw new FileOperationException("");
+            throw new FileOperationException("Cannot read content of i18n message file '" + messagesFile + "'.");
+        } catch (JsonParseException e) {
+            throw new FileOperationException("I18n message file '" + messagesFile + "' is not a valid JSON.");
         }
-        return properties;
     }
 }

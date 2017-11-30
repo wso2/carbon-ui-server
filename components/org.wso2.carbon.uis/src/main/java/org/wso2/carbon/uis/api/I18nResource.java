@@ -21,8 +21,8 @@ package org.wso2.carbon.uis.api;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -33,7 +33,7 @@ import java.util.Set;
 public class I18nResource {
 
     private final Locale locale;
-    private final Properties messages;
+    private final Map<String, String> messages;
 
     /**
      * Creates a new i18n resource.
@@ -41,7 +41,7 @@ public class I18nResource {
      * @param locale   locale of the i18n resource
      * @param messages messages of the i18n resource
      */
-    public I18nResource(Locale locale, Properties messages) {
+    public I18nResource(Locale locale, Map<String, String> messages) {
         this.locale = locale;
         this.messages = messages;
     }
@@ -67,7 +67,7 @@ public class I18nResource {
      * given locale
      */
     public String getMessage(String messageKey, Object[] messageParams, String defaultMessage) {
-        String message = messages.getProperty(messageKey);
+        String message = messages.get(messageKey);
         if (message == null) {
             return defaultMessage;
         }

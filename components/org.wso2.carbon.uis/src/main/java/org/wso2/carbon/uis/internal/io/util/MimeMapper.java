@@ -19,38 +19,39 @@
 package org.wso2.carbon.uis.internal.io.util;
 
 import org.wso2.carbon.uis.api.exception.UISRuntimeException;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 
 /**
- * This class lazily loads the 'mime-map.properties' file and maps file extension to mime type using the file.
+ * Maps MIME types to file extensions.
  *
  * @since 0.8.0
  */
 public class MimeMapper {
 
-    private static final String MIME_PROPERTY_FILE = "mime-map.properties";
-    private static volatile Properties mimeMap = null;
+    private static final String FILE_NAME_MIME_TYPES = "mime-types.yaml";
+    private static Map<String, String> mimeTypes;
 
     private MimeMapper() {
     }
 
-    private static Properties loadMimeMap() throws UISRuntimeException {
-        Properties mimeMap = new Properties();
-        try (InputStream inputStream = MimeMapper.class.getClassLoader().getResourceAsStream(MIME_PROPERTY_FILE)) {
+    @SuppressWarnings("unchecked")
+    private static Map<String, String> loadMimeTypes() throws UISRuntimeException {
+        try (InputStream inputStream = MimeMapper.class.getClassLoader().getResourceAsStream(FILE_NAME_MIME_TYPES)) {
             if (inputStream == null) {
-                throw new UISRuntimeException("Cannot find MIME types property file '" + MIME_PROPERTY_FILE + "'");
+                throw new UISRuntimeException(
+                        "Cannot find MIME types file '" + FILE_NAME_MIME_TYPES + "' in class path.");
             }
-            mimeMap.load(inputStream);
-        } catch (IllegalArgumentException e) {
-            throw new UISRuntimeException("MIME types property file is '" + MIME_PROPERTY_FILE + "' is invalid.", e);
+            return new Yaml().loadAs(inputStream, Map.class);
         } catch (IOException e) {
-            throw new UISRuntimeException("Cannot read MIME types property file '" + MIME_PROPERTY_FILE + "'.", e);
+            throw new UISRuntimeException("Cannot read MIME types file '" + FILE_NAME_MIME_TYPES + "'.", e);
+        } catch (Exception e) {
+            throw new UISRuntimeException("MIME types file is '" + FILE_NAME_MIME_TYPES + "' is invalid.", e);
         }
-        return mimeMap;
     }
 
     /**
@@ -58,18 +59,16 @@ public class MimeMapper {
      *
      * @param extension file extension
      * @return MIME type for the given file extension
-     * @throws UISRuntimeException if cannot find or read the MIME types property file, or it is invalid
+     * @throws UISRuntimeException if cannot find or read the MIME types file, or it is invalid
      */
     public static Optional<String> getMimeType(String extension) throws UISRuntimeException {
-        if (mimeMap == null) {
-            /* Here, class object 'MimeMapper.class' is used as the synchronization lock because 'getMimeType()' is
-            the only is public method. */
+        if (mimeTypes == null) {
             synchronized (MimeMapper.class) {
-                if (mimeMap == null) {
-                    mimeMap = loadMimeMap();
+                if (mimeTypes == null) {
+                    mimeTypes = loadMimeTypes();
                 }
             }
         }
-        return Optional.ofNullable(mimeMap.getProperty(extension));
+        return Optional.ofNullable(mimeTypes.get(extension));
     }
 }

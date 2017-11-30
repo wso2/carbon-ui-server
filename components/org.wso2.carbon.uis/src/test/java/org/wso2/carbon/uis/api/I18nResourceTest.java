@@ -18,14 +18,16 @@
 
 package org.wso2.carbon.uis.api;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Locale;
-import java.util.Properties;
 import java.util.Set;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * Test cases for {@link I18nResource} class.
@@ -36,10 +38,8 @@ public class I18nResourceTest {
 
     @Test
     public void testGetMessage() {
-        Properties properties = new Properties();
-        properties.put("welcome", "Hello!");
-        properties.put("welcome-name", "Hello {0}!");
-        I18nResource i18nResource = new I18nResource(Locale.US, properties);
+        I18nResource i18nResource = new I18nResource(Locale.US, ImmutableMap.of("welcome", "Hello!",
+                                                                                "welcome-name", "Hello {0}!"));
 
         Assert.assertEquals(i18nResource.getMessage("bye", null, "Bye!"), "Bye!");
         Assert.assertEquals(i18nResource.getMessage("welcome", null, null), "Hello!");
@@ -65,15 +65,12 @@ public class I18nResourceTest {
     @DataProvider
     public Object[][] equalI18nResources() {
         I18nResource i18nResource = new I18nResource(Locale.US, null);
-        Properties messages1 = new Properties();
-        messages1.put("hello", "Welcome!");
-        Properties messages2 = new Properties();
-        messages2.put("hello", "Welcome!");
         return new Object[][]{
                 {i18nResource, i18nResource},
                 {new I18nResource(Locale.US, null), new I18nResource(Locale.US, null)},
-                {new I18nResource(Locale.US, new Properties()), new I18nResource(Locale.US, new Properties())},
-                {new I18nResource(Locale.US, messages1), new I18nResource(Locale.US, messages2)}
+                {new I18nResource(Locale.US, emptyMap()), new I18nResource(Locale.US, emptyMap())},
+                {new I18nResource(Locale.US, ImmutableMap.of("hello", "Welcome!")),
+                        new I18nResource(Locale.US, ImmutableMap.of("hello", "Welcome!"))}
         };
     }
 

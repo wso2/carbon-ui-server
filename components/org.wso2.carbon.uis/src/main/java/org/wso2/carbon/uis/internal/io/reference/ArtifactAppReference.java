@@ -35,6 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.wso2.carbon.uis.internal.io.reference.ArtifactI18nResourceReference.I18N_RESOURCE_FILE_EXTENSION;
+
 /**
  * A reference to a web app artifact in a directory.
  *
@@ -124,7 +126,8 @@ public class ArtifactAppReference implements AppReference {
         }
         try {
             return Files.list(lang)
-                    .filter(path -> Files.isRegularFile(path) && "properties".equals(PathUtils.getExtension(path)))
+                    .filter(path -> Files.isRegularFile(path) &&
+                                    I18N_RESOURCE_FILE_EXTENSION.equals(PathUtils.getExtension(path)))
                     .map(ArtifactI18nResourceReference::new)
                     .collect(Collectors.toSet());
         } catch (IOException e) {
