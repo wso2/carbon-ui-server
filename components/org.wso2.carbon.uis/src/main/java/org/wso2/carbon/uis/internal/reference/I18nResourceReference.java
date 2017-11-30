@@ -21,7 +21,7 @@ package org.wso2.carbon.uis.internal.reference;
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
 
 import java.util.Locale;
-import java.util.Properties;
+import java.util.Map;
 
 /**
  * A reference to an i18n resource in a web app artifact.
@@ -44,5 +44,5 @@ public interface I18nResourceReference {
      * @return messages of the i18n resource
      * @throws FileOperationException if cannot read the messages
      */
-    Properties getMessages() throws FileOperationException;
+    Map<String, String> getMessages() throws FileOperationException;
 }
