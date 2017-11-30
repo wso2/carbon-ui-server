@@ -39,7 +39,13 @@ import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
 import org.wso2.msf4j.Microservice;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Objects;
@@ -124,7 +130,7 @@ public class Msf4jHttpConnector implements HttpConnector {
 
                     microserviceRegistrations.put(app.getName(), serviceRegistration);
                     LOGGER.info("Web app '{}' is available at '{}'.", app.getName(),
-                                httpTransport.getAppUrl(app.getContextPath()));
+                                getAppUrl(app, httpTransport));
                 });
     }
 
@@ -143,6 +149,44 @@ public class Msf4jHttpConnector implements HttpConnector {
     @Override
     public void unregisterAllApps() {
         microserviceRegistrations.keySet().forEach(this::unregisterApp);
+    }
+
+    /**
+     * Returns URL for the specified app.
+     *
+     * @param app           web app
+     * @param httpTransport HTTP transport
+     * @return an URL that use to access the specified app
+     */
+    private static String getAppUrl(App app, HttpTransport httpTransport) {
+        String hostname = httpTransport.getHost().trim();
+        // We can safely continue with the hostname from HTTP transport, if following if-block breaks at any point.
+        if ("localhost".equals(hostname) || "127.0.0.1".equals(hostname) || "0.0.0.0".equals(hostname) ||
+            "::1".equals(hostname)) {
+            try {
+                Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+                while (networkInterfaces.hasMoreElements()) {
+                    NetworkInterface networkInterface = networkInterfaces.nextElement();
+                    if (!networkInterface.isUp() || networkInterface.isLoopback() || networkInterface.isVirtual()) {
+                        continue;
+                    }
+
+                    Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+                    while (inetAddresses.hasMoreElements()) {
+                        InetAddress inetAddress = inetAddresses.nextElement();
+                        if (((inetAddress instanceof Inet4Address) || (inetAddress instanceof Inet6Address)) &&
+                            !inetAddress.isLoopbackAddress()) {
+                            hostname = inetAddress.getHostAddress();
+                        }
+                    }
+                }
+            } catch (SocketException e) {
+                // Log level DEBUG since this is not a 'breaking' error.
+                LOGGER.debug("Cannot access information on network interfaces.", e);
+            }
+        }
+
+        return httpTransport.getScheme() + "://" + hostname + ":" + httpTransport.getPort() + app.getContextPath();
     }
 
     /**
@@ -207,16 +251,6 @@ public class Msf4jHttpConnector implements HttpConnector {
          */
         public boolean isSecured() {
             return scheme.equalsIgnoreCase("https");
-        }
-
-        /**
-         * Returns the full URL for the given web app context path
-         *
-         * @param appContextPath context path of the app
-         * @return URL for the given app through the represented HTTP trasport
-         */
-        public String getAppUrl(String appContextPath) {
-            return scheme + "://" + host + ":" + port + appContextPath;
         }
 
         @Override
