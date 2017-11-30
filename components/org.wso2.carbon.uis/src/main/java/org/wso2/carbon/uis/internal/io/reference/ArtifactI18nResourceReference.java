@@ -67,7 +67,7 @@ public class ArtifactI18nResourceReference implements I18nResourceReference {
             BufferedReader bufferedReader = Files.newBufferedReader(messagesFile, StandardCharsets.UTF_8);
             return GSON.fromJson(bufferedReader, GSON_TYPE);
         } catch (IOException e) {
-            throw new FileOperationException("Cannot read content of I18n message file '" + messagesFile + "'.");
+            throw new FileOperationException("Cannot read content of i18n message file '" + messagesFile + "'.");
         } catch (JsonParseException e) {
             throw new FileOperationException("I18n message file '" + messagesFile + "' is not a valid JSON.");
         }
