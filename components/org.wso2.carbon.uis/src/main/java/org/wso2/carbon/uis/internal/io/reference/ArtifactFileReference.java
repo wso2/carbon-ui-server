@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.uis.internal.io.reference;
 
-import org.apache.commons.io.FilenameUtils;
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
 import org.wso2.carbon.uis.internal.io.util.PathUtils;
 import org.wso2.carbon.uis.internal.reference.FileReference;
@@ -53,7 +52,7 @@ public class ArtifactFileReference implements FileReference {
 
     @Override
     public String getExtension() throws FileOperationException {
-        return FilenameUtils.getExtension(getName());
+        return PathUtils.getExtension(filePath);
     }
 
     @Override
