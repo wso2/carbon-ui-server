@@ -18,15 +18,8 @@
 
 package org.wso2.carbon.uis.api.http;
 
-import org.apache.commons.io.FilenameUtils;
-
-import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 
 /**
  * Represents a HTTP response.
@@ -63,113 +56,45 @@ public class HttpResponse {
     private int status;
     private Object content;
     private String contentType;
-    private MultivaluedMap<String, String> headers;
+    private Map<String, String> headers;
     private Map<String, String> cookies;
 
-    public HttpResponse() {
-        this.status = 200;
-        this.headers = new MultivaluedHashMap<>();
-        this.cookies = new HashMap<>();
-    }
-
     /**
-     * Sets the <a href="https://tools.ietf.org/html/rfc2616#section-10">HTTP status code</a> of this response to the
-     * specified integer.
+     * Creates a new response.
      *
-     * @param statusCode HTTP status code to be set
+     * @param status      HTTP statusCode code of the response
+     * @param content     content of the response
+     * @param contentType MIME type of the response
      */
-    public void setStatus(int statusCode) {
-        this.status = statusCode;
+    public HttpResponse(int status, Object content, String contentType) {
+        this(status, content, contentType, Collections.emptyMap(), Collections.emptyMap());
     }
 
     /**
-     * Returns the <a href="https://tools.ietf.org/html/rfc2616#section-10">HTTP status code</a> of this response.
+     * Creates a new response.
      *
-     * @return HTTP status code of this response
+     * @param status      HTTP statusCode code of the response
+     * @param content     content of the response
+     * @param contentType MIME type of the response
+     * @param headers     HTTP headers of the response
+     * @param cookies     cookies of the response
+     */
+    public HttpResponse(int status, Object content, String contentType,
+                        Map<String, String> headers, Map<String, String> cookies) {
+        this.status = status;
+        this.content = content;
+        this.contentType = contentType;
+        this.headers = Collections.unmodifiableMap(headers);
+        this.cookies = Collections.unmodifiableMap(cookies);
+    }
+
+    /**
+     * Returns the <a href="https://tools.ietf.org/html/rfc2616#section-10">HTTP statusCode code</a> of this response.
+     *
+     * @return HTTP statusCode code of this response
      */
     public int getStatus() {
         return status;
-    }
-
-    /**
-     * Sets the specified textual content to this response. This is equivalent to
-     * {@code setContent(content, }{@link #CONTENT_TYPE_TEXT_PLAIN}{@code )}
-     *
-     * @param content textual content to be set
-     * @see #setContent(String, String)
-     */
-    public void setContent(String content) {
-        setContent(content, CONTENT_TYPE_TEXT_PLAIN);
-    }
-
-    /**
-     * Sets the specified textual content and the content type to this response.
-     *
-     * @param content     textual content to be set
-     * @param contentType MIME type of the content
-     */
-    public void setContent(String content, String contentType) {
-        setContent((Object) content, contentType);
-    }
-
-    /**
-     * Sets the file content located by the specified path to this response.
-     *
-     * @param content path of the file content to be set
-     */
-    public void setContent(Path content) {
-        setContent(content.toFile());
-    }
-
-    /**
-     * Sets the file content located by the specified path and the content type to this response.
-     *
-     * @param content     path of the file content to be set
-     * @param contentType MIME type of the content
-     */
-    public void setContent(Path content, String contentType) {
-        setContent(content.toFile(), contentType);
-    }
-
-    /**
-     * Sets the specified file content to this response.
-     *
-     * @param content file content to be set
-     */
-    public void setContent(File content) {
-        String extension = FilenameUtils.getExtension(content.getName());
-        setContent(content, extension.isEmpty() ? CONTENT_TYPE_WILDCARD : extension);
-    }
-
-    /**
-     * Sets the specified file content and the content type to this response.
-     *
-     * @param content     file content to be set
-     * @param contentType MIME type of the content
-     */
-    public void setContent(File content, String contentType) {
-        setContent((Object) content, contentType);
-    }
-
-    /**
-     * Sets the content read through the specified input stream and the content type to this response.
-     *
-     * @param content     input stream to the content to be set
-     * @param contentType MIME type of the content
-     */
-    public void setContent(InputStream content, String contentType) {
-        setContent((Object) content, contentType);
-    }
-
-    /**
-     * Sets the specified content and the content type to this response.
-     *
-     * @param content     content to be set
-     * @param contentType MIME type of the content
-     */
-    public void setContent(Object content, String contentType) {
-        this.content = content;
-        this.contentType = contentType;
     }
 
     /**
@@ -192,55 +117,12 @@ public class HttpResponse {
     }
 
     /**
-     * Sets the specified the HTTP status code and the textual content to this response.
-     *
-     * @param statusCode HTTP status code to be set
-     * @param content    textual content to be set
-     */
-    public void setContent(int statusCode, String content) {
-        setStatus(statusCode);
-        setContent(content);
-    }
-
-    /**
-     * Sets the specified the HTTP status code and the textual content to this response.
-     *
-     * @param statusCode  HTTP status code to be set
-     * @param content     textual content to be set
-     * @param contentType MIME type of the content
-     */
-    public void setContent(int statusCode, String content, String contentType) {
-        setStatus(statusCode);
-        setContent(content, contentType);
-    }
-
-    /**
-     * Adds a new value to the specified HTTP header of this response.
-     *
-     * @param name  name of the HTTP header
-     * @param value value to be added; if {@code null} existing value(s) will be removed
-     */
-    public void setHeader(String name, String value) {
-        headers.add(name, value);
-    }
-
-    /**
      * Returns the HTTP headers of this response.
      *
      * @return HTTP headers of this response.
      */
-    public MultivaluedMap<String, String> getHeaders() {
+    public Map<String, String> getHeaders() {
         return headers;
-    }
-
-    /**
-     * Adds a cookie to this response.
-     *
-     * @param name  name of the cookie
-     * @param value value of the cookie
-     */
-    public void addCookie(String name, String value) {
-        cookies.put(name, value);
     }
 
     /**

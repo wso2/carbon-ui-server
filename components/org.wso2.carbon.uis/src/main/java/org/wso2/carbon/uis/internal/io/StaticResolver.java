@@ -28,7 +28,9 @@ import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
 import org.wso2.carbon.uis.internal.exception.ResourceNotFoundException;
+import org.wso2.carbon.uis.internal.http.ResponseBuilder;
 import org.wso2.carbon.uis.internal.io.util.MimeMapper;
+import org.wso2.carbon.uis.internal.io.util.PathUtils;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 
 import java.io.FileNotFoundException;
@@ -55,11 +57,7 @@ import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_IMAGE_PNG;
 import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_WILDCARD;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_CACHE_CONTROL;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_LAST_MODIFIED;
-import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_BAD_REQUEST;
-import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_INTERNAL_SERVER_ERROR;
-import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_NOT_FOUND;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_NOT_MODIFIED;
-import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_OK;
 
 /**
  * Dispatches HTTP requests for static resources.
@@ -109,31 +107,29 @@ public class StaticResolver {
     /**
      * Serves the default favicon.
      *
-     * @param request  HTTP request to be served
-     * @param response HTTP response to be written
+     * @param request HTTP request to be served
+     * @return HTTP response that carries the default favicon
      */
-    public void serveDefaultFavicon(HttpRequest request, HttpResponse response) {
+    public HttpResponse serveDefaultFavicon(HttpRequest request) {
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("default-favicon.png");
         if (inputStream == null) {
             LOGGER.error("Cannot find default favicon 'default-favicon.png' in classpath.");
-            response.setStatus(STATUS_NOT_FOUND);
+            return ResponseBuilder.notFound("Cannot find default favicon").build();
         } else {
-            response.setStatus(STATUS_OK);
-            response.setContent(inputStream, CONTENT_TYPE_IMAGE_PNG);
+            return ResponseBuilder.ok(inputStream, CONTENT_TYPE_IMAGE_PNG).build();
         }
     }
 
     /**
      * Serves a static resource inside the specified app.
      *
-     * @param app      app to be served
-     * @param request  HTTP request to be served
-     * @param response HTTP response to be written
+     * @param app     app to be served
+     * @param request HTTP request to be served
+     * @return HTTP response that carries the serving file
      */
-    public void serve(App app, HttpRequest request, HttpResponse response) {
+    public HttpResponse serve(App app, HttpRequest request) {
         Path resourcePath;
         ZonedDateTime lastModifiedDate;
-        setResponseSecurityHeaders(app, response);
         try {
             if (request.isAppStaticResourceRequest()) {
                 // /public/app/...
@@ -146,43 +142,37 @@ public class StaticResolver {
                 resourcePath = resolveResourceInTheme(app, request.getUriWithoutContextPath());
             } else {
                 // /public/...
-                response.setContent(STATUS_BAD_REQUEST, "Invalid static resource URI '" + request.getUri() + "'.");
-                return;
+                return ResponseBuilder.badRequest("Invalid static resource URI '" + request.getUri() + "'.").build();
             }
             lastModifiedDate = resourcesLastModifiedDates.computeIfAbsent(resourcePath, this::getLastModifiedDate);
         } catch (IllegalArgumentException e) {
             // Invalid/incorrect static resource URI.
-            response.setContent(STATUS_BAD_REQUEST, e.getMessage());
-            return;
+            return ResponseBuilder.badRequest(e.getMessage()).build();
         } catch (ResourceNotFoundException e) {
             // Static resource file does not exists.
-            response.setContent(STATUS_NOT_FOUND, "Requested resource '" + request.getUri() + "' does not exists.");
-            return;
+            return ResponseBuilder.notFound("Requested resource '" + request.getUri() + "' does not exists.").build();
         } catch (Exception e) {
             // FileOperationException, IOException or any other Exception that might occur.
             LOGGER.error("An error occurred when manipulating paths for static resource request '{}'.", request, e);
-            response.setContent(STATUS_INTERNAL_SERVER_ERROR,
-                                "A server occurred while serving for static resource request '" + request + "'.");
-            return;
+            return ResponseBuilder.serverError("A server occurred while serving for static resource request.").build();
         }
 
         if (lastModifiedDate == null) {
             /* Since we have failed to read last modified date of 'resourcePath' file, we cannot set cache headers.
             Therefore just serve the file without any cache headers. */
-            response.setStatus(STATUS_OK);
-            response.setContent(resourcePath, getContentType(request, resourcePath));
-            return;
+            return ResponseBuilder.ok(resourcePath, getContentType(request, resourcePath)).build();
         }
         ZonedDateTime ifModifiedSinceDate = getIfModifiedSinceDate(request);
         if ((ifModifiedSinceDate != null) && Duration.between(ifModifiedSinceDate, lastModifiedDate).isZero()) {
             // Resource is NOT modified since the last serve.
-            response.setStatus(STATUS_NOT_MODIFIED);
-            return;
+            return ResponseBuilder.status(STATUS_NOT_MODIFIED).build();
         }
 
-        setCacheHeaders(lastModifiedDate, response);
-        response.setStatus(STATUS_OK);
-        response.setContent(resourcePath, getContentType(request, resourcePath));
+        return ResponseBuilder.ok(resourcePath, getContentType(request, resourcePath))
+                .header(HEADER_LAST_MODIFIED, HTTP_DATE_FORMATTER.format(lastModifiedDate))
+                .header(HEADER_CACHE_CONTROL, "public,max-age=2592000")
+                .headers(app.getConfiguration().getResponseHeaders().forStaticResources())
+                .build();
     }
 
     private Path resolveResourceInApp(App app, String uriWithoutContextPath) {
@@ -325,23 +315,14 @@ public class StaticResolver {
         }
     }
 
-    private void setResponseSecurityHeaders(App app, HttpResponse response) {
-        app.getConfiguration().getResponseHeaders().forStaticResources().forEach(response::setHeader);
-    }
-
-    private void setCacheHeaders(ZonedDateTime lastModifiedDate, HttpResponse response) {
-        response.setHeader(HEADER_LAST_MODIFIED, HTTP_DATE_FORMATTER.format(lastModifiedDate));
-        response.setHeader(HEADER_CACHE_CONTROL, "public,max-age=2592000");
-    }
-
     private String getContentType(HttpRequest request, Path resource) {
         String extensionFromUri = FilenameUtils.getExtension(request.getUriWithoutContextPath());
         Optional<String> contentType = MimeMapper.getMimeType(extensionFromUri);
         if (contentType.isPresent()) {
             return contentType.get();
         }
-        // Here 'resource' never null, thus 'FilenameUtils.getExtension(...)' never return null.
-        String extensionFromPath = FilenameUtils.getExtension(resource.getFileName().toString());
+
+        String extensionFromPath = PathUtils.getExtension(resource);
         return MimeMapper.getMimeType(extensionFromPath).orElse(CONTENT_TYPE_WILDCARD);
     }
 
