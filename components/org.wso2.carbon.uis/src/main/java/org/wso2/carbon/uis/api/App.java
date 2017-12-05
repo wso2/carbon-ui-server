@@ -18,10 +18,10 @@
 
 package org.wso2.carbon.uis.api;
 
+import org.wso2.carbon.uis.api.exception.PageNotFoundException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.util.Multilocational;
 import org.wso2.carbon.uis.api.util.Overridable;
-import org.wso2.carbon.uis.internal.exception.PageNotFoundException;
 import org.wso2.carbon.uis.internal.exception.PageRedirectException;
 import org.wso2.carbon.uis.internal.impl.OverriddenApp;
 
