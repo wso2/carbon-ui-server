@@ -34,3 +34,7 @@ wso2.securevault:
     type: org.wso2.carbon.secvault.reader.DefaultMasterKeyReader
     parameters:
       masterKeyReaderFile: ${sys:carbon.home}/conf/${sys:wso2.runtime}/master-keys.yaml
+
+wso2.carbon-ui-server:
+  contextPaths:
+    "test": "/sample"

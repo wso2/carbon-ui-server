@@ -57,11 +57,8 @@ import java.util.function.Function;
  *
  * @since 0.8.0
  */
-@Component(name = "org.wso2.carbon.uis.internal.http.Msf4jHttpConnector",
-           service = HttpConnector.class,
-           immediate = true
-)
-@SuppressWarnings("unused")
+@Component(service = HttpConnector.class,
+           immediate = true)
 public class Msf4jHttpConnector implements HttpConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Msf4jHttpConnector.class);
@@ -78,13 +75,10 @@ public class Msf4jHttpConnector implements HttpConnector {
         this.microserviceRegistrations = HashMultimap.create();
     }
 
-    @Reference(
-            name = "http-connector-provider",
-            service = ServerConnector.class,
-            cardinality = ReferenceCardinality.AT_LEAST_ONE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetCarbonTransport"
-    )
+    @Reference(service = ServerConnector.class,
+               cardinality = ReferenceCardinality.AT_LEAST_ONE,
+               policy = ReferencePolicy.DYNAMIC,
+               unbind = "unsetCarbonTransport")
     protected void setCarbonTransport(ServerConnector serverConnector) {
         if (serverConnector instanceof HTTPServerConnector) {
             HTTPServerConnector httpServerConnector = (HTTPServerConnector) serverConnector;

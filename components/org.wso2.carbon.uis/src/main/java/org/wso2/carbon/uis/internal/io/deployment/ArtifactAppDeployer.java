@@ -27,11 +27,14 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.config.ConfigurationException;
+import org.wso2.carbon.config.provider.ConfigProvider;
 import org.wso2.carbon.deployment.engine.Artifact;
 import org.wso2.carbon.deployment.engine.ArtifactType;
 import org.wso2.carbon.deployment.engine.Deployer;
 import org.wso2.carbon.deployment.engine.exception.CarbonDeploymentException;
 import org.wso2.carbon.uis.api.App;
+import org.wso2.carbon.uis.api.ServerConfiguration;
 import org.wso2.carbon.uis.internal.deployment.AppCreator;
 import org.wso2.carbon.uis.internal.deployment.AppDeploymentEventListener;
 import org.wso2.carbon.uis.internal.deployment.AppRegistry;
@@ -48,17 +51,12 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 /**
- * An app deployer that finds web apps from a directory.
+ * A web app deployer for Carbon Deployment engine.
  *
  * @since 0.8.3
  */
-@Component(name = "org.wso2.carbon.uis.internal.io.deployment.ArtifactAppDeployer",
-           service = Deployer.class,
-           immediate = true,
-           property = {
-                   "componentName=wso2-carbon-ui-server-deployer"
-           }
-)
+@Component(service = Deployer.class,
+           immediate = true)
 public class ArtifactAppDeployer implements Deployer {
 
     private static final String ARTIFACT_TYPE = "web-ui-app";
@@ -69,24 +67,18 @@ public class ArtifactAppDeployer implements Deployer {
     private final URL deploymentLocation;
     private final AppRegistry appRegistry;
     private AppDeploymentEventListener appDeploymentEventListener;
+    private ServerConfiguration serverConfiguration;
 
     /**
      * Creates a new app deployer.
      */
     public ArtifactAppDeployer() {
         this.artifactType = new ArtifactType<>(ARTIFACT_TYPE);
-        URL deploymentLocationUrl = null;
-        try {
-            deploymentLocationUrl = new URL(DEPLOYMENT_LOCATION);
-        } catch (MalformedURLException e) {
-            LOGGER.error("Invalid URL '{}' as app deployment location.", DEPLOYMENT_LOCATION);
-        }
-        this.deploymentLocation = deploymentLocationUrl;
+        this.deploymentLocation = getLocationUrl();
         this.appRegistry = new AppRegistry();
     }
 
-    @Reference(name = "deploymentListener",
-               service = AppDeploymentEventListener.class,
+    @Reference(service = AppDeploymentEventListener.class,
                cardinality = ReferenceCardinality.MANDATORY,
                policy = ReferencePolicy.DYNAMIC,
                unbind = "unregisterListener")
@@ -100,6 +92,24 @@ public class ArtifactAppDeployer implements Deployer {
         this.appDeploymentEventListener = null;
         LOGGER.debug("An instance of class '{}' unregistered as an app deployment listener.",
                      listener.getClass().getName());
+    }
+
+    @Reference(service = ConfigProvider.class,
+               cardinality = ReferenceCardinality.MANDATORY,
+               policy = ReferencePolicy.DYNAMIC,
+               unbind = "unsetConfigProvider")
+    protected void setConfigProvider(ConfigProvider configProvider) {
+        try {
+            this.serverConfiguration = configProvider.getConfigurationObject(ServerConfiguration.class);
+        } catch (ConfigurationException e) {
+            this.serverConfiguration = new ServerConfiguration();
+            LOGGER.error("Cannot load server configurations from 'deployment.yaml'. Falling-back to defaults.", e);
+        }
+    }
+
+    protected void unsetConfigProvider(ConfigProvider configProvider) {
+        LOGGER.debug("An instance of class '{}' unregistered as a config provider.",
+                     configProvider.getClass().getName());
     }
 
     @Activate
@@ -187,18 +197,9 @@ public class ArtifactAppDeployer implements Deployer {
         LOGGER.debug("Web app '{}' undeployed from context path '{}'.", app.getName(), app.getContextPath());
     }
 
-    private static boolean isValidAppArtifact(Path appPath) throws CarbonDeploymentException {
-        try {
-            return Files.exists(appPath) && Files.isDirectory(appPath) && Files.isReadable(appPath) &&
-                   !Files.isHidden(appPath);
-        } catch (IOException e) {
-            throw new CarbonDeploymentException("Cannot access web app artifact in '" + appPath + "'.", e);
-        }
-    }
-
-    private static App createApp(Path appPath) throws CarbonDeploymentException {
+    private App createApp(Path appPath) throws CarbonDeploymentException {
         AppReference appReference = new ArtifactAppReference(appPath);
-        String appContextPath = createAppContextPath(appReference);
+        String appContextPath = getAppContextPath(appReference);
         try {
             return AppCreator.createApp(appReference, appContextPath);
         } catch (AppCreationException e) {
@@ -208,8 +209,40 @@ public class ArtifactAppDeployer implements Deployer {
         }
     }
 
-    private static String createAppContextPath(AppReference appReference) {
-        // TODO: 10/7/17 Get the context path of the app from the deployment.yaml, if not return below default value.
-        return "/" + appReference.getName();
+    private String getAppContextPath(AppReference appReference) throws CarbonDeploymentException {
+        String appName = appReference.getName();
+        String contextPath = serverConfiguration.getContextPaths().get(appName);
+        if (contextPath == null) {
+            return ("/" + appName); // default context path
+        } else {
+            if (contextPath.isEmpty()) {
+                throw new CarbonDeploymentException(
+                        "Cannot deploy web app '" + appName + "' as the configured context path is empty.");
+            } else if (contextPath.charAt(0) != '/') {
+                throw new CarbonDeploymentException(
+                        "Cannot deploy web app '" + appName + "' as the configured context path '" + contextPath +
+                        "' does not start with a '/'.");
+            } else {
+                return contextPath;
+            }
+        }
+    }
+
+    private static boolean isValidAppArtifact(Path appPath) throws CarbonDeploymentException {
+        try {
+            return Files.exists(appPath) && Files.isDirectory(appPath) && Files.isReadable(appPath) &&
+                   !Files.isHidden(appPath);
+        } catch (IOException e) {
+            throw new CarbonDeploymentException("Cannot access web app artifact in '" + appPath + "'.", e);
+        }
+    }
+
+    private static URL getLocationUrl() {
+        try {
+            return new URL(DEPLOYMENT_LOCATION);
+        } catch (MalformedURLException e) {
+            LOGGER.error("Invalid URL '{}' as app deployment location.", DEPLOYMENT_LOCATION, e);
+            return null;
+        }
     }
 }
