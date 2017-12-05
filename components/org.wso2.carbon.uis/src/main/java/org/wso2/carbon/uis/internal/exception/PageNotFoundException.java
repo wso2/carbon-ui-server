@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.uis.internal.exception;
 
+import org.wso2.carbon.uis.api.exception.HttpErrorException;
 import org.wso2.carbon.uis.api.http.HttpResponse;
 
 /**
