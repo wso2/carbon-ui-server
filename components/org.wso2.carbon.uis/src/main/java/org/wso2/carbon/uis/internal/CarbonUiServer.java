@@ -41,13 +41,8 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @since 0.8.0
  */
-@Component(name = "org.wso2.carbon.uis.internal.CarbonUiServer",
-           service = {Server.class, AppDeploymentEventListener.class},
-           immediate = true,
-           property = {
-                   "componentName=wso2-carbon-ui-server"
-           }
-)
+@Component(service = {Server.class, AppDeploymentEventListener.class},
+           immediate = true)
 public class CarbonUiServer implements Server, AppDeploymentEventListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CarbonUiServer.class);
@@ -58,8 +53,7 @@ public class CarbonUiServer implements Server, AppDeploymentEventListener {
      */
     private final ConcurrentMap<String, App> deployedApps = new ConcurrentHashMap<>();
 
-    @Reference(name = "httpConnector",
-               service = HttpConnector.class,
+    @Reference(service = HttpConnector.class,
                cardinality = ReferenceCardinality.MANDATORY,
                policy = ReferencePolicy.DYNAMIC,
                unbind = "unsetHttpConnector")
