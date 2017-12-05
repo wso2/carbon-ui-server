@@ -48,6 +48,10 @@
         </dependency>
 
         <!--Config-->
+        <dependency>
+            <groupId>org.wso2.carbon.config</groupId>
+            <artifactId>org.wso2.carbon.config</artifactId>
+        </dependency>
 
         <!--MSF4J-->
         <dependency>
@@ -144,7 +148,8 @@
     <properties>
         <import.package>
             org.wso2.carbon.kernel.startupresolver.*; version="${carbon.kernel.version.range}",
-            org.wso2.carbon.deployment.engine.*;version="${carbon.deployment.version.range}",
+            org.wso2.carbon.deployment.engine.*; version="${carbon.deployment.version.range}",
+            org.wso2.carbon.config.*; version="${carbon.config.version.range}",
             org.wso2.msf4j; version="${msf4j.version.range}",
             javax.ws.rs.*; version="${javax.ws.rs.version.range}",
             org.wso2.carbon.messaging; version="${carbon.messaging.version.range}",
@@ -167,6 +172,9 @@
             org.wso2.carbon.uis.api.*;version="${project.version}",
             org.wso2.carbon.uis.spi.*;version="${project.version}"
         </export.package>
+        <carbon.component>
+            osgi.service; objectClass="org.wso2.carbon.deployment.engine.Deployer"
+        </carbon.component>
     </properties>
 
 </project>

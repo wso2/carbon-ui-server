@@ -61,40 +61,8 @@
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.config</groupId>
-            <artifactId>org.wso2.carbon.config.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.secvault</groupId>
-            <artifactId>org.wso2.carbon.secvault.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.utils</groupId>
-            <artifactId>org.wso2.carbon.utils.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.touchpoint</groupId>
             <artifactId>org.wso2.carbon.touchpoint.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-
-        <!--Transport-->
-        <dependency>
-            <groupId>org.wso2.carbon.messaging</groupId>
-            <artifactId>org.wso2.carbon.messaging.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.transport</groupId>
-            <artifactId>org.wso2.carbon.transport.http.netty.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.transport</groupId>
-            <artifactId>org.wso2.carbon.connector.framework.feature</artifactId>
             <type>zip</type>
         </dependency>
 
@@ -110,10 +78,43 @@
             <type>zip</type>
         </dependency>
 
+        <!--Config-->
+        <dependency>
+            <groupId>org.wso2.carbon.config</groupId>
+            <artifactId>org.wso2.carbon.config.feature</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.secvault</groupId>
+            <artifactId>org.wso2.carbon.secvault.feature</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.utils</groupId>
+            <artifactId>org.wso2.carbon.utils.feature</artifactId>
+            <type>zip</type>
+        </dependency>
+
         <!-- MSF4J -->
         <dependency>
             <groupId>org.wso2.msf4j</groupId>
             <artifactId>org.wso2.msf4j.feature</artifactId>
+            <type>zip</type>
+        </dependency>
+        <!--Transport-->
+        <dependency>
+            <groupId>org.wso2.carbon.messaging</groupId>
+            <artifactId>org.wso2.carbon.messaging.feature</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.transport</groupId>
+            <artifactId>org.wso2.carbon.transport.http.netty.feature</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.transport</groupId>
+            <artifactId>org.wso2.carbon.connector.framework.feature</artifactId>
             <type>zip</type>
         </dependency>
         <!--Metrics-->
@@ -212,10 +213,6 @@
 
                                 <!--Kernel-->
                                 <feature>
-                                    <id>org.wso2.carbon.touchpoint.feature</id>
-                                    <version>${carbon.touchpoint.version}</version>
-                                </feature>
-                                <feature>
                                     <id>org.wso2.carbon.server.feature</id>
                                     <version>${carbon.kernel.version}</version>
                                 </feature>
@@ -227,6 +224,22 @@
                                     <id>org.wso2.carbon.osgi.feature</id>
                                     <version>${carbon.kernel.version}</version>
                                 </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.touchpoint.feature</id>
+                                    <version>${carbon.touchpoint.version}</version>
+                                </feature>
+
+                                <!--Deployment-->
+                                <feature>
+                                    <id>org.wso2.carbon.deployment.engine.feature</id>
+                                    <version>${carbon.deployment.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.deployment.notifier.feature</id>
+                                    <version>${carbon.deployment.version}</version>
+                                </feature>
+
+                                <!--Config-->
                                 <feature>
                                     <id>org.wso2.carbon.config.feature</id>
                                     <version>${carbon.config.version}</version>
@@ -240,6 +253,11 @@
                                     <version>${carbon.utils.version}</version>
                                 </feature>
 
+                                <!--MSF4J-->
+                                <feature>
+                                    <id>org.wso2.msf4j.feature</id>
+                                    <version>${msf4j.version}</version>
+                                </feature>
                                 <!--Transport-->
                                 <feature>
                                     <id>org.wso2.carbon.messaging.feature</id>
@@ -252,22 +270,6 @@
                                 <feature>
                                     <id>org.wso2.carbon.connector.framework.feature</id>
                                     <version>${carbon.transport.version}</version>
-                                </feature>
-
-                                <!--Deployment-->
-                                <feature>
-                                    <id>org.wso2.carbon.deployment.engine.feature</id>
-                                    <version>${carbon.deployment.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.deployment.notifier.feature</id>
-                                    <version>${carbon.deployment.version}</version>
-                                </feature>
-
-                                <!--MSF4J-->
-                                <feature>
-                                    <id>org.wso2.msf4j.feature</id>
-                                    <version>${msf4j.version}</version>
                                 </feature>
                                 <!--Metrics-->
                                 <feature>
@@ -352,6 +354,35 @@
                                     <version>${carbon.kernel.version}</version>
                                 </feature>
 
+                                <!--Deployment-->
+                                <feature>
+                                    <id>org.wso2.carbon.deployment.engine.feature</id>
+                                    <version>${carbon.deployment.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.deployment.notifier.feature</id>
+                                    <version>${carbon.deployment.version}</version>
+                                </feature>
+
+                                <!--Config-->
+                                <feature>
+                                    <id>org.wso2.carbon.config.feature</id>
+                                    <version>${carbon.config.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.secvault.feature</id>
+                                    <version>${carbon.securevault.version}</version>
+                                </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.utils.feature</id>
+                                    <version>${carbon.utils.version}</version>
+                                </feature>
+
+                                <!--MSF4J-->
+                                <feature>
+                                    <id>org.wso2.msf4j.feature</id>
+                                    <version>${msf4j.version}</version>
+                                </feature>
                                 <!--Transport-->
                                 <feature>
                                     <id>org.wso2.carbon.messaging.feature</id>
@@ -364,22 +395,6 @@
                                 <feature>
                                     <id>org.wso2.carbon.connector.framework.feature</id>
                                     <version>${carbon.transport.version}</version>
-                                </feature>
-
-                                <!--Deployment-->
-                                <feature>
-                                    <id>org.wso2.carbon.deployment.engine.feature</id>
-                                    <version>${carbon.deployment.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.deployment.notifier.feature</id>
-                                    <version>${carbon.deployment.version}</version>
-                                </feature>
-
-                                <!--MSF4J-->
-                                <feature>
-                                    <id>org.wso2.msf4j.feature</id>
-                                    <version>${msf4j.version}</version>
                                 </feature>
                                 <!--Metrics-->
                                 <feature>

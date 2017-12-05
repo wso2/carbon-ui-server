@@ -59,6 +59,11 @@
             <!--Kernel-->
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.core</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.server.feature</artifactId>
                 <version>${carbon.kernel.version}</version>
                 <type>zip</type>
@@ -80,11 +85,6 @@
                 <artifactId>org.wso2.carbon.touchpoint.feature</artifactId>
                 <version>${carbon.touchpoint.version}</version>
                 <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.core</artifactId>
-                <version>${carbon.kernel.version}</version>
             </dependency>
 
             <!--Deployment-->
