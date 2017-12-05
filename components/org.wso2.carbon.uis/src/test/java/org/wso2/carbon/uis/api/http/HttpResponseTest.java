@@ -24,7 +24,7 @@ import org.testng.annotations.Test;
 /**
  * Test cases for {@link HttpResponse} class.
  *
- * @since 0.12.7
+ * @since 0.13.0
  */
 public class HttpResponseTest {
 

@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Builder for {@link HttpResponse} class.
  *
- * @since 0.12.7
+ * @since 0.13.0
  */
 public class ResponseBuilder {
 

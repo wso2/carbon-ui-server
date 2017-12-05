@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * Test cases for {@link ResponseBuilder} class.
  *
- * @since 0.12.7
+ * @since 0.13.0
  */
 public class ResponseBuilderTest {
 
