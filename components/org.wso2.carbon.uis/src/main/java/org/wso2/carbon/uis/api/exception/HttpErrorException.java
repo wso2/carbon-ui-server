@@ -16,9 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.exception;
-
-import org.wso2.carbon.uis.api.exception.UISRuntimeException;
+package org.wso2.carbon.uis.api.exception;
 
 /**
  * Indicates a HTTP error.
