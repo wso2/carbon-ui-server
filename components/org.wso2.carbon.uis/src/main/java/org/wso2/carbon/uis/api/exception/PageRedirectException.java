@@ -16,9 +16,8 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.exception;
+package org.wso2.carbon.uis.api.exception;
 
-import org.wso2.carbon.uis.api.exception.HttpErrorException;
 import org.wso2.carbon.uis.api.http.HttpResponse;
 
 /**
