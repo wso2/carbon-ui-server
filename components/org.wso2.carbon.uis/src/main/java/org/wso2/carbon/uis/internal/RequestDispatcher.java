@@ -26,14 +26,14 @@ import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
 import org.wso2.carbon.uis.internal.exception.HttpErrorException;
 import org.wso2.carbon.uis.internal.exception.PageRedirectException;
+import org.wso2.carbon.uis.internal.http.ResponseBuilder;
 import org.wso2.carbon.uis.internal.io.StaticResolver;
 
 import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_TEXT_HTML;
+import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_TEXT_PLAIN;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_LOCATION;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_BAD_REQUEST;
-import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_FOUND;
 import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_INTERNAL_SERVER_ERROR;
-import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_OK;
 
 /**
  * Dispatches HTTP requests.
@@ -68,49 +68,46 @@ public class RequestDispatcher {
      * @return HTTP response
      */
     public HttpResponse serve(HttpRequest request) {
-        HttpResponse response = new HttpResponse();
-
         if (!request.isValid()) {
-            serveDefaultErrorPage(STATUS_BAD_REQUEST, "Invalid URI '" + request.getUri() + "'.", response);
-            return response;
+            return serveDefaultErrorPage(STATUS_BAD_REQUEST, "Invalid URI '" + request.getUri() + "'.");
         }
         if (request.isDefaultFaviconRequest()) {
-            serveDefaultFavicon(request, response);
-            return response;
+            return serveDefaultFavicon(request);
         }
 
-        serve(app, request, response);
-        return response;
+        return serve(app, request);
     }
 
-    private void serve(App app, HttpRequest request, HttpResponse response) {
+    private HttpResponse serve(App app, HttpRequest request) {
         try {
             if (request.isStaticResourceRequest()) {
-                staticResolver.serve(app, request, response);
+                return staticResolver.serve(app, request);
             } else {
-                servePage(app, request, response);
+                return servePage(app, request);
             }
         } catch (PageRedirectException e) {
-            response.setStatus(STATUS_FOUND);
-            response.setHeader(HEADER_LOCATION, e.getRedirectUrl());
+            return ResponseBuilder.status(e.getHttpStatusCode())
+                    .header(HEADER_LOCATION, e.getRedirectUrl())
+                    .build();
         } catch (HttpErrorException e) {
-            serveDefaultErrorPage(e.getHttpStatusCode(), e.getMessage(), response);
+            return serveDefaultErrorPage(e.getHttpStatusCode(), e.getMessage());
         } catch (UISRuntimeException e) {
             String msg = "A server error occurred while serving for request '" + request + "'.";
             LOGGER.error(msg, e);
-            serveDefaultErrorPage(STATUS_INTERNAL_SERVER_ERROR, msg, response);
+            return serveDefaultErrorPage(STATUS_INTERNAL_SERVER_ERROR, msg);
         } catch (Exception e) {
             String msg = "An unexpected error occurred while serving for request '" + request + "'.";
             LOGGER.error(msg, e);
-            serveDefaultErrorPage(STATUS_INTERNAL_SERVER_ERROR, msg, response);
+            return serveDefaultErrorPage(STATUS_INTERNAL_SERVER_ERROR, msg);
         }
     }
 
-    private void servePage(App app, HttpRequest request, HttpResponse response) {
+    private HttpResponse servePage(App app, HttpRequest request) {
         try {
-            setResponseSecurityHeaders(app, response);
             String html = app.renderPage(request);
-            response.setContent(STATUS_OK, html, CONTENT_TYPE_TEXT_HTML);
+            return ResponseBuilder.ok(html, CONTENT_TYPE_TEXT_HTML)
+                    .headers(app.getConfiguration().getResponseHeaders().forPages())
+                    .build();
         } catch (UISRuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -127,15 +124,14 @@ public class RequestDispatcher {
         }
     }
 
-    private void serveDefaultErrorPage(int httpStatusCode, String content, HttpResponse response) {
-        response.setContent(httpStatusCode, content);
+    private HttpResponse serveDefaultErrorPage(int httpStatusCode, String content) {
+        return ResponseBuilder.status(httpStatusCode)
+                .content(content)
+                .contentType(CONTENT_TYPE_TEXT_PLAIN)
+                .build();
     }
 
-    private void serveDefaultFavicon(HttpRequest request, HttpResponse response) {
-        staticResolver.serveDefaultFavicon(request, response);
-    }
-
-    private void setResponseSecurityHeaders(App app, HttpResponse httpResponse) {
-        app.getConfiguration().getResponseHeaders().forPages().forEach(httpResponse::setHeader);
+    private HttpResponse serveDefaultFavicon(HttpRequest request) {
+        return staticResolver.serveDefaultFavicon(request);
     }
 }

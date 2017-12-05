@@ -41,8 +41,7 @@ public class StaticResolverTest {
 
     @Test
     public void testServeDefaultFavicon() {
-        final HttpResponse response = new HttpResponse();
-        new StaticResolver().serveDefaultFavicon(null, response);
+        final HttpResponse response = new StaticResolver().serveDefaultFavicon(null);
 
         Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_OK);
         Assert.assertEquals(response.getContentType(), HttpResponse.CONTENT_TYPE_IMAGE_PNG);
@@ -63,8 +62,7 @@ public class StaticResolverTest {
 
     @Test(dataProvider = "invalidUris")
     public void testServeWithInvalidUri(HttpRequest request) {
-        final HttpResponse response = new HttpResponse();
-        new StaticResolver().serve(creatApp(), request, response);
+        final HttpResponse response = new StaticResolver().serve(creatApp(), request);
 
         Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_BAD_REQUEST);
         Assert.assertEquals(response.getContentType(), HttpResponse.CONTENT_TYPE_TEXT_PLAIN);
