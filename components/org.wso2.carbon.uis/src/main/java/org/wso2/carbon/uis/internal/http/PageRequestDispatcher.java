@@ -18,52 +18,57 @@
 
 package org.wso2.carbon.uis.internal.http;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.carbon.uis.api.App;
-import org.wso2.carbon.uis.api.exception.HttpErrorException;
+import org.wso2.carbon.uis.api.exception.PageNotFoundException;
 import org.wso2.carbon.uis.api.exception.PageRedirectException;
-import org.wso2.carbon.uis.api.exception.UISRuntimeException;
+import org.wso2.carbon.uis.api.exception.RenderingException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
 
 import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_TEXT_HTML;
-import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_TEXT_PLAIN;
 import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_LOCATION;
-import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_INTERNAL_SERVER_ERROR;
 
+/**
+ * Dispatcher for HTTP request for pages.
+ *
+ * @since 0.13.4
+ */
 public class PageRequestDispatcher {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PageRequestDispatcher.class);
 
     private final App app;
 
+    /**
+     * Creates a new request dispatcher.
+     *
+     * @param app web app to be served
+     */
     public PageRequestDispatcher(App app) {
         this.app = app;
     }
 
-    public HttpResponse server(HttpRequest request) {
+    /**
+     * Serves to the supplied HTTP request and returns a HTTP response.
+     *
+     * @param request HTTP request to be served
+     * @return a HTTP response that carries the result
+     */
+    public HttpResponse serve(HttpRequest request) {
         try {
             String html = app.renderPage(request);
             return ResponseBuilder.ok(html, CONTENT_TYPE_TEXT_HTML)
                     .headers(app.getConfiguration().getResponseHeaders().forPages())
                     .build();
+        } catch (RenderingException e) {
+            return ResponseBuilder
+                    .serverError("An error occurred when rendering page '" + request.getUriWithoutContextPath() + "'.")
+                    .build();
+        } catch (PageNotFoundException e) {
+            return ResponseBuilder.notFound("Page '" + request.getUriWithoutContextPath() + "' does not exists.")
+                    .build();
         } catch (PageRedirectException e) {
             return ResponseBuilder.status(e.getHttpStatusCode())
                     .header(HEADER_LOCATION, e.getRedirectUrl())
                     .build();
-        } catch (HttpErrorException e) {
-            return serveDefaultErrorPage(e.getHttpStatusCode(), e.getMessage());
-        } catch (UISRuntimeException e) {
-            LOGGER.error("Cannot serve request {} due to a runtime exception in the server.", request, e);
-            return serveDefaultErrorPage(STATUS_INTERNAL_SERVER_ERROR, "Internal server error.");
         }
-    }
-
-    private static HttpResponse serveDefaultErrorPage(int httpStatusCode, String content) {
-        return ResponseBuilder.status(httpStatusCode)
-                .content(content)
-                .contentType(CONTENT_TYPE_TEXT_PLAIN)
-                .build();
     }
 }
