@@ -63,10 +63,9 @@ public abstract class Page implements Comparable<Page> {
     /**
      * Renders this page and returns a HTML document.
      *
-     *
-     * @param request
-     * @param configuration
-     * @return html
+     * @param request HTTP request
+     * @param configuration configurations of the app
+     * @return output html of page rendering
      * @throws RenderingException if an error occurred during page rendering
      */
     public abstract String render(HttpRequest request, Configuration configuration) throws RenderingException;
