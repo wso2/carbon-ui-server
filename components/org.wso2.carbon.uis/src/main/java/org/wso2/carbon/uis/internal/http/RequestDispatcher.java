@@ -24,7 +24,7 @@ import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
-import org.wso2.carbon.uis.internal.io.StaticRequestDispatcher;
+import org.wso2.carbon.uis.internal.io.http.StaticRequestDispatcher;
 
 /**
  * Dispatches HTTP requests.

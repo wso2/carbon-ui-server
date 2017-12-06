@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.io;
+package org.wso2.carbon.uis.internal.io.http;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
