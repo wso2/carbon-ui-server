@@ -22,6 +22,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.uis.api.App;
+import org.wso2.carbon.uis.internal.exception.AppCreationException;
 import org.wso2.carbon.uis.internal.io.reference.ArtifactAppReference;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 
@@ -38,8 +39,7 @@ public class AppCreatorTest {
     public Object[][] appReferences() {
         return new Object[][]{
                 {new ArtifactAppReference(Paths.get("src/test/resources/apps/full-app/"))},
-                {new ArtifactAppReference(Paths.get("src/test/resources/apps/minimal-app/"))},
-                {new ArtifactAppReference(Paths.get("src/test/resources/apps/empty-app/"))}
+                {new ArtifactAppReference(Paths.get("src/test/resources/apps/minimal-app/"))}
         };
     }
 
@@ -47,5 +47,12 @@ public class AppCreatorTest {
     public void testCreateApp(AppReference appReference) {
         App app = AppCreator.createApp(appReference, "/test");
         Assert.assertNotNull(app);
+    }
+
+    @Test
+    public void testCreateAppWithEmptyDirectory() {
+        AppReference appReference = new ArtifactAppReference(Paths.get("src/test/resources/apps/empty-app/"));
+        Assert.assertThrows(AppCreationException.class,
+                            () -> AppCreator.createApp(appReference, "/test"));
     }
 }
