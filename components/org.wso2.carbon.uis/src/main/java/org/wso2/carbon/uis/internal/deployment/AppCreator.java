@@ -29,6 +29,7 @@ import org.wso2.carbon.uis.api.exception.RenderingException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.internal.deployment.parser.YamlFileParser;
 import org.wso2.carbon.uis.internal.exception.AppCreationException;
+import org.wso2.carbon.uis.internal.exception.FileOperationException;
 import org.wso2.carbon.uis.internal.impl.HbsPage;
 import org.wso2.carbon.uis.internal.impl.HtmlPage;
 import org.wso2.carbon.uis.internal.reference.AppReference;
@@ -60,27 +61,37 @@ public class AppCreator {
      * @throws AppCreationException if an error occurred when creating the app
      */
     public static App createApp(AppReference appReference, String appContext) throws AppCreationException {
-        SortedSet<Page> pages = createPages(appReference);
-        Set<Extension> extensions = appReference.getExtensionReferences().stream()
-                .map(AppCreator::createExtension)
-                .collect(Collectors.toSet());
-        Set<Theme> themes = appReference.getThemeReferences().stream()
-                .map(AppCreator::createTheme)
-                .collect(Collectors.toSet());
-        Set<I18nResource> i18nResources = appReference.getI18nResourceReferences().stream()
-                .map(AppCreator::createI18nResource)
-                .collect(Collectors.toSet());
-        Configuration configuration = appReference.getConfiguration()
-                .map(AppCreator::createConfiguration)
-                .orElse(Configuration.DEFAULT_CONFIGURATION);
-        return new App(appReference.getName(), appContext, pages, extensions, themes, i18nResources, configuration,
-                       appReference.getPath());
+        try {
+            SortedSet<Page> pages = createPages(appReference);
+            Set<Extension> extensions = appReference.getExtensionReferences().stream()
+                    .map(AppCreator::createExtension)
+                    .collect(Collectors.toSet());
+            Set<Theme> themes = appReference.getThemeReferences().stream()
+                    .map(AppCreator::createTheme)
+                    .collect(Collectors.toSet());
+            Set<I18nResource> i18nResources = appReference.getI18nResourceReferences().stream()
+                    .map(AppCreator::createI18nResource)
+                    .collect(Collectors.toSet());
+            Configuration configuration = appReference.getConfiguration()
+                    .map(AppCreator::createConfiguration)
+                    .orElse(Configuration.DEFAULT_CONFIGURATION);
+            return new App(appReference.getName(), appContext, pages, extensions, themes, i18nResources, configuration,
+                           appReference.getPath());
+        } catch (FileOperationException e) {
+            throw new AppCreationException(
+                    "Cannot create web app '" + appReference.getName() + "' with context path '" + appContext + "'.",
+                    e);
+        }
     }
 
     private static SortedSet<Page> createPages(AppReference appReference) {
         List<Page> pages = appReference.getPageReferences().stream()
                 .map(AppCreator::createPage)
                 .collect(Collectors.toList());
+        if (pages.isEmpty()) {
+            throw new AppCreationException("App '" + appReference.getName() + "' does not contains any pages.");
+        }
+
         // TODO: 10/13/17 remove following workaround after adding support for URI patterns with * in UriPatten class
         if ((pages.size() == 1) && (pages.get(0).getUriPatten().matches("/index"))) {
             final Page indexPage = pages.get(0);
