@@ -26,6 +26,7 @@ import org.wso2.carbon.uis.api.Extension;
 import org.wso2.carbon.uis.api.Theme;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
+import org.wso2.carbon.uis.internal.exception.BadRequestException;
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
 import org.wso2.carbon.uis.internal.exception.ResourceNotFoundException;
 import org.wso2.carbon.uis.internal.http.ResponseBuilder;
@@ -34,6 +35,7 @@ import org.wso2.carbon.uis.internal.io.util.PathUtils;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -45,12 +47,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.AbstractMap;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_IMAGE_PNG;
@@ -64,12 +63,13 @@ import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_NOT_MODIFIED;
  *
  * @since 0.8.0
  */
-public class StaticResolver {
+public class StaticRequestDispatcher {
 
     private static final DateTimeFormatter HTTP_DATE_FORMATTER;
     private static final ZoneId GMT_TIME_ZONE;
-    private static final Logger LOGGER = LoggerFactory.getLogger(StaticResolver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaticRequestDispatcher.class);
 
+    private final App app;
     private final Map<Path, ZonedDateTime> resourcesLastModifiedDates;
 
     static {
@@ -79,29 +79,13 @@ public class StaticResolver {
     }
 
     /**
-     * Constructs a new static request dispatcher.
+     * Creates a new request dispatcher.
+     *
+     * @param app web app to be served
      */
-    public StaticResolver() {
-        if (false) {
-            /*
-             * When the dev mode is enabled, we do not cache last modified dates of serving static resources. This is
-             * achieved by setting a dummy map to the 'resourcesLastModifiedDates' field. Dummy map does not store any
-             * values and it size is always zero.
-             */
-            this.resourcesLastModifiedDates = new AbstractMap<Path, ZonedDateTime>() {
-                @Override
-                public Set<Entry<Path, ZonedDateTime>> entrySet() {
-                    return Collections.emptySet(); // No entries in this dummy map.
-                }
-
-                @Override
-                public ZonedDateTime put(Path key, ZonedDateTime value) {
-                    return value; // Do not store in this is dummy Map.
-                }
-            };
-        } else {
-            this.resourcesLastModifiedDates = new ConcurrentHashMap<>();
-        }
+    public StaticRequestDispatcher(App app) {
+        this.app = app;
+        this.resourcesLastModifiedDates = new ConcurrentHashMap<>();
     }
 
     /**
@@ -121,61 +105,65 @@ public class StaticResolver {
     }
 
     /**
-     * Serves a static resource inside the specified app.
+     * Serves to the supplied HTTP request and returns a HTTP response.
      *
-     * @param app     app to be served
      * @param request HTTP request to be served
-     * @return HTTP response that carries the serving file
+     * @return a HTTP response that carries the result
      */
-    public HttpResponse serve(App app, HttpRequest request) {
-        Path resourcePath;
-        ZonedDateTime lastModifiedDate;
+    public HttpResponse serve(HttpRequest request) {
         try {
-            if (request.isAppStaticResourceRequest()) {
-                // /public/app/...
-                resourcePath = resolveResourceInApp(app, request.getUriWithoutContextPath());
-            } else if (request.isExtensionStaticResourceRequest()) {
-                // /public/extensions/...
-                resourcePath = resolveResourceInExtension(app, request.getUriWithoutContextPath());
-            } else if (request.isThemeStaticResourceRequest()) {
-                // /public/themes/...
-                resourcePath = resolveResourceInTheme(app, request.getUriWithoutContextPath());
+            Path resourcePath = resolveResource(request);
+            ZonedDateTime lastModifiedDate = getLastModifiedDate(resourcePath);
+            if (lastModifiedDate == null) {
+            /* Since we have failed to read last modified date of 'resourcePath' file, we cannot set cache headers.
+            Therefore just serve the file without any cache headers. */
+                return ResponseBuilder.ok(resourcePath, getContentType(request, resourcePath))
+                        .headers(app.getConfiguration().getResponseHeaders().forStaticResources())
+                        .build();
             } else {
-                // /public/...
-                return ResponseBuilder.badRequest("Invalid static resource URI '" + request.getUri() + "'.").build();
+                ZonedDateTime ifModifiedSinceDate = getIfModifiedSinceDate(request);
+                if ((ifModifiedSinceDate != null) && Duration.between(ifModifiedSinceDate, lastModifiedDate).isZero()) {
+                    // Resource is NOT modified since the last serve.
+                    return ResponseBuilder.status(STATUS_NOT_MODIFIED).build();
+                } else {
+                    return ResponseBuilder.ok(resourcePath, getContentType(request, resourcePath))
+                            .header(HEADER_LAST_MODIFIED, HTTP_DATE_FORMATTER.format(lastModifiedDate))
+                            .header(HEADER_CACHE_CONTROL, "public,max-age=2592000")
+                            .headers(app.getConfiguration().getResponseHeaders().forStaticResources())
+                            .build();
+                }
             }
-            lastModifiedDate = resourcesLastModifiedDates.computeIfAbsent(resourcePath, this::getLastModifiedDate);
-        } catch (IllegalArgumentException e) {
-            // Invalid/incorrect static resource URI.
-            return ResponseBuilder.badRequest(e.getMessage()).build();
+        } catch (BadRequestException e) {
+            return ResponseBuilder.badRequest("Static resource URI '" + request.getUri() + "' is invalid.").build();
         } catch (ResourceNotFoundException e) {
-            // Static resource file does not exists.
             return ResponseBuilder.notFound("Requested resource '" + request.getUri() + "' does not exists.").build();
-        } catch (Exception e) {
-            // FileOperationException, IOException or any other Exception that might occur.
+        } catch (FileOperationException e) {
             LOGGER.error("An error occurred when manipulating paths for static resource request '{}'.", request, e);
             return ResponseBuilder.serverError("A server occurred while serving for static resource request.").build();
         }
-
-        if (lastModifiedDate == null) {
-            /* Since we have failed to read last modified date of 'resourcePath' file, we cannot set cache headers.
-            Therefore just serve the file without any cache headers. */
-            return ResponseBuilder.ok(resourcePath, getContentType(request, resourcePath)).build();
-        }
-        ZonedDateTime ifModifiedSinceDate = getIfModifiedSinceDate(request);
-        if ((ifModifiedSinceDate != null) && Duration.between(ifModifiedSinceDate, lastModifiedDate).isZero()) {
-            // Resource is NOT modified since the last serve.
-            return ResponseBuilder.status(STATUS_NOT_MODIFIED).build();
-        }
-
-        return ResponseBuilder.ok(resourcePath, getContentType(request, resourcePath))
-                .header(HEADER_LAST_MODIFIED, HTTP_DATE_FORMATTER.format(lastModifiedDate))
-                .header(HEADER_CACHE_CONTROL, "public,max-age=2592000")
-                .headers(app.getConfiguration().getResponseHeaders().forStaticResources())
-                .build();
     }
 
-    private Path resolveResourceInApp(App app, String uriWithoutContextPath) {
+    private ZonedDateTime getLastModifiedDate(Path resourcePath) {
+        return resourcesLastModifiedDates.computeIfAbsent(resourcePath, StaticRequestDispatcher::readLastModifiedDate);
+    }
+
+    private Path resolveResource(HttpRequest request) throws BadRequestException {
+        if (request.isAppStaticResourceRequest()) {
+            // /public/app/...
+            return resolveResourceInApp(app, request.getUriWithoutContextPath());
+        } else if (request.isExtensionStaticResourceRequest()) {
+            // /public/extensions/...
+            return resolveResourceInExtension(app, request.getUriWithoutContextPath());
+        } else if (request.isThemeStaticResourceRequest()) {
+            // /public/themes/...
+            return resolveResourceInTheme(app, request.getUriWithoutContextPath());
+        } else {
+            // /public/...
+            throw new BadRequestException("Invalid static resource URI '" + request.getUri() + "'.");
+        }
+    }
+
+    private static Path resolveResourceInApp(App app, String uriWithoutContextPath) throws BadRequestException {
         /* Correct 'uriWithoutContextPath' value must be in "/public/app/{sub-directory}/{rest-of-the-path}" format.
          * So there should be at least 4 slashes. Don't worry about multiple consecutive slashes. They are covered in
          * HttpRequest.isValid() method which is called before this method.
@@ -193,7 +181,7 @@ public class StaticResolver {
             }
         }
         if (slashesCount != 4) {
-            throw new IllegalArgumentException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
+            throw new BadRequestException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
         }
 
         // {sub-directory}/{rest-of-the-path}
@@ -201,7 +189,8 @@ public class StaticResolver {
         return selectPath(app.getPaths(), AppReference.DIR_NAME_PUBLIC_RESOURCES, relativeFilePath);
     }
 
-    private Path resolveResourceInExtension(App app, String uriWithoutContextPath) {
+    private static Path resolveResourceInExtension(App app, String uriWithoutContextPath)
+            throws BadRequestException, ResourceNotFoundException {
         /* Correct 'uriWithoutContextPath' value must be in
          * "/public/extensions/{extension-type}/{extension-name}/{rest-of-the-path}" format.
          * So there should be at least 5 slashes. Don't worry about multiple consecutive slashes. They are covered
@@ -223,7 +212,7 @@ public class StaticResolver {
             }
         }
         if (slashesCount != 5) {
-            throw new IllegalArgumentException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
+            throw new BadRequestException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
         }
         String extensionType = uriWithoutContextPath.substring(thirdSlashIndex + 1, fourthSlashIndex);
         String extensionName = uriWithoutContextPath.substring(fourthSlashIndex + 1, fifthSlashIndex);
@@ -237,7 +226,8 @@ public class StaticResolver {
         return selectPath(extension.getPaths(), relativeFilePath);
     }
 
-    private Path resolveResourceInTheme(App app, String uriWithoutContextPath) {
+    private static Path resolveResourceInTheme(App app, String uriWithoutContextPath)
+            throws BadRequestException, ResourceNotFoundException {
         /* Correct 'uriWithoutContextPath' value must be in
          * "/public/themes/{theme-name}/{sub-directory}/{rest-of-the-path}" format.
          * So there should be at least 5 slashes. Don't worry about multiple consecutive slashes. They are covered
@@ -258,7 +248,7 @@ public class StaticResolver {
             }
         }
         if (slashesCount != 5) {
-            throw new IllegalArgumentException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
+            throw new BadRequestException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
         }
         String themeName = uriWithoutContextPath.substring(thirdSlashIndex + 1, fourthSlashIndex);
         Theme theme = app.getTheme(themeName)
@@ -270,7 +260,8 @@ public class StaticResolver {
         return selectPath(theme.getPaths(), relativeFilePath);
     }
 
-    private ZonedDateTime getLastModifiedDate(Path resourcePath) {
+    private static ZonedDateTime readLastModifiedDate(Path resourcePath)
+            throws ResourceNotFoundException, FileOperationException {
         if (!Files.isReadable(resourcePath)) {
             throw new ResourceNotFoundException("Static resource file '" + resourcePath + "' is not readable.");
         }
@@ -281,8 +272,7 @@ public class StaticResolver {
         } catch (NoSuchFileException | FileNotFoundException e) {
             // This shouldn't be happening because we checked the file's readability before. But just in case.
             throw new ResourceNotFoundException("Static resource file '" + resourcePath + "' does not exists.", e);
-        } catch (Exception e) {
-            // UnsupportedOperationException, IOException or any other Exception that might occur.
+        } catch (UnsupportedOperationException | IOException e) {
             throw new FileOperationException(
                     "Cannot read file attributes from static resource file '" + resourcePath + "'.", e);
         }
@@ -301,21 +291,22 @@ public class StaticResolver {
         }
     }
 
-    private ZonedDateTime getIfModifiedSinceDate(HttpRequest request) {
+    private static ZonedDateTime getIfModifiedSinceDate(HttpRequest request) {
         // If-Modified-Since: Sat, 29 Oct 1994 19:43:31 GMT
         String ifModifiedSinceHeader = request.getHeaders().get("If-Modified-Since");
         if (ifModifiedSinceHeader == null) {
             return null; // 'If-Modified-Since' does not exists in HTTP headres.
         }
+
         try {
             return ZonedDateTime.parse(ifModifiedSinceHeader, HTTP_DATE_FORMATTER);
         } catch (DateTimeParseException e) {
-            LOGGER.warn("Cannot parse 'If-Modified-Since' HTTP header value '{}'.", ifModifiedSinceHeader, e);
+            LOGGER.debug("Cannot parse 'If-Modified-Since' HTTP header value '{}'.", ifModifiedSinceHeader, e);
             return null;
         }
     }
 
-    private String getContentType(HttpRequest request, Path resource) {
+    private static String getContentType(HttpRequest request, Path resource) {
         String extensionFromUri = FilenameUtils.getExtension(request.getUriWithoutContextPath());
         Optional<String> contentType = MimeMapper.getMimeType(extensionFromUri);
         if (contentType.isPresent()) {
@@ -326,7 +317,7 @@ public class StaticResolver {
         return MimeMapper.getMimeType(extensionFromPath).orElse(CONTENT_TYPE_WILDCARD);
     }
 
-    private Path selectPath(List<String> parentDirectories, String... relativeFilePath) {
+    private static Path selectPath(List<String> parentDirectories, String... relativeFilePath) {
         Path path = null;
         for (String parentDirectory : parentDirectories) {
             path = Paths.get(parentDirectory, relativeFilePath);

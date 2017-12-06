@@ -21,19 +21,12 @@ package org.wso2.carbon.uis.internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.uis.api.App;
-import org.wso2.carbon.uis.api.exception.HttpErrorException;
-import org.wso2.carbon.uis.api.exception.PageRedirectException;
 import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
+import org.wso2.carbon.uis.internal.http.PageRequestDispatcher;
 import org.wso2.carbon.uis.internal.http.ResponseBuilder;
-import org.wso2.carbon.uis.internal.io.StaticResolver;
-
-import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_TEXT_HTML;
-import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_TEXT_PLAIN;
-import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_LOCATION;
-import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_BAD_REQUEST;
-import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_INTERNAL_SERVER_ERROR;
+import org.wso2.carbon.uis.internal.io.StaticRequestDispatcher;
 
 /**
  * Dispatches HTTP requests.
@@ -44,8 +37,8 @@ public class RequestDispatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestDispatcher.class);
 
-    private final App app;
-    private final StaticResolver staticResolver;
+    private final PageRequestDispatcher pageRequestDispatcher;
+    private final StaticRequestDispatcher staticRequestDispatcher;
 
     /**
      * Creates a new request dispatcher.
@@ -53,12 +46,12 @@ public class RequestDispatcher {
      * @param app web app to be served
      */
     public RequestDispatcher(App app) {
-        this(app, new StaticResolver());
+        this(new PageRequestDispatcher(app), new StaticRequestDispatcher(app));
     }
 
-    RequestDispatcher(App app, StaticResolver staticResolver) {
-        this.app = app;
-        this.staticResolver = staticResolver;
+    RequestDispatcher(PageRequestDispatcher pageRequestDispatcher, StaticRequestDispatcher staticRequestDispatcher) {
+        this.pageRequestDispatcher = pageRequestDispatcher;
+        this.staticRequestDispatcher = staticRequestDispatcher;
     }
 
     /**
@@ -69,69 +62,23 @@ public class RequestDispatcher {
      */
     public HttpResponse serve(HttpRequest request) {
         if (!request.isValid()) {
-            return serveDefaultErrorPage(STATUS_BAD_REQUEST, "Invalid URI '" + request.getUri() + "'.");
-        }
-        if (request.isDefaultFaviconRequest()) {
-            return serveDefaultFavicon(request);
+            return ResponseBuilder.badRequest("URI '" + request.getUri() + "' is invalid.").build();
         }
 
-        return serve(app, request);
-    }
-
-    private HttpResponse serve(App app, HttpRequest request) {
         try {
-            if (request.isStaticResourceRequest()) {
-                return staticResolver.serve(app, request);
+            if (request.isDefaultFaviconRequest()) {
+                return staticRequestDispatcher.serveDefaultFavicon(request);
+            } else if (request.isStaticResourceRequest()) {
+                return staticRequestDispatcher.serve(request);
             } else {
-                return servePage(app, request);
+                return pageRequestDispatcher.serve(request);
             }
-        } catch (PageRedirectException e) {
-            return ResponseBuilder.status(e.getHttpStatusCode())
-                    .header(HEADER_LOCATION, e.getRedirectUrl())
-                    .build();
-        } catch (HttpErrorException e) {
-            return serveDefaultErrorPage(e.getHttpStatusCode(), e.getMessage());
         } catch (UISRuntimeException e) {
-            String msg = "A server error occurred while serving for request '" + request + "'.";
-            LOGGER.error(msg, e);
-            return serveDefaultErrorPage(STATUS_INTERNAL_SERVER_ERROR, msg);
+            LOGGER.error("An error occurred when serving for request '{}'.", request, e);
+            return ResponseBuilder.serverError("A server occurred while serving for request.").build();
         } catch (Exception e) {
-            String msg = "An unexpected error occurred while serving for request '" + request + "'.";
-            LOGGER.error(msg, e);
-            return serveDefaultErrorPage(STATUS_INTERNAL_SERVER_ERROR, msg);
+            LOGGER.error("An unexpected error occurred when serving for request '{}'.", request, e);
+            return ResponseBuilder.serverError("An unexpected server occurred while serving for request.").build();
         }
-    }
-
-    private HttpResponse servePage(App app, HttpRequest request) {
-        try {
-            String html = app.renderPage(request);
-            return ResponseBuilder.ok(html, CONTENT_TYPE_TEXT_HTML)
-                    .headers(app.getConfiguration().getResponseHeaders().forPages())
-                    .build();
-        } catch (UISRuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            // May be an UISRuntimeException cause this 'e' Exception. Let's unwrap 'e' and find out.
-            Throwable th = e;
-            while ((th = th.getCause()) != null) {
-                if (th instanceof UISRuntimeException) {
-                    // Cause of 'e' is an UISRuntimeException. Throw 'th' so that we can handle it properly.
-                    throw (UISRuntimeException) th;
-                }
-            }
-            // Cause of 'e' is not an UISRuntimeException.
-            throw e;
-        }
-    }
-
-    private HttpResponse serveDefaultErrorPage(int httpStatusCode, String content) {
-        return ResponseBuilder.status(httpStatusCode)
-                .content(content)
-                .contentType(CONTENT_TYPE_TEXT_PLAIN)
-                .build();
-    }
-
-    private HttpResponse serveDefaultFavicon(HttpRequest request) {
-        return staticResolver.serveDefaultFavicon(request);
     }
 }
