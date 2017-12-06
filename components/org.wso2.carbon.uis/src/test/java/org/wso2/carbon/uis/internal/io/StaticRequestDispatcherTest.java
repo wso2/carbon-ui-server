@@ -28,9 +28,13 @@ import org.wso2.carbon.uis.internal.deployment.AppCreator;
 import org.wso2.carbon.uis.internal.io.reference.ArtifactAppReference;
 
 import java.nio.file.Paths;
+import java.util.Collections;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.wso2.carbon.uis.api.http.HttpResponse.HEADER_LAST_MODIFIED;
+
+import static java.util.Collections.singletonMap;
 
 /**
  * Test cases for {@link StaticRequestDispatcher} class.
@@ -49,29 +53,124 @@ public class StaticRequestDispatcherTest {
     }
 
     @DataProvider
-    public Object[][] invalidUris() {
+    public Object[][] invalidRequests() {
         return new Object[][]{
                 {createRequest("/public/")},
                 {createRequest("/public/app/")},
                 {createRequest("/public/extensions/")},
                 {createRequest("/public/extensions/foo")},
+                {createRequest("/public/extensions/foo/")},
                 {createRequest("/public/themes/")},
-                {createRequest("/public/themes/bar")}
+                {createRequest("/public/themes/bar")},
+                {createRequest("/public/themes/bar/")}
         };
     }
 
-    @Test(dataProvider = "invalidUris")
-    public void testServeWithInvalidUri(HttpRequest request) {
-        final HttpResponse response = new StaticRequestDispatcher(creatApp()).serve(request);
+    @Test(dataProvider = "invalidRequests")
+    public void testServeInvalidRequest(HttpRequest request) {
+        HttpResponse response = new StaticRequestDispatcher(creatApp()).serve(request);
 
         Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_BAD_REQUEST);
-        Assert.assertEquals(response.getContentType(), HttpResponse.CONTENT_TYPE_TEXT_PLAIN);
         Assert.assertNotNull(response.getContent());
+    }
+
+    @Test
+    public void testServeAppStaticResourceRequest() {
+        App app = creatApp();
+        HttpRequest request = createRequest("/public/app/css/styles.css");
+
+        HttpResponse response = new StaticRequestDispatcher(app).serve(request);
+        Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_OK);
+        Assert.assertEquals(response.getContentType(), "text/css");
+        app.getConfiguration().getResponseHeaders().forStaticResources().forEach((header, value) -> {
+            Assert.assertEquals(response.getHeaders().get(header), value,
+                                "Value '" + value + "' of configured response header '" + header +
+                                "' for static resources does not exists in the response.");
+        });
+    }
+
+    @Test
+    public void testServeExtensionStaticResourceRequest() {
+        HttpRequest request = createRequest("/public/extensions/widgets/line-chart/css/styles.css");
+
+        HttpResponse response = new StaticRequestDispatcher(creatApp()).serve(request);
+        Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_OK);
+        Assert.assertEquals(response.getContentType(), "text/css");
+    }
+
+    @Test
+    public void testServeNotFoundExtensionStaticResourceRequest() {
+        HttpRequest request = createRequest("/public/extensions/foo/bar/css/styles.css");
+
+        HttpResponse response = new StaticRequestDispatcher(creatApp()).serve(request);
+        Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_NOT_FOUND);
+        Assert.assertNotNull(response.getContent());
+    }
+
+    @Test
+    public void testServeThemeStaticResourceRequest() {
+        HttpRequest request = createRequest("/public/themes/light/css/styles.css");
+
+        HttpResponse response = new StaticRequestDispatcher(creatApp()).serve(request);
+        Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_OK);
+        Assert.assertEquals(response.getContentType(), "text/css");
+    }
+
+    @Test
+    public void testServeNotFoundThemeStaticResourceRequest() {
+        HttpRequest request = createRequest("/public/themes/foo/css/styles.css");
+
+        HttpResponse response = new StaticRequestDispatcher(creatApp()).serve(request);
+        Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_NOT_FOUND);
+        Assert.assertNotNull(response.getContent());
+    }
+
+    @Test
+    public void testServeWhenIfModifiedSinceDateHeaderPresent() {
+        HttpRequest request = createRequest("/public/app/css/styles.css");
+        when(request.getHeaders()).thenReturn(
+                singletonMap("If-Modified-Since", "Sat, 27 May 2017 10:20:30 GMT"));
+
+        HttpResponse response = new StaticRequestDispatcher(creatApp()).serve(request);
+        Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_OK);
+        Assert.assertEquals(response.getContentType(), "text/css");
+        Assert.assertNotNull(response.getHeaders().get(HEADER_LAST_MODIFIED));
+    }
+
+    @Test
+    public void testServeWhenIfModifiedSinceDateHeaderInvalid() {
+        HttpRequest request = createRequest("/public/app/css/styles.css");
+        when(request.getHeaders()).thenReturn(singletonMap("If-Modified-Since", "foo bar"));
+
+        HttpResponse response = new StaticRequestDispatcher(creatApp()).serve(request);
+        Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_OK);
+        Assert.assertEquals(response.getContentType(), "text/css");
+        Assert.assertNotNull(response.getHeaders().get(HEADER_LAST_MODIFIED));
+    }
+
+    @Test
+    public void testServeWhenResourceNotModified() {
+        StaticRequestDispatcher staticRequestDispatcher = new StaticRequestDispatcher(creatApp());
+
+        // first serve
+        HttpRequest previousRequest = createRequest("/public/app/css/styles.css");
+        HttpResponse previousResponse = staticRequestDispatcher.serve(previousRequest);
+
+        // second serve
+        HttpRequest request = createRequest("/public/app/css/styles.css");
+        when(request.getHeaders()).thenReturn(singletonMap("If-Modified-Since",
+                                                           previousResponse.getHeaders().get(HEADER_LAST_MODIFIED)));
+        HttpResponse response = staticRequestDispatcher.serve(request);
+        Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_NOT_MODIFIED);
     }
 
     private static HttpRequest createRequest(String uriWithoutContextPath) {
         HttpRequest request = mock(HttpRequest.class);
         when(request.getUriWithoutContextPath()).thenReturn(uriWithoutContextPath);
+        when(request.getHeaders()).thenReturn(Collections.emptyMap());
+        when(request.isAppStaticResourceRequest()).thenCallRealMethod();
+        when(request.isExtensionStaticResourceRequest()).thenCallRealMethod();
+        when(request.isThemeStaticResourceRequest()).thenCallRealMethod();
         return request;
     }
 
