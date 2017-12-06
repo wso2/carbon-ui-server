@@ -26,6 +26,7 @@ import org.wso2.carbon.uis.api.Extension;
 import org.wso2.carbon.uis.api.Theme;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
+import org.wso2.carbon.uis.internal.exception.BadRequestException;
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
 import org.wso2.carbon.uis.internal.exception.ResourceNotFoundException;
 import org.wso2.carbon.uis.internal.http.ResponseBuilder;
@@ -34,6 +35,7 @@ import org.wso2.carbon.uis.internal.io.util.PathUtils;
 import org.wso2.carbon.uis.internal.reference.AppReference;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -45,12 +47,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.AbstractMap;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_IMAGE_PNG;
@@ -70,6 +69,7 @@ public class StaticRequestDispatcher {
     private static final ZoneId GMT_TIME_ZONE;
     private static final Logger LOGGER = LoggerFactory.getLogger(StaticRequestDispatcher.class);
 
+    private final App app;
     private final Map<Path, ZonedDateTime> resourcesLastModifiedDates;
 
     static {
@@ -79,29 +79,13 @@ public class StaticRequestDispatcher {
     }
 
     /**
-     * Constructs a new static request dispatcher.
+     * Creates a new request dispatcher.
+     *
+     * @param app web app to be served
      */
-    public StaticRequestDispatcher() {
-        if (false) {
-            /*
-             * When the dev mode is enabled, we do not cache last modified dates of serving static resources. This is
-             * achieved by setting a dummy map to the 'resourcesLastModifiedDates' field. Dummy map does not store any
-             * values and it size is always zero.
-             */
-            this.resourcesLastModifiedDates = new AbstractMap<Path, ZonedDateTime>() {
-                @Override
-                public Set<Entry<Path, ZonedDateTime>> entrySet() {
-                    return Collections.emptySet(); // No entries in this dummy map.
-                }
-
-                @Override
-                public ZonedDateTime put(Path key, ZonedDateTime value) {
-                    return value; // Do not store in this is dummy Map.
-                }
-            };
-        } else {
-            this.resourcesLastModifiedDates = new ConcurrentHashMap<>();
-        }
+    public StaticRequestDispatcher(App app) {
+        this.app = app;
+        this.resourcesLastModifiedDates = new ConcurrentHashMap<>();
     }
 
     /**
@@ -121,13 +105,12 @@ public class StaticRequestDispatcher {
     }
 
     /**
-     * Serves a static resource inside the specified app.
+     * Serves to the supplied HTTP request and returns a HTTP response.
      *
-     * @param app     app to be served
      * @param request HTTP request to be served
-     * @return HTTP response that carries the serving file
+     * @return a HTTP response that carries the result
      */
-    public HttpResponse serve(App app, HttpRequest request) {
+    public HttpResponse serve(HttpRequest request) {
         Path resourcePath;
         ZonedDateTime lastModifiedDate;
         try {
@@ -145,14 +128,11 @@ public class StaticRequestDispatcher {
                 return ResponseBuilder.badRequest("Invalid static resource URI '" + request.getUri() + "'.").build();
             }
             lastModifiedDate = resourcesLastModifiedDates.computeIfAbsent(resourcePath, this::getLastModifiedDate);
-        } catch (IllegalArgumentException e) {
-            // Invalid/incorrect static resource URI.
-            return ResponseBuilder.badRequest(e.getMessage()).build();
+        } catch (BadRequestException e) {
+            return ResponseBuilder.badRequest("Static resource URI '" + request.getUri() + "' is invalid.").build();
         } catch (ResourceNotFoundException e) {
-            // Static resource file does not exists.
             return ResponseBuilder.notFound("Requested resource '" + request.getUri() + "' does not exists.").build();
-        } catch (Exception e) {
-            // FileOperationException, IOException or any other Exception that might occur.
+        } catch (FileOperationException e) {
             LOGGER.error("An error occurred when manipulating paths for static resource request '{}'.", request, e);
             return ResponseBuilder.serverError("A server occurred while serving for static resource request.").build();
         }
@@ -175,7 +155,7 @@ public class StaticRequestDispatcher {
                 .build();
     }
 
-    private Path resolveResourceInApp(App app, String uriWithoutContextPath) {
+    private Path resolveResourceInApp(App app, String uriWithoutContextPath) throws BadRequestException {
         /* Correct 'uriWithoutContextPath' value must be in "/public/app/{sub-directory}/{rest-of-the-path}" format.
          * So there should be at least 4 slashes. Don't worry about multiple consecutive slashes. They are covered in
          * HttpRequest.isValid() method which is called before this method.
@@ -193,7 +173,7 @@ public class StaticRequestDispatcher {
             }
         }
         if (slashesCount != 4) {
-            throw new IllegalArgumentException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
+            throw new BadRequestException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
         }
 
         // {sub-directory}/{rest-of-the-path}
@@ -201,7 +181,8 @@ public class StaticRequestDispatcher {
         return selectPath(app.getPaths(), AppReference.DIR_NAME_PUBLIC_RESOURCES, relativeFilePath);
     }
 
-    private Path resolveResourceInExtension(App app, String uriWithoutContextPath) {
+    private Path resolveResourceInExtension(App app, String uriWithoutContextPath)
+            throws BadRequestException, ResourceNotFoundException {
         /* Correct 'uriWithoutContextPath' value must be in
          * "/public/extensions/{extension-type}/{extension-name}/{rest-of-the-path}" format.
          * So there should be at least 5 slashes. Don't worry about multiple consecutive slashes. They are covered
@@ -223,7 +204,7 @@ public class StaticRequestDispatcher {
             }
         }
         if (slashesCount != 5) {
-            throw new IllegalArgumentException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
+            throw new BadRequestException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
         }
         String extensionType = uriWithoutContextPath.substring(thirdSlashIndex + 1, fourthSlashIndex);
         String extensionName = uriWithoutContextPath.substring(fourthSlashIndex + 1, fifthSlashIndex);
@@ -237,7 +218,8 @@ public class StaticRequestDispatcher {
         return selectPath(extension.getPaths(), relativeFilePath);
     }
 
-    private Path resolveResourceInTheme(App app, String uriWithoutContextPath) {
+    private Path resolveResourceInTheme(App app, String uriWithoutContextPath)
+            throws BadRequestException, ResourceNotFoundException {
         /* Correct 'uriWithoutContextPath' value must be in
          * "/public/themes/{theme-name}/{sub-directory}/{rest-of-the-path}" format.
          * So there should be at least 5 slashes. Don't worry about multiple consecutive slashes. They are covered
@@ -258,7 +240,7 @@ public class StaticRequestDispatcher {
             }
         }
         if (slashesCount != 5) {
-            throw new IllegalArgumentException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
+            throw new BadRequestException("Invalid static resource URI '" + uriWithoutContextPath + "'.");
         }
         String themeName = uriWithoutContextPath.substring(thirdSlashIndex + 1, fourthSlashIndex);
         Theme theme = app.getTheme(themeName)
@@ -270,7 +252,8 @@ public class StaticRequestDispatcher {
         return selectPath(theme.getPaths(), relativeFilePath);
     }
 
-    private ZonedDateTime getLastModifiedDate(Path resourcePath) {
+    private ZonedDateTime getLastModifiedDate(Path resourcePath)
+            throws ResourceNotFoundException, FileOperationException {
         if (!Files.isReadable(resourcePath)) {
             throw new ResourceNotFoundException("Static resource file '" + resourcePath + "' is not readable.");
         }
@@ -281,8 +264,7 @@ public class StaticRequestDispatcher {
         } catch (NoSuchFileException | FileNotFoundException e) {
             // This shouldn't be happening because we checked the file's readability before. But just in case.
             throw new ResourceNotFoundException("Static resource file '" + resourcePath + "' does not exists.", e);
-        } catch (Exception e) {
-            // UnsupportedOperationException, IOException or any other Exception that might occur.
+        } catch (UnsupportedOperationException | IOException e) {
             throw new FileOperationException(
                     "Cannot read file attributes from static resource file '" + resourcePath + "'.", e);
         }

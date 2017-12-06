@@ -41,7 +41,7 @@ public class StaticRequestDispatcherTest {
 
     @Test
     public void testServeDefaultFavicon() {
-        final HttpResponse response = new StaticRequestDispatcher().serveDefaultFavicon(null);
+        final HttpResponse response = new StaticRequestDispatcher(null).serveDefaultFavicon(null);
 
         Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_OK);
         Assert.assertEquals(response.getContentType(), HttpResponse.CONTENT_TYPE_IMAGE_PNG);
@@ -62,7 +62,7 @@ public class StaticRequestDispatcherTest {
 
     @Test(dataProvider = "invalidUris")
     public void testServeWithInvalidUri(HttpRequest request) {
-        final HttpResponse response = new StaticRequestDispatcher().serve(creatApp(), request);
+        final HttpResponse response = new StaticRequestDispatcher(creatApp()).serve(request);
 
         Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_BAD_REQUEST);
         Assert.assertEquals(response.getContentType(), HttpResponse.CONTENT_TYPE_TEXT_PLAIN);

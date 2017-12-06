@@ -53,7 +53,7 @@ public class RequestDispatcher {
      * @param app web app to be served
      */
     public RequestDispatcher(App app) {
-        this(app, new StaticRequestDispatcher());
+        this(app, new StaticRequestDispatcher(app));
     }
 
     RequestDispatcher(App app, StaticRequestDispatcher staticRequestDispatcher) {
@@ -81,7 +81,7 @@ public class RequestDispatcher {
     private HttpResponse serve(App app, HttpRequest request) {
         try {
             if (request.isStaticResourceRequest()) {
-                return staticRequestDispatcher.serve(app, request);
+                return staticRequestDispatcher.serve(request);
             } else {
                 return servePage(app, request);
             }
