@@ -20,6 +20,7 @@ package org.wso2.carbon.uis.api;
 
 import org.wso2.carbon.uis.api.exception.PageNotFoundException;
 import org.wso2.carbon.uis.api.exception.PageRedirectException;
+import org.wso2.carbon.uis.api.exception.RenderingException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.util.Multilocational;
 import org.wso2.carbon.uis.api.util.Overridable;
@@ -185,9 +186,12 @@ public class App implements Multilocational, Overridable<App> {
      *
      * @param request HTTP request for the page
      * @return HTML content of the page
+     * @throws RenderingException    if an error occurred when rendering the page
      * @throws PageNotFoundException if there is no page matching for the HTTP request
+     * @throws PageRedirectException if a page redirection happens
      */
-    public String renderPage(HttpRequest request) throws PageNotFoundException {
+    public String renderPage(HttpRequest request)
+            throws RenderingException, PageNotFoundException, PageRedirectException {
         String uriWithoutContextPath = request.getUriWithoutContextPath();
         Page matchingPage = getMatchingPage(uriWithoutContextPath);
         if (matchingPage != null) {
