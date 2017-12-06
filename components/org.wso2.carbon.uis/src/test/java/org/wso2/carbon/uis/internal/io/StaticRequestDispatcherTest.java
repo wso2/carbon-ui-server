@@ -33,15 +33,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Test cases for {@link StaticResolver} class.
+ * Test cases for {@link StaticRequestDispatcher} class.
  *
  * @since 0.12.5
  */
-public class StaticResolverTest {
+public class StaticRequestDispatcherTest {
 
     @Test
     public void testServeDefaultFavicon() {
-        final HttpResponse response = new StaticResolver().serveDefaultFavicon(null);
+        final HttpResponse response = new StaticRequestDispatcher().serveDefaultFavicon(null);
 
         Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_OK);
         Assert.assertEquals(response.getContentType(), HttpResponse.CONTENT_TYPE_IMAGE_PNG);
@@ -62,7 +62,7 @@ public class StaticResolverTest {
 
     @Test(dataProvider = "invalidUris")
     public void testServeWithInvalidUri(HttpRequest request) {
-        final HttpResponse response = new StaticResolver().serve(creatApp(), request);
+        final HttpResponse response = new StaticRequestDispatcher().serve(creatApp(), request);
 
         Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_BAD_REQUEST);
         Assert.assertEquals(response.getContentType(), HttpResponse.CONTENT_TYPE_TEXT_PLAIN);

@@ -27,7 +27,7 @@ import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
 import org.wso2.carbon.uis.internal.http.ResponseBuilder;
-import org.wso2.carbon.uis.internal.io.StaticResolver;
+import org.wso2.carbon.uis.internal.io.StaticRequestDispatcher;
 
 import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_TEXT_HTML;
 import static org.wso2.carbon.uis.api.http.HttpResponse.CONTENT_TYPE_TEXT_PLAIN;
@@ -45,7 +45,7 @@ public class RequestDispatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestDispatcher.class);
 
     private final App app;
-    private final StaticResolver staticResolver;
+    private final StaticRequestDispatcher staticRequestDispatcher;
 
     /**
      * Creates a new request dispatcher.
@@ -53,12 +53,12 @@ public class RequestDispatcher {
      * @param app web app to be served
      */
     public RequestDispatcher(App app) {
-        this(app, new StaticResolver());
+        this(app, new StaticRequestDispatcher());
     }
 
-    RequestDispatcher(App app, StaticResolver staticResolver) {
+    RequestDispatcher(App app, StaticRequestDispatcher staticRequestDispatcher) {
         this.app = app;
-        this.staticResolver = staticResolver;
+        this.staticRequestDispatcher = staticRequestDispatcher;
     }
 
     /**
@@ -81,7 +81,7 @@ public class RequestDispatcher {
     private HttpResponse serve(App app, HttpRequest request) {
         try {
             if (request.isStaticResourceRequest()) {
-                return staticResolver.serve(app, request);
+                return staticRequestDispatcher.serve(app, request);
             } else {
                 return servePage(app, request);
             }
@@ -132,6 +132,6 @@ public class RequestDispatcher {
     }
 
     private HttpResponse serveDefaultFavicon(HttpRequest request) {
-        return staticResolver.serveDefaultFavicon(request);
+        return staticRequestDispatcher.serveDefaultFavicon(request);
     }
 }

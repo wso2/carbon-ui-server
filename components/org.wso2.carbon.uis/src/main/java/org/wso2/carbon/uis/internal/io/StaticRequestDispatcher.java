@@ -64,11 +64,11 @@ import static org.wso2.carbon.uis.api.http.HttpResponse.STATUS_NOT_MODIFIED;
  *
  * @since 0.8.0
  */
-public class StaticResolver {
+public class StaticRequestDispatcher {
 
     private static final DateTimeFormatter HTTP_DATE_FORMATTER;
     private static final ZoneId GMT_TIME_ZONE;
-    private static final Logger LOGGER = LoggerFactory.getLogger(StaticResolver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaticRequestDispatcher.class);
 
     private final Map<Path, ZonedDateTime> resourcesLastModifiedDates;
 
@@ -81,7 +81,7 @@ public class StaticResolver {
     /**
      * Constructs a new static request dispatcher.
      */
-    public StaticResolver() {
+    public StaticRequestDispatcher() {
         if (false) {
             /*
              * When the dev mode is enabled, we do not cache last modified dates of serving static resources. This is
