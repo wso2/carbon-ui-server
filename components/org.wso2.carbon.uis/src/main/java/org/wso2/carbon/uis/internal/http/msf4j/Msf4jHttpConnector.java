@@ -117,9 +117,10 @@ public class Msf4jHttpConnector implements HttpConnector {
         httpTransports.stream()
                 .filter(httpTransport -> !app.getConfiguration().isHttpsOnly() || httpTransport.isSecured())
                 .forEach(httpTransport -> {
-                    Dictionary<String, String> properties = new Hashtable<>();
+                    Dictionary<String, Object> properties = new Hashtable<>();
                     properties.put("CHANNEL_ID", httpTransport.getId());
                     properties.put("contextPath", app.getContextPath());
+                    properties.put("skipCarbonStartupResolver", true);
                     ServiceRegistration<Microservice> serviceRegistration = bundleContext.registerService(
                             Microservice.class, new WebappMicroservice(httpListener), properties);
 
