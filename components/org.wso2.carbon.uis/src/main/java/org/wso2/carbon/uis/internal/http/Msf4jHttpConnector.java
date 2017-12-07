@@ -107,6 +107,7 @@ public class Msf4jHttpConnector implements HttpConnector {
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
+        unregisterAllApps();
         this.bundleContext = null;
         LOGGER.debug("MSF4J HTTP connector deactivated.");
     }
