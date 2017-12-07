@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.uis.api.http;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -122,7 +123,7 @@ public interface HttpRequest {
      *
      * @return a map containing parameter names as keys and parameter values as map values
      */
-    Map<String, Object> getQueryParams();
+    Map<String, List<String>> getQueryParams();
 
     /**
      * Returns all HTTP headers of this request.
@@ -155,7 +156,7 @@ public interface HttpRequest {
         String uri = getUri();
 
         // An URI must begin with '/' & it should have at least two characters.
-        if ((uri.length() < 2) || (uri.charAt(0) != '/')) {
+        if ((uri == null) || (uri.length() < 2) || (uri.charAt(0) != '/')) {
             return false;
         }
 

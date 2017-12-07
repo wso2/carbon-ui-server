@@ -21,11 +21,12 @@ package org.wso2.carbon.uis.internal.http;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import org.wso2.carbon.messaging.Header;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.msf4j.Request;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class Msf4jHttpRequest implements HttpRequest {
     private final String contextPath;
     private final String uriWithoutContextPath;
     private final String queryString;
-    private final Map<String, Object> queryParams;
+    private final Map<String, List<String>> queryParams;
 
     /**
      * Creates a new GET {@link HttpRequest} from the MSF4J request.
@@ -76,18 +77,16 @@ public class Msf4jHttpRequest implements HttpRequest {
         this.uriWithoutContextPath = HttpRequest.getUriWithoutContextPath(this.uri);
         this.queryString = rawQueryString; // Query string is not very useful, so we don't bother to decode it.
         if (rawQueryString != null) {
-            HashMap<String, Object> map = new HashMap<>();
-            new QueryStringDecoder(rawQueryString, false).parameters()
-                    .forEach((key, value) -> map.put(key, (value.size() == 1) ? value.get(0) : value));
-            this.queryParams = map;
+            this.queryParams = Collections.unmodifiableMap(new QueryStringDecoder(rawQueryString, false).parameters());
         } else {
             this.queryParams = Collections.emptyMap();
         }
 
         // process headers and cookies
-        this.headers = new HashMap<>();
-        request.getHeaders().getAll().forEach(header -> this.headers.put(header.getName(), header.getValue()));
-        String cookieHeader = this.headers.get(HttpHeaders.COOKIE);
+        Map<String, String> httpHeaders = request.getHeaders().getAll().stream()
+                .collect(Collectors.toMap(Header::getName, Header::getValue));
+        this.headers = Collections.unmodifiableMap(httpHeaders);
+        String cookieHeader = httpHeaders.get(HttpHeaders.COOKIE);
         this.cookies = (cookieHeader == null) ? Collections.emptyMap() :
                 ServerCookieDecoder.STRICT.decode(cookieHeader).stream().collect(Collectors.toMap(Cookie::name,
                                                                                                   Function.identity()));
@@ -134,7 +133,7 @@ public class Msf4jHttpRequest implements HttpRequest {
     }
 
     @Override
-    public Map<String, Object> getQueryParams() {
+    public Map<String, List<String>> getQueryParams() {
         return queryParams;
     }
 
