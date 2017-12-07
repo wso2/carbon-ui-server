@@ -37,7 +37,6 @@ import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.http.HttpConnector;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
-import org.wso2.carbon.uis.internal.http.WebappMicroservice;
 import org.wso2.msf4j.Microservice;
 
 import java.net.Inet4Address;
