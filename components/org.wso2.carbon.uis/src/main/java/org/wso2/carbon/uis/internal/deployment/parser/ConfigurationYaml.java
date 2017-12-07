@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.deployment;
+package org.wso2.carbon.uis.internal.deployment.parser;
 
 import org.wso2.carbon.uis.api.Configuration;
 

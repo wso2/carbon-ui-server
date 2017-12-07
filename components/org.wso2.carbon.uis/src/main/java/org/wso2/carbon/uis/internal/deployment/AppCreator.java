@@ -27,6 +27,7 @@ import org.wso2.carbon.uis.api.Theme;
 import org.wso2.carbon.uis.api.UriPatten;
 import org.wso2.carbon.uis.api.exception.RenderingException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
+import org.wso2.carbon.uis.internal.deployment.parser.ConfigurationYaml;
 import org.wso2.carbon.uis.internal.deployment.parser.YamlFileParser;
 import org.wso2.carbon.uis.internal.exception.AppCreationException;
 import org.wso2.carbon.uis.internal.exception.FileOperationException;
