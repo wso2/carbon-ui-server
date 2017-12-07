@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.http;
+package org.wso2.carbon.uis.internal.http.msf4j;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -37,6 +37,7 @@ import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.http.HttpConnector;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
+import org.wso2.carbon.uis.internal.http.WebappMicroservice;
 import org.wso2.msf4j.Microservice;
 
 import java.net.Inet4Address;
