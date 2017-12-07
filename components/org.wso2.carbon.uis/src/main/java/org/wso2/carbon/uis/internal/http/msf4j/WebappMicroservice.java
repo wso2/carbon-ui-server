@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.http;
+package org.wso2.carbon.uis.internal.http.msf4j;
 
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
@@ -24,13 +24,9 @@ import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 
 import java.util.function.Function;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
@@ -69,39 +65,6 @@ public class WebappMicroservice implements Microservice {
 
     private Response getImpl(@Context Request request) {
         Msf4jHttpRequest httpRequest = new Msf4jHttpRequest(request);
-        return buildResponse(httpListener.apply(httpRequest));
-    }
-
-    @POST
-    @Path(PATH_ALL)
-    @Consumes({MediaType.APPLICATION_JSON})
-    public Response postJsonAll(@Context Request request, Object params) {
-        return postJsonRoot(request, params);
-    }
-
-    @POST
-    @Path(PATH_ROOT)
-    @Consumes({MediaType.APPLICATION_JSON})
-    public Response postJsonRoot(@Context Request request, Object params) {
-        return postImpl(request, null, params);
-    }
-
-    @POST
-    @Path(PATH_ALL)
-    @Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA})
-    public Response postFormAll(@Context Request request, @Context MultivaluedMap multivaluedMap) {
-        return postFormRoot(request, multivaluedMap);
-    }
-
-    @POST
-    @Path(PATH_ROOT)
-    @Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA})
-    public Response postFormRoot(@Context Request request, @Context MultivaluedMap multivaluedMap) {
-        return postImpl(request, multivaluedMap, null);
-    }
-
-    private Response postImpl(Request request, MultivaluedMap<String, ?> multivaluedMap, Object params) {
-        Msf4jHttpRequest httpRequest = new Msf4jHttpRequest(request, multivaluedMap, params);
         return buildResponse(httpListener.apply(httpRequest));
     }
 

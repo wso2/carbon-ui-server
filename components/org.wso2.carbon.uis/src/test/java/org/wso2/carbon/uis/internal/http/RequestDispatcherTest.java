@@ -16,15 +16,14 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal;
+package org.wso2.carbon.uis.internal.http;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.uis.api.exception.UISRuntimeException;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
-import org.wso2.carbon.uis.internal.http.PageRequestDispatcher;
-import org.wso2.carbon.uis.internal.io.StaticRequestDispatcher;
+import org.wso2.carbon.uis.internal.io.http.StaticRequestDispatcher;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;

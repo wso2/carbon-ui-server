@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.http;
+package org.wso2.carbon.uis.internal.http.msf4j;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -107,6 +107,7 @@ public class Msf4jHttpConnector implements HttpConnector {
 
     @Deactivate
     protected void deactivate(BundleContext bundleContext) {
+        unregisterAllApps();
         this.bundleContext = null;
         LOGGER.debug("MSF4J HTTP connector deactivated.");
     }

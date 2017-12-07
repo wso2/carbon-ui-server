@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.uis.api.http;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,31 +29,11 @@ import java.util.Map;
 public interface HttpRequest {
 
     /**
-     * HTTP header <a href="https://tools.ietf.org/html/rfc2616#section-14.17">content type</a>.
-     */
-    String HEADER_CONTENT_TYPE = "Content-Type";
-    /**
-     * HTTP header <a href="https://tools.ietf.org/html/rfc2616#section-14.13">content length</a>.
-     */
-    String HEADER_CONTENT_LENGTH = "Content-Length";
-    /**
-     * HTTP header <a href="https://tools.ietf.org/html/rfc2616#section-14.4">accept language</a>.
-     */
-    String HEADER_ACCEPT_LANGUAGE = "Accept-Language";
-
-    /**
      * Returns the name of the HTTP method with which this request was made, for example, GET, POST.
      *
      * @return a {@code String} specifying the name of the method with which this request was made
      */
     String getMethod();
-
-    /**
-     * Return whether this request is a GET request or not.
-     *
-     * @return {@code true} if this is a GET request, {@code false} if this is not a GET request (POST)
-     */
-    boolean isGetRequest();
 
     /**
      * Returns the name and version of the protocol the request uses in the form <i>protocol/majorVersion
@@ -142,7 +123,7 @@ public interface HttpRequest {
      *
      * @return a map containing parameter names as keys and parameter values as map values
      */
-    Map<String, Object> getQueryParams();
+    Map<String, List<String>> getQueryParams();
 
     /**
      * Returns all HTTP headers of this request.
@@ -160,55 +141,6 @@ public interface HttpRequest {
     String getCookieValue(String cookieName);
 
     /**
-     * Returns the MIME type of the body of the request, or {@code null} if the type is not known. Return value is
-     * computed from the "Content-Type" HTTP header.
-     *
-     * @return a {@code String} containing the name of the MIME type of the request, or {@code null} if the type is not
-     * known
-     */
-    String getContentType();
-
-    /**
-     * Returns the length, in bytes, of the request body or -1 if the length is not known. Return value is computed from
-     * the "Content-Length" HTTP header.
-     *
-     * @return the length of the request body or -1 if the length is not known
-     */
-    long getContentLength();
-
-    Map<String, Object> getFormParams();
-
-    Map<String, Object> getFiles();
-
-    /**
-     * Returns the Internet Protocol (IP) address of the interface on which the request was received.
-     *
-     * @return a {@code String} containing the IP address on which the request was received.
-     */
-    String getLocalAddress();
-
-    /**
-     * Returns the Internet Protocol (IP) port number of the interface on which the request was received.
-     *
-     * @return an integer specifying the port number
-     */
-    int getLocalPort();
-
-    /**
-     * Returns the Internet Protocol (IP) address of the client or last proxy that sent the request.
-     *
-     * @return a <code>String</code> containing the IP address of the client that sent the request
-     */
-    String getRemoteAddress();
-
-    /**
-     * Returns the Internet Protocol (IP) source port of the client or last proxy that sent the request.
-     *
-     * @return an integer specifying the port number
-     */
-    int getRemotePort();
-
-    /**
      * Returns a string representation of this request.
      *
      * @return a string representation of this request
@@ -224,7 +156,7 @@ public interface HttpRequest {
         String uri = getUri();
 
         // An URI must begin with '/' & it should have at least two characters.
-        if ((uri.length() < 2) || (uri.charAt(0) != '/')) {
+        if ((uri == null) || (uri.length() < 2) || (uri.charAt(0) != '/')) {
             return false;
         }
 

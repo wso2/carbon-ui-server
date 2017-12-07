@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.http.HttpConnector;
 import org.wso2.carbon.uis.internal.deployment.AppDeploymentEventListener;
+import org.wso2.carbon.uis.internal.http.RequestDispatcher;
 import org.wso2.carbon.uis.spi.Server;
 
 import java.util.Optional;
