@@ -20,6 +20,7 @@ package org.wso2.carbon.uis.internal.http;
 
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.carbon.uis.api.http.HttpResponse;
+import org.wso2.carbon.uis.internal.http.msf4j.Msf4jHttpRequest;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 
