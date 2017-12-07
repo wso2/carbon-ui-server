@@ -24,15 +24,12 @@ import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.msf4j.Request;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
 
 /**
  * MSF4J based implementation of HTTP request.
@@ -42,12 +39,7 @@ import javax.ws.rs.core.MultivaluedMap;
 public class Msf4jHttpRequest implements HttpRequest {
 
     private static final String PROPERTY_HTTP_VERSION = "HTTP_VERSION";
-    private static final String PROPERTY_LOCAL_NAME = "LOCAL_NAME";
     private static final String PROPERTY_IS_SECURED_CONNECTION = "IS_SECURED_CONNECTION";
-    private static final String PROPERTY_LISTENER_PORT = "LISTENER_PORT";
-    private static final String PROPERTY_REMOTE_HOST = "REMOTE_HOST";
-    private static final String PROPERTY_REMOTE_PORT = "REMOTE_PORT";
-    private static final String REQUEST_GET = "GET";
 
     private final Request msf4jRequest;
     private final String method;
@@ -58,9 +50,6 @@ public class Msf4jHttpRequest implements HttpRequest {
     private final String uriWithoutContextPath;
     private final String queryString;
     private final Map<String, Object> queryParams;
-    private final Map<String, Object> formParams;
-    private final Map<String, Object> files;
-    private final boolean isGetRequest;
 
     /**
      * Creates a new GET {@link HttpRequest} from the MSF4J request.
@@ -68,21 +57,8 @@ public class Msf4jHttpRequest implements HttpRequest {
      * @param request MSF4J request
      */
     public Msf4jHttpRequest(Request request) {
-        this(request, null, null);
-    }
-
-    /**
-     * Creates a new POST {@link HttpRequest} from the MSF4J request.
-     *
-     * @param request    MSF4J request
-     * @param formParams HTML form params
-     * @param postParams POST data
-     */
-    public Msf4jHttpRequest(Request request, MultivaluedMap<String, ?> formParams, Object postParams) {
-
         this.msf4jRequest = request;
         this.method = request.getHttpMethod();
-        this.isGetRequest = REQUEST_GET.equals(method);
 
         // process URI
         String rawUri = request.getUri();
@@ -114,54 +90,12 @@ public class Msf4jHttpRequest implements HttpRequest {
         String cookieHeader = this.headers.get(HttpHeaders.COOKIE);
         this.cookies = (cookieHeader == null) ? Collections.emptyMap() :
                 ServerCookieDecoder.STRICT.decode(cookieHeader).stream().collect(Collectors.toMap(Cookie::name,
-                                                                                                  c -> c));
-
-        // process POST data
-        if (formParams == null) {
-            // This request is not a form POST submission.
-            this.files = Collections.emptyMap();
-            if (postParams == null) {
-                this.formParams = Collections.emptyMap();
-            } else {
-                if (postParams instanceof List) {
-                    List<?> postParamsList = (List<?>) postParams;
-                    this.formParams = new HashMap<>(postParamsList.size());
-                    for (int i = 0; i < postParamsList.size(); i++) {
-                        this.formParams.put(Integer.toString(i), postParamsList.get(i));
-                    }
-                } else if (postParams instanceof Map) {
-                    this.formParams = (Map<String, Object>) postParams;
-                } else {
-                    throw new NotSupportedException(
-                            "Unsupported JSON data type. Expected Map or List. Instead found '" +
-                            postParams.getClass().getName() + "'.");
-                }
-            }
-        } else {
-            this.formParams = new HashMap<>();
-            this.files = new HashMap<>();
-            for (Map.Entry<String, ? extends List<?>> entry : formParams.entrySet()) {
-                List<?> values = entry.getValue();
-                if (values.isEmpty()) {
-                    continue;
-                }
-                if (values.get(0) instanceof File) {
-                    this.files.put(entry.getKey(), (values.size() == 1) ? values.get(0) : values);
-                } else {
-                    this.formParams.put(entry.getKey(), (values.size() == 1) ? values.get(0) : values);
-                }
-            }
-        }
+                                                                                                  Function.identity()));
     }
 
     @Override
     public String getMethod() {
         return method;
-    }
-
-    @Override
-    public boolean isGetRequest() {
-        return isGetRequest;
     }
 
     @Override
@@ -213,47 +147,6 @@ public class Msf4jHttpRequest implements HttpRequest {
     public String getCookieValue(String cookieName) {
         Cookie cookie = cookies.get(cookieName);
         return (cookie == null) ? null : cookie.value();
-    }
-
-    @Override
-    public String getContentType() {
-        return headers.get(HEADER_CONTENT_TYPE);
-    }
-
-    @Override
-    public long getContentLength() {
-        String contentLengthHeader = headers.get(HEADER_CONTENT_LENGTH);
-        return (contentLengthHeader == null) ? -1 : Long.parseLong(contentLengthHeader);
-    }
-
-    @Override
-    public Map<String, Object> getFormParams() {
-        return formParams;
-    }
-
-    @Override
-    public Map<String, Object> getFiles() {
-        return files;
-    }
-
-    @Override
-    public String getLocalAddress() {
-        return (String) msf4jRequest.getProperty(PROPERTY_LOCAL_NAME);
-    }
-
-    @Override
-    public int getLocalPort() {
-        return (Integer) msf4jRequest.getProperty(PROPERTY_LISTENER_PORT);
-    }
-
-    @Override
-    public String getRemoteAddress() {
-        return (String) msf4jRequest.getProperty(PROPERTY_REMOTE_HOST);
-    }
-
-    @Override
-    public int getRemotePort() {
-        return (Integer) msf4jRequest.getProperty(PROPERTY_REMOTE_PORT);
     }
 
     @Override
