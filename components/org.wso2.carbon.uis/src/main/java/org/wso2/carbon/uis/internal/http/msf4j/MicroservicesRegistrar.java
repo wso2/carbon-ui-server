@@ -29,11 +29,9 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.messaging.ServerConnector;
-import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
-import org.wso2.carbon.transport.http.netty.listener.HTTPServerConnector;
 import org.wso2.carbon.uis.internal.http.HttpTransport;
 import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.MicroservicesServer;
 
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -68,28 +66,22 @@ public class MicroservicesRegistrar {
         LOGGER.debug("Microservices registrar deactivated.");
     }
 
-    @Reference(service = ServerConnector.class,
+    @Reference(service = MicroservicesServer.class,
                cardinality = ReferenceCardinality.AT_LEAST_ONE,
                policy = ReferencePolicy.DYNAMIC,
-               unbind = "unsetCarbonTransport")
-    protected void setCarbonTransport(ServerConnector serverConnector) {
-        if (serverConnector instanceof HTTPServerConnector) {
-            HTTPServerConnector httpServerConnector = (HTTPServerConnector) serverConnector;
-            HttpTransport httpTransport = toHttpTransport(httpServerConnector);
-            httpTransports.add(httpTransport);
-            LOGGER.debug("HTTP transport '{}' registered via server connector '{}'.",
-                        httpTransport.getId(), serverConnector.getClass().getName());
-        }
+               unbind = "unsetMicroservicesServer")
+    protected void setMicroservicesServer(MicroservicesServer microservicesServer) {
+         microservicesServer.getListenerConfigurations().entrySet().stream()
+                .map(entry -> new HttpTransport(entry.getKey(), entry.getValue().getScheme(),
+                                                entry.getValue().getHost(), entry.getValue().getPort()))
+                .peek(httpTransport -> LOGGER.debug("HTTP transport {} is available.", httpTransport))
+                .forEach(httpTransports::add);
+        LOGGER.debug("Microservices Server '{}' registered.", microservicesServer.getClass().getName());
     }
 
-    protected void unsetCarbonTransport(ServerConnector serverConnector) {
-        if (serverConnector instanceof HTTPServerConnector) {
-            HTTPServerConnector httpServerConnector = (HTTPServerConnector) serverConnector;
-            HttpTransport httpTransport = toHttpTransport(httpServerConnector);
-            httpTransports.remove(httpTransport);
-            LOGGER.debug("HTTP transport '{}' unregistered via server connector '{}'.",
-                        httpTransport.getId(), serverConnector.getClass().getName());
-        }
+    protected void unsetMicroservicesServer(MicroservicesServer microservicesServer) {
+        httpTransports.clear();
+        LOGGER.debug("Microservices Server '{}' unregistered.", microservicesServer.getClass().getName());
     }
 
     /**
@@ -133,10 +125,4 @@ public class MicroservicesRegistrar {
         return bundleContext.registerService(Microservice.class, microservice, properties);
 
     }
-
-    private static HttpTransport toHttpTransport(HTTPServerConnector httpServerConnector) {
-        ListenerConfiguration config = httpServerConnector.getListenerConfiguration();
-        return new HttpTransport(config.getId(), config.getScheme(), config.getHost(), config.getPort());
-    }
-
 }

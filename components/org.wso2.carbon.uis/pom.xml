@@ -30,7 +30,7 @@
     <parent>
         <groupId>org.wso2.carbon.uis</groupId>
         <artifactId>uis-parent</artifactId>
-        <version>0.15.1-SNAPSHOT</version>
+        <version>0.16.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -60,12 +60,18 @@
         </dependency>
         <!--Transport-->
         <dependency>
-            <groupId>org.wso2.carbon.messaging</groupId>
-            <artifactId>org.wso2.carbon.messaging</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.transport</groupId>
-            <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
+            <groupId>org.wso2.transport.http</groupId>
+            <artifactId>org.wso2.transport.http.netty</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.wso2.carbon.messaging</groupId>
+                    <artifactId>org.wso2.carbon.messaging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.wso2.orbit.org.yaml</groupId>
+                    <artifactId>snakeyaml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--OSGi-->
@@ -152,8 +158,7 @@
             org.wso2.carbon.config.*; version="${carbon.config.version.range}",
             org.wso2.msf4j; version="${msf4j.version.range}",
             javax.ws.rs.*; version="${javax.ws.rs.version.range}",
-            org.wso2.carbon.messaging; version="${carbon.messaging.version.range}",
-            org.wso2.carbon.transport.http.netty.*;version="${carbon.transport.version.range}",
+            org.wso2.transport.http.netty.*; version="${transport.http.netty.version.range}",
             org.osgi.framework; version="${org.osgi.framework.version.range}",
             org.osgi.framework.wiring; version="${org.osgi.framework.wiring.version.range}",
             org.osgi.service.component.annotations.*; version="${org.osgi.service.component.annotations.version.range}",
