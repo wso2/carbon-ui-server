@@ -30,7 +30,7 @@
     <parent>
         <groupId>org.wso2.carbon.uis</groupId>
         <artifactId>uis-parent</artifactId>
-        <version>0.14.2-SNAPSHOT</version>
+        <version>0.15.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -174,7 +174,8 @@
         </export.package>
         <carbon.component>
             osgi.service; objectClass="org.wso2.carbon.deployment.engine.Deployer",
-            startup.listener; componentName="carbon-ui-server-startup-listener"; requiredService="org.wso2.carbon.uis.spi.RestApiProvider",
+            startup.listener; componentName="carbon-ui-server-startup-listener";
+            requiredService="org.wso2.carbon.uis.spi.RestApiProvider",
             osgi.service; objectClass="org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener"
         </carbon.component>
     </properties>
