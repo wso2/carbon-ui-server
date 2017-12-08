@@ -18,17 +18,8 @@
 
 package org.wso2.carbon.uis.internal.io.deployment;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.config.ConfigurationException;
-import org.wso2.carbon.config.provider.ConfigProvider;
 import org.wso2.carbon.deployment.engine.Artifact;
 import org.wso2.carbon.deployment.engine.ArtifactType;
 import org.wso2.carbon.deployment.engine.Deployer;
@@ -48,6 +39,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -55,8 +47,6 @@ import java.util.Optional;
  *
  * @since 0.8.3
  */
-@Component(service = Deployer.class,
-           immediate = true)
 public class ArtifactAppDeployer implements Deployer {
 
     private static final String ARTIFACT_TYPE = "web-ui-app";
@@ -66,61 +56,22 @@ public class ArtifactAppDeployer implements Deployer {
     private final ArtifactType<String> artifactType;
     private final URL deploymentLocation;
     private final AppRegistry appRegistry;
-    private AppDeploymentEventListener appDeploymentEventListener;
-    private ServerConfiguration serverConfiguration;
+    private final List<AppDeploymentEventListener> appDeploymentEventListeners;
+    private final ServerConfiguration serverConfiguration;
 
     /**
      * Creates a new app deployer.
+     *
+     * @param appDeploymentEventListeners app deployment event listeners
+     * @param serverConfiguration         server configurations
      */
-    public ArtifactAppDeployer() {
+    public ArtifactAppDeployer(List<AppDeploymentEventListener> appDeploymentEventListeners,
+                               ServerConfiguration serverConfiguration) {
+        this.appDeploymentEventListeners = appDeploymentEventListeners;
+        this.serverConfiguration = serverConfiguration;
         this.artifactType = new ArtifactType<>(ARTIFACT_TYPE);
         this.deploymentLocation = getLocationUrl();
         this.appRegistry = new AppRegistry();
-    }
-
-    @Reference(service = AppDeploymentEventListener.class,
-               cardinality = ReferenceCardinality.MANDATORY,
-               policy = ReferencePolicy.DYNAMIC,
-               unbind = "unregisterListener")
-    protected void registerListener(AppDeploymentEventListener listener) {
-        this.appDeploymentEventListener = listener;
-        LOGGER.debug("An instance of class '{}' registered as an app deployment listener.",
-                     listener.getClass().getName());
-    }
-
-    protected void unregisterListener(AppDeploymentEventListener listener) {
-        this.appDeploymentEventListener = null;
-        LOGGER.debug("An instance of class '{}' unregistered as an app deployment listener.",
-                     listener.getClass().getName());
-    }
-
-    @Reference(service = ConfigProvider.class,
-               cardinality = ReferenceCardinality.MANDATORY,
-               policy = ReferencePolicy.DYNAMIC,
-               unbind = "unsetConfigProvider")
-    protected void setConfigProvider(ConfigProvider configProvider) {
-        try {
-            this.serverConfiguration = configProvider.getConfigurationObject(ServerConfiguration.class);
-        } catch (ConfigurationException e) {
-            this.serverConfiguration = new ServerConfiguration();
-            LOGGER.error("Cannot load server configurations from 'deployment.yaml'. Falling-back to defaults.", e);
-        }
-    }
-
-    protected void unsetConfigProvider(ConfigProvider configProvider) {
-        LOGGER.debug("An instance of class '{}' unregistered as a config provider.",
-                     configProvider.getClass().getName());
-    }
-
-    @Activate
-    protected void activate(BundleContext bundleContext) {
-        LOGGER.debug("Carbon UI server app deployer activated.");
-    }
-
-    @Deactivate
-    protected void deactivate(BundleContext bundleContext) {
-        appRegistry.clear();
-        LOGGER.debug("Carbon UI server app deployer deactivated.");
     }
 
     @Override
@@ -187,14 +138,21 @@ public class ArtifactAppDeployer implements Deployer {
         return artifactType;
     }
 
+    /**
+     * Closes this deployer.
+     */
+    public void close() {
+        appRegistry.clear();
+    }
+
     private void publishAppDeploymentEvent(App app) {
-        appDeploymentEventListener.appDeploymentEvent(app);
-        LOGGER.debug("Web app '{}' deployed for context path '{}'.", app.getName(), app.getContextPath());
+        appDeploymentEventListeners.forEach(listener -> listener.appDeploymentEvent(app));
+        LOGGER.debug("Web app '{}' in '{}' deployed successfully.", app.getName(), app.getHighestPriorityPath());
     }
 
     private void publishAppUndeploymentEvent(App app) {
-        appDeploymentEventListener.appUndeploymentEvent(app.getName());
-        LOGGER.debug("Web app '{}' undeployed from context path '{}'.", app.getName(), app.getContextPath());
+        appDeploymentEventListeners.forEach(listner -> listner.appUndeploymentEvent(app.getName()));
+        LOGGER.debug("Web app '{}' in '{}' undeployed successfully.", app.getName(), app.getHighestPriorityPath());
     }
 
     private App createApp(Path appPath) throws CarbonDeploymentException {
