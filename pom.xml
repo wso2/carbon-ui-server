@@ -145,32 +145,9 @@
             </dependency>
             <!--Transport-->
             <dependency>
-                <groupId>org.wso2.carbon.messaging</groupId>
-                <artifactId>org.wso2.carbon.messaging</artifactId>
-                <version>${carbon.messaging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.messaging</groupId>
-                <artifactId>org.wso2.carbon.messaging.feature</artifactId>
-                <version>${carbon.messaging.version}</version>
-                <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.transport</groupId>
-                <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
-                <version>${carbon.transport.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.transport</groupId>
-                <artifactId>org.wso2.carbon.transport.http.netty.feature</artifactId>
-                <version>${carbon.transport.version}</version>
-                <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.transport</groupId>
-                <artifactId>org.wso2.carbon.connector.framework.feature</artifactId>
-                <version>${carbon.transport.version}</version>
-                <type>zip</type>
+                <groupId>org.wso2.transport.http</groupId>
+                <artifactId>org.wso2.transport.http.netty</artifactId>
+                <version>${transport.http.netty.version}</version>
             </dependency>
             <!--Metrics-->
             <dependency>
@@ -393,20 +370,18 @@
         <carbon.deployment.version.range>[5.0.0, 6.0.0)</carbon.deployment.version.range>
 
         <!--Config-->
-        <carbon.config.version>2.1.2</carbon.config.version>
-        <carbon.config.version.range>[2.1.2, 3.0.0)</carbon.config.version.range>
+        <carbon.config.version>2.1.5</carbon.config.version>
+        <carbon.config.version.range>[2.1.5, 3.0.0)</carbon.config.version.range>
         <carbon.securevault.version>5.0.8</carbon.securevault.version>
         <carbon.utils.version>2.0.2</carbon.utils.version>
 
         <!--MSF4J-->
-        <msf4j.version>2.4.2</msf4j.version>
-        <msf4j.version.range>[2.4.2, 3.0.0)</msf4j.version.range>
+        <msf4j.version>2.5.0-beta</msf4j.version>
+        <msf4j.version.range>[2.5.0-beta, 3.0.0)</msf4j.version.range>
         <javax.ws.rs.version.range>[2.0.0, 3.0.0)</javax.ws.rs.version.range>
         <!--Transport-->
-        <carbon.messaging.version>3.0.1</carbon.messaging.version>
-        <carbon.messaging.version.range>[3.0.1, 4.0.0)</carbon.messaging.version.range>
-        <carbon.transport.version>5.0.1</carbon.transport.version>
-        <carbon.transport.version.range>[5.0.1, 6.0.0)</carbon.transport.version.range>
+        <transport.http.netty.version>6.0.56</transport.http.netty.version>
+        <transport.http.netty.version.range>[6.0.56, 7.0.0)</transport.http.netty.version.range>
         <!--Metrics-->
         <carbon.metrics.version>2.3.2</carbon.metrics.version>
         <carbon.jndi.version>1.0.4</carbon.jndi.version>

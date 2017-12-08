@@ -21,7 +21,6 @@ package org.wso2.carbon.uis.internal.http.msf4j;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
-import org.wso2.carbon.messaging.Header;
 import org.wso2.carbon.uis.api.http.HttpRequest;
 import org.wso2.msf4j.Request;
 
@@ -83,8 +82,8 @@ public class Msf4jHttpRequest implements HttpRequest {
         }
 
         // process headers and cookies
-        Map<String, String> httpHeaders = request.getHeaders().getAll().stream()
-                .collect(Collectors.toMap(Header::getName, Header::getValue));
+        Map<String, String> httpHeaders = request.getHeaders().getRequestHeaders().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get(0)));
         this.headers = Collections.unmodifiableMap(httpHeaders);
         String cookieHeader = httpHeaders.get(HttpHeaders.COOKIE);
         this.cookies = (cookieHeader == null) ? Collections.emptyMap() :

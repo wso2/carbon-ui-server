@@ -101,22 +101,6 @@
             <artifactId>org.wso2.msf4j.feature</artifactId>
             <type>zip</type>
         </dependency>
-        <!--Transport-->
-        <dependency>
-            <groupId>org.wso2.carbon.messaging</groupId>
-            <artifactId>org.wso2.carbon.messaging.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.transport</groupId>
-            <artifactId>org.wso2.carbon.transport.http.netty.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.transport</groupId>
-            <artifactId>org.wso2.carbon.connector.framework.feature</artifactId>
-            <type>zip</type>
-        </dependency>
         <!--Metrics-->
         <dependency>
             <groupId>org.wso2.carbon.metrics</groupId>
@@ -258,19 +242,6 @@
                                     <id>org.wso2.msf4j.feature</id>
                                     <version>${msf4j.version}</version>
                                 </feature>
-                                <!--Transport-->
-                                <feature>
-                                    <id>org.wso2.carbon.messaging.feature</id>
-                                    <version>${carbon.messaging.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.transport.http.netty.feature</id>
-                                    <version>${carbon.transport.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.connector.framework.feature</id>
-                                    <version>${carbon.transport.version}</version>
-                                </feature>
                                 <!--Metrics-->
                                 <feature>
                                     <id>org.wso2.carbon.metrics.core.feature</id>
@@ -382,19 +353,6 @@
                                 <feature>
                                     <id>org.wso2.msf4j.feature</id>
                                     <version>${msf4j.version}</version>
-                                </feature>
-                                <!--Transport-->
-                                <feature>
-                                    <id>org.wso2.carbon.messaging.feature</id>
-                                    <version>${carbon.messaging.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.transport.http.netty.feature</id>
-                                    <version>${carbon.transport.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.carbon.connector.framework.feature</id>
-                                    <version>${carbon.transport.version}</version>
                                 </feature>
                                 <!--Metrics-->
                                 <feature>
