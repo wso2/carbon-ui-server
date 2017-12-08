@@ -22,7 +22,7 @@
 
     <groupId>org.wso2.carbon.uis</groupId>
     <artifactId>uis-parent</artifactId>
-    <version>0.15.1-SNAPSHOT</version>
+    <version>0.16.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>WSO2 Carbon UI Server - Parent</name>
@@ -358,7 +358,7 @@
     </build>
 
     <properties>
-        <carbon.uis.version>0.15.1-SNAPSHOT</carbon.uis.version>
+        <carbon.uis.version>0.16.0-SNAPSHOT</carbon.uis.version>
 
         <!--Kernel-->
         <carbon.kernel.version>5.2.5</carbon.kernel.version>
