@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.uis.spi;
 
+import org.wso2.carbon.uis.api.App;
 import org.wso2.msf4j.Microservice;
 
 import java.util.Map;
@@ -41,7 +42,8 @@ public interface RestApiProvider {
      * <p>
      * Key of the returning map is considered as the path (without the app context path) of the REST API.
      *
+     * @param app app that returning microservices belong to
      * @return microservices to be deploy
      */
-    Map<String, Microservice> getMicroservices();
+    Map<String, Microservice> getMicroservices(App app);
 }
