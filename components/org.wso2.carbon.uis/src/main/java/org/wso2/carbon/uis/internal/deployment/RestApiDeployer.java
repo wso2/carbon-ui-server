@@ -71,7 +71,7 @@ public class RestApiDeployer implements AppDeploymentEventListener {
 
         String appContextPath = app.getContextPath();
         boolean httpsOnly = app.getConfiguration().isHttpsOnly();
-        Set<MicroserviceRegistration> registrations = restApiProvider.getMicroservices().entrySet().stream()
+        Set<MicroserviceRegistration> registrations = restApiProvider.getMicroservices(app).entrySet().stream()
                 .map(entry -> registerMicroservice((appContextPath + entry.getKey()), entry.getValue(), httpsOnly))
                 .collect(Collectors.toSet());
         microserviceRegistrations.put(app.getName(), registrations);

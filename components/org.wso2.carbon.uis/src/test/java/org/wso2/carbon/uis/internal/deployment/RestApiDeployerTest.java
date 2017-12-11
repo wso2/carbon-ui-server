@@ -105,7 +105,8 @@ public class RestApiDeployerTest {
     private static RestApiProvider createRestApiProvider(String appName) {
         RestApiProvider restApiProvider = mock(RestApiProvider.class);
         when(restApiProvider.getAppName()).thenReturn(appName);
-        when(restApiProvider.getMicroservices()).thenReturn(Collections.singletonMap("/bar", mock(Microservice.class)));
+        when(restApiProvider.getMicroservices(any()))
+                .thenReturn(Collections.singletonMap("/bar", mock(Microservice.class)));
         return restApiProvider;
     }
 
