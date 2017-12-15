@@ -376,12 +376,12 @@
         <carbon.utils.version>2.0.2</carbon.utils.version>
 
         <!--MSF4J-->
-        <msf4j.version>2.5.0-beta</msf4j.version>
-        <msf4j.version.range>[2.5.0-beta, 3.0.0)</msf4j.version.range>
+        <msf4j.version>2.5.0-beta2</msf4j.version>
+        <msf4j.version.range>[2.5.0-beta2, 3.0.0)</msf4j.version.range>
         <javax.ws.rs.version.range>[2.0.0, 3.0.0)</javax.ws.rs.version.range>
         <!--Transport-->
-        <transport.http.netty.version>6.0.56</transport.http.netty.version>
-        <transport.http.netty.version.range>[6.0.56, 7.0.0)</transport.http.netty.version.range>
+        <transport.http.netty.version>6.0.63</transport.http.netty.version>
+        <transport.http.netty.version.range>[6.0.63, 7.0.0)</transport.http.netty.version.range>
         <!--Metrics-->
         <carbon.metrics.version>2.3.2</carbon.metrics.version>
         <carbon.jndi.version>1.0.4</carbon.jndi.version>
