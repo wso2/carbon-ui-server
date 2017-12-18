@@ -85,7 +85,7 @@ public class ServerConfiguration {
          * @throws IllegalArgumentException if configured transport ID is invalid
          */
         public Optional<String> getTransportId() throws IllegalArgumentException {
-            if ((transportId != null) && !transportId.isEmpty()) {
+            if ((transportId != null) && transportId.isEmpty()) {
                 throw new IllegalArgumentException("Configured transport ID is invalid as it cannot be a empty.");
             }
             return Optional.ofNullable(transportId);
