@@ -37,17 +37,10 @@ import static java.util.Collections.singletonMap;
 public class ConfigurationTest {
 
     @Test
-    public void testIsHttpsOnly() {
-        Configuration configuration = new Configuration(false, null);
-        Assert.assertEquals(configuration.isHttpsOnly(), false);
-    }
-
-    @Test
     public void testGetResponseHeaders() {
         Map<String, String> pages = singletonMap(HEADER_EXPIRES, "100");
         Map<String, String> staticResources = singletonMap(HEADER_CACHE_CONTROL, "public,max-age=100");
-        Configuration configuration = new Configuration(true,
-                                                        new Configuration.HttpResponseHeaders(pages, staticResources));
+        Configuration configuration = new Configuration(new Configuration.HttpResponseHeaders(pages, staticResources));
 
         Assert.assertEquals(configuration.getResponseHeaders().forPages().get(HEADER_PRAGMA),
                             Configuration.DEFAULT_CONFIGURATION.getResponseHeaders().forPages().get(HEADER_PRAGMA));
