@@ -21,6 +21,8 @@ package org.wso2.carbon.uis.internal.deployment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.uis.api.App;
+import org.wso2.carbon.uis.api.ServerConfiguration;
+import org.wso2.carbon.uis.internal.exception.AppDeploymentEventListenerException;
 import org.wso2.carbon.uis.internal.http.msf4j.MicroserviceRegistration;
 import org.wso2.carbon.uis.internal.http.msf4j.MicroservicesRegistrar;
 import org.wso2.carbon.uis.spi.RestApiProvider;
@@ -47,6 +49,7 @@ public class RestApiDeployer implements AppDeploymentEventListener {
 
     private final MicroservicesRegistrar microservicesRegistrar;
     private final Map<String, RestApiProvider> restApiProviders;
+    private final ServerConfiguration serverConfiguration;
     private final ConcurrentMap<String, Set<MicroserviceRegistration>> microserviceRegistrations;
 
     /**
@@ -54,31 +57,56 @@ public class RestApiDeployer implements AppDeploymentEventListener {
      *
      * @param restApiProviders       REST APIs providers
      * @param microservicesRegistrar Microservices registrar
+     * @param serverConfiguration    server configuration
      */
-    public RestApiDeployer(Set<RestApiProvider> restApiProviders, MicroservicesRegistrar microservicesRegistrar) {
+    public RestApiDeployer(Set<RestApiProvider> restApiProviders, MicroservicesRegistrar microservicesRegistrar,
+                           ServerConfiguration serverConfiguration) {
+        this.microservicesRegistrar = microservicesRegistrar;
         this.restApiProviders = restApiProviders.stream()
                 .collect(Collectors.toMap(RestApiProvider::getAppName, Function.identity()));
-        this.microservicesRegistrar = microservicesRegistrar;
+        this.serverConfiguration = serverConfiguration;
         this.microserviceRegistrations = new ConcurrentHashMap<>();
     }
 
     @Override
-    public void appDeploymentEvent(App app) {
+    public void appDeploymentEvent(App app) throws AppDeploymentEventListenerException {
         RestApiProvider restApiProvider = restApiProviders.get(app.getName());
         if (restApiProvider == null) {
+            LOGGER.debug("Web app '{}' does not have any REST APIs provider registered for it.", app.getName());
             return;
         }
 
         String appContextPath = app.getContextPath();
-        boolean httpsOnly = app.getConfiguration().isHttpsOnly();
-        Set<MicroserviceRegistration> registrations = restApiProvider.getMicroservices(app).entrySet().stream()
-                .map(entry -> registerMicroservice((appContextPath + entry.getKey()), entry.getValue(), httpsOnly))
-                .collect(Collectors.toSet());
-        microserviceRegistrations.put(app.getName(), registrations);
+        String appName = app.getName();
+        String transportId = serverConfiguration.getConfigurationForApp(appName)
+                .flatMap(ServerConfiguration.AppConfiguration::getTransportId)
+                .orElse(null);
+        Map<String, Microservice> microservices = restApiProvider.getMicroservices(app);
+        for (String contextPath : microservices.keySet()) {
+            if ((contextPath == null) || contextPath.isEmpty() || (contextPath.charAt(0) != '/')) {
+                throw new AppDeploymentEventListenerException(
+                        "Invalid context path '" + contextPath + "' returned for a REST API by REST API Provider '" +
+                        restApiProvider + "' for app '" + appName +
+                        "'. Context path should be a nun-null, non-empty, and should start with a '/'.");
+            }
+        }
+        Set<MicroserviceRegistration> microserviceRegistrations;
+
+        if (transportId == null) {
+            microserviceRegistrations = microservices.entrySet().stream()
+                    .map(entry -> registerMicroservice(entry.getValue(), (appContextPath + entry.getKey())))
+                    .flatMap(Set::stream)
+                    .collect(Collectors.toSet());
+        } else {
+            microserviceRegistrations = microservices.entrySet().stream()
+                    .map(entry -> registerMicroservice(entry.getValue(), appContextPath + entry.getKey(), transportId))
+                    .collect(Collectors.toSet());
+        }
+        this.microserviceRegistrations.put(app.getName(), microserviceRegistrations);
     }
 
     @Override
-    public void appUndeploymentEvent(String appName) {
+    public void appUndeploymentEvent(String appName) throws AppDeploymentEventListenerException {
         Set<MicroserviceRegistration> microserviceRegistrations = this.microserviceRegistrations.remove(appName);
         if (microserviceRegistrations != null) {
             microserviceRegistrations.forEach(MicroserviceRegistration::unregister);
@@ -98,19 +126,33 @@ public class RestApiDeployer implements AppDeploymentEventListener {
         restApiProviders.clear();
     }
 
-    private MicroserviceRegistration registerMicroservice(String contextPath, Microservice microservice,
-                                                          boolean httpsOnly) {
-        MicroserviceRegistration microserviceRegistration;
-        if (httpsOnly) {
-            microserviceRegistration = microservicesRegistrar.registerSecuredMicroservice(microservice, contextPath);
-            LOGGER.debug("Microservice '{}' deployed as a HTTPS REST API in context path '{}'.",
-                         microservice, contextPath);
+    private Set<MicroserviceRegistration> registerMicroservice(Microservice microservice, String contextPath) {
+        Set<MicroserviceRegistration> registrations = microservicesRegistrar.register(microservice, contextPath);
+        if (registrations.isEmpty()) {
+            throw new AppDeploymentEventListenerException(
+                    "Cannot find any HTTPS transports to register Microservice " + microservice +
+                    " as a REST API to context path '" + contextPath + "'.");
         } else {
-            microserviceRegistration = microservicesRegistrar.registerMicroservice(microservice, contextPath);
-            LOGGER.debug("Microservice '{}' deployed as a HTTP REST API in context path '{}'.",
-                         microservice, contextPath);
+            for (MicroserviceRegistration registration : registrations) {
+                LOGGER.debug("Microservice '{}' is available as a HTTPS REST API at '{}'.", microservice,
+                             registration.getRegisteredHttpTransport().getUrlFor(contextPath));
+            }
         }
-        // TODO: 12/8/17 Print accessible URL for the deployed Microservice
+        return registrations;
+    }
+
+    private MicroserviceRegistration registerMicroservice(Microservice microservice, String contextPath,
+                                                          String transportId) {
+        MicroserviceRegistration microserviceRegistration;
+        try {
+            microserviceRegistration = microservicesRegistrar.register(microservice, contextPath, transportId);
+        } catch (IllegalArgumentException e) {
+            throw new AppDeploymentEventListenerException(
+                    "Cannot find a configured HTTP transport for ID '" + transportId + "' to deploy REST APIs.");
+        }
+
+        LOGGER.debug("Microservice '{}' is available as a HTTP REST API at '{}'.", microservice,
+                     microserviceRegistration.getRegisteredHttpTransport().getUrlFor(contextPath));
         return microserviceRegistration;
     }
 }

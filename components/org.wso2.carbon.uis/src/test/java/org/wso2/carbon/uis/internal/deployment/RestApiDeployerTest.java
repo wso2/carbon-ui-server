@@ -18,21 +18,27 @@
 
 package org.wso2.carbon.uis.internal.deployment;
 
+import org.osgi.framework.ServiceRegistration;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.uis.api.App;
-import org.wso2.carbon.uis.api.Configuration;
+import org.wso2.carbon.uis.api.ServerConfiguration;
+import org.wso2.carbon.uis.internal.exception.AppDeploymentEventListenerException;
+import org.wso2.carbon.uis.internal.http.HttpTransport;
 import org.wso2.carbon.uis.internal.http.msf4j.MicroserviceRegistration;
 import org.wso2.carbon.uis.internal.http.msf4j.MicroservicesRegistrar;
 import org.wso2.carbon.uis.spi.RestApiProvider;
 import org.wso2.msf4j.Microservice;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,61 +51,152 @@ public class RestApiDeployerTest {
 
     @Test
     public void testAppDeploymentEventWithZeroRestApiProviders() {
-        RestApiDeployer restApiDeployer = new RestApiDeployer(Collections.emptySet(), createMicroservicesRegistrar());
-        restApiDeployer.appDeploymentEvent(createApp("foo"));
+        RestApiDeployer restApiDeployer = new RestApiDeployer(Collections.emptySet(), createMicroservicesRegistrar(),
+                                                              new ServerConfiguration());
+        restApiDeployer.appDeploymentEvent(createApp());
     }
 
     @Test
-    public void testAppDeploymentEventForHttp() {
-        Set<RestApiProvider> restApiProviders = Collections.singleton(createRestApiProvider("foo"));
-        MicroservicesRegistrar microservicesRegistrar = createMicroservicesRegistrar();
-        RestApiDeployer restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar);
+    public void testAppDeploymentEventWithInvalidContextPath() {
+        App app = createApp();
+        final String appName = app.getName();
 
-        restApiDeployer.appDeploymentEvent(createApp("foo"));
-        verify(microservicesRegistrar).registerMicroservice(any(), eq("/foo/bar"));
+        RestApiProvider restApiProvider = mock(RestApiProvider.class);
+        when(restApiProvider.getAppName()).thenReturn(appName);
+        RestApiDeployer restApiDeployer = new RestApiDeployer(Collections.singleton(restApiProvider),
+                                                              createMicroservicesRegistrar(),
+                                                              new ServerConfiguration());
+
+        when(restApiProvider.getMicroservices(any()))
+                .thenReturn(Collections.singletonMap("", mock(Microservice.class)));
+        Assert.assertThrows(AppDeploymentEventListenerException.class,
+                            () -> restApiDeployer.appDeploymentEvent(app));
+
+        when(restApiProvider.getMicroservices(any()))
+                .thenReturn(Collections.singletonMap("bar", mock(Microservice.class)));
+        Assert.assertThrows(AppDeploymentEventListenerException.class,
+                            () -> restApiDeployer.appDeploymentEvent(app));
     }
 
     @Test
-    public void testAppDeploymentEventForHttps() {
-        Set<RestApiProvider> restApiProviders = Collections.singleton(createRestApiProvider("foo"));
-        MicroservicesRegistrar microservicesRegistrar = createMicroservicesRegistrar();
-        RestApiDeployer restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar);
+    public void testAppDeploymentEventNoConfigurationZeroRegistrations() {
+        App app = createApp();
+        final String appName = app.getName();
 
-        Configuration configuration = mock(Configuration.class);
-        when(configuration.isHttpsOnly()).thenReturn(true);
-        App app = createApp("foo");
-        when(app.getConfiguration()).thenReturn(configuration);
+        Set<RestApiProvider> restApiProviders = Collections.singleton(createRestApiProvider(appName));
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), anyString())).thenReturn(Collections.emptySet());
+        RestApiDeployer restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar,
+                                                              new ServerConfiguration());
+
+        Assert.assertThrows(AppDeploymentEventListenerException.class,
+                            () -> restApiDeployer.appDeploymentEvent(app));
+    }
+
+    @Test
+    public void testAppDeploymentEventNoConfiguration() {
+        App app = createApp();
+        final String appName = app.getName();
+        final String appContextPath = app.getContextPath();
+
+        Set<RestApiProvider> restApiProviders = Collections.singleton(createRestApiProvider(appName));
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), anyString()))
+                .thenReturn(Collections.singleton(createMicroserviceRegistration()));
+        RestApiDeployer restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar,
+                                                              new ServerConfiguration());
 
         restApiDeployer.appDeploymentEvent(app);
-        verify(microservicesRegistrar).registerSecuredMicroservice(any(), eq("/foo/bar"));
+        verify(microservicesRegistrar).register(any(), eq(appContextPath + "/bar"));
     }
 
     @Test
-    public void testAppUndeploymentEventWithZeroRestApiProviders() {
-        RestApiDeployer restApiDeployer = new RestApiDeployer(Collections.emptySet(), createMicroservicesRegistrar());
-        restApiDeployer.appDeploymentEvent(createApp("foo"));
-        restApiDeployer.appUndeploymentEvent("foo");
+    public void testAppDeploymentEventInvalidTransportId() {
+        App app = createApp();
+        final String appName = app.getName();
+        final String appContextPath = app.getContextPath();
+
+        final String transportId = "someTransportId";
+        Set<RestApiProvider> restApiProviders = Collections.singleton(createRestApiProvider(appName));
+
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), eq(appContextPath + "/bar"), eq(transportId)))
+                .thenThrow(IllegalArgumentException.class);
+
+        ServerConfiguration.AppConfiguration appConfiguration = mock(ServerConfiguration.AppConfiguration.class);
+        when(appConfiguration.getTransportId()).thenReturn(Optional.of(transportId));
+        ServerConfiguration serverConfiguration = mock(ServerConfiguration.class);
+        when(serverConfiguration.getConfigurationForApp(eq(appName))).thenReturn(Optional.of(appConfiguration));
+
+
+        RestApiDeployer restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar,
+                                                              serverConfiguration);
+        Assert.assertThrows(AppDeploymentEventListenerException.class,
+                            () -> restApiDeployer.appDeploymentEvent(app));
+    }
+
+    @Test
+    public void testAppDeploymentEventValidTransportId() {
+        App app = createApp();
+        final String appName = app.getName();
+        final String appContextPath = app.getContextPath();
+
+        final String transportId = "some-id";
+        Set<RestApiProvider> restApiProviders = Collections.singleton(createRestApiProvider(appName));
+
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), eq(appContextPath + "/bar"), eq(transportId)))
+                .thenReturn(createMicroserviceRegistration());
+
+        ServerConfiguration.AppConfiguration appConfiguration = mock(ServerConfiguration.AppConfiguration.class);
+        when(appConfiguration.getTransportId()).thenReturn(Optional.of(transportId));
+        ServerConfiguration serverConfiguration = mock(ServerConfiguration.class);
+        when(serverConfiguration.getConfigurationForApp(eq(appName))).thenReturn(Optional.of(appConfiguration));
+
+
+        RestApiDeployer restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar,
+                                                              serverConfiguration);
+        try {
+            restApiDeployer.appDeploymentEvent(app);
+        } catch (Exception e) {
+            Assert.fail("Cannot register REST API Microservice for transport '" + transportId + "'.", e);
+        }
     }
 
     @Test
     public void testAppUndeploymentEvent() {
-        Set<RestApiProvider> restApiProviders = Collections.singleton(createRestApiProvider("foo"));
-        MicroservicesRegistrar microservicesRegistrar = createMicroservicesRegistrar();
-        RestApiDeployer restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar);
-        App app = createApp("foo");
+        App app = createApp();
+        final String appName = app.getName();
+
+        Set<RestApiProvider> restApiProviders = Collections.singleton(createRestApiProvider(appName));
+        MicroserviceRegistration microserviceRegistration = spy(createMicroserviceRegistration());
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), anyString()))
+                .thenReturn(Collections.singleton(microserviceRegistration));
+        RestApiDeployer restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar,
+                                                              new ServerConfiguration());
 
         restApiDeployer.appDeploymentEvent(app);
-        restApiDeployer.appUndeploymentEvent(app.getName());
+        restApiDeployer.appUndeploymentEvent(appName);
+        verify(microserviceRegistration).unregister();
     }
 
     @Test
     public void testClose() {
-        Set<RestApiProvider> restApiProviders = Collections.singleton(createRestApiProvider("foo"));
-        MicroservicesRegistrar microservicesRegistrar = createMicroservicesRegistrar();
-        RestApiDeployer restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar);
+        App app = createApp();
+        final String appName = app.getName();
 
-        restApiDeployer.appDeploymentEvent(createApp("foo"));
+        Set<RestApiProvider> restApiProviders = Collections.singleton(createRestApiProvider(appName));
+        MicroserviceRegistration microserviceRegistration = spy(createMicroserviceRegistration());
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), anyString()))
+                .thenReturn(Collections.singleton(microserviceRegistration));
+        RestApiDeployer restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar,
+                                                              new ServerConfiguration());
+
+        restApiDeployer.appDeploymentEvent(app);
         restApiDeployer.close();
+        verify(microserviceRegistration).unregister();
     }
 
     private static RestApiProvider createRestApiProvider(String appName) {
@@ -112,18 +209,23 @@ public class RestApiDeployerTest {
 
     private static MicroservicesRegistrar createMicroservicesRegistrar() {
         MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
-        when(microservicesRegistrar.registerMicroservice(any(), anyString()))
-                .thenReturn(mock(MicroserviceRegistration.class));
-        when(microservicesRegistrar.registerSecuredMicroservice(any(), anyString()))
-                .thenReturn(mock(MicroserviceRegistration.class));
+        when(microservicesRegistrar.register(any(), anyString(), anyString()))
+                .thenReturn(createMicroserviceRegistration());
+        when(microservicesRegistrar.register(any(), anyString()))
+                .thenReturn(Collections.singleton(createMicroserviceRegistration()));
         return microservicesRegistrar;
     }
 
-    private static App createApp(String appName) {
+    @SuppressWarnings("unchecked")
+    private static MicroserviceRegistration createMicroserviceRegistration() {
+        HttpTransport httpTransport = new HttpTransport("something", "some-id", "http", "localhost", 9090);
+        return new MicroserviceRegistration(httpTransport, mock(ServiceRegistration.class));
+    }
+
+    private static App createApp() {
         App app = mock(App.class);
-        when(app.getName()).thenReturn(appName);
-        when(app.getContextPath()).thenReturn("/" + appName);
-        when(app.getConfiguration()).thenReturn(Configuration.DEFAULT_CONFIGURATION);
+        when(app.getName()).thenReturn("foo");
+        when(app.getContextPath()).thenReturn("/foo");
         return app;
     }
 }
