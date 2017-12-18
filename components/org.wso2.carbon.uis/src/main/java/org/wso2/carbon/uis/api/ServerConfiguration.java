@@ -23,6 +23,7 @@ import org.wso2.carbon.config.annotation.Element;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Bean class for server configurations.
@@ -32,15 +33,53 @@ import java.util.Map;
 @Configuration(namespace = "wso2.carbon-ui-server", description = "Configurations for Carbon UI Server")
 public class ServerConfiguration {
 
-    @Element(description = "context paths for web apps")
-    private Map<String, String> contextPaths = Collections.emptyMap();
+    @Element(description = "Configurations for web apps.\n" +
+                           "Here key is the name of the web app abd value is configurations for that web app.")
+    private Map<String, AppConfiguration> apps = Collections.emptyMap();
 
     /**
-     * Returns overrding context paths for web apps.
+     * Returns configurations for the specified app.
      *
-     * @return overriding context paths
+     * @param appName name of the app
+     * @return server configurations of the app
      */
-    public Map<String, String> getContextPaths() {
-        return contextPaths;
+    public Optional<AppConfiguration> getConfigurationForApp(String appName) {
+        return Optional.ofNullable(apps.get(appName));
+    }
+
+    /**
+     * Bean class for configurations of a web app.
+     *
+     * @since 0.18.0
+     */
+    public static class AppConfiguration {
+
+        @Element(description = "Context path of this web app.\n" +
+                               "This overrides the default context path (which is '/'+<app-name>) of the app. " +
+                               "Context path should start with a '/' (e.g. '/foo').")
+        private String contextPath;
+
+        @Element(description = "ID of the HTTP listener configuration that this web app should be deployed.\n" +
+                               "'listenerConfigurations' can be found under 'wso2.transport.http' namespace. " +
+                               "If absent, this web app will be deployed to all available HTTPS transports.")
+        private String transportId;
+
+        /**
+         * Returns the context path in this app configuration.
+         *
+         * @return the context path
+         */
+        public Optional<String> getContextPath() {
+            return Optional.ofNullable(contextPath);
+        }
+
+        /**
+         * Returns the transport ID in this app configuration.
+         *
+         * @return the transport ID
+         */
+        public Optional<String> getTransportId() {
+            return Optional.ofNullable(transportId);
+        }
     }
 }
