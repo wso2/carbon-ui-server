@@ -18,20 +18,25 @@
 
 package org.wso2.carbon.uis.internal.deployment;
 
+import org.osgi.framework.ServiceRegistration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.Configuration;
+import org.wso2.carbon.uis.api.ServerConfiguration;
+import org.wso2.carbon.uis.internal.exception.AppDeploymentEventListenerException;
 import org.wso2.carbon.uis.internal.http.HttpTransport;
 import org.wso2.carbon.uis.internal.http.msf4j.MicroserviceRegistration;
 import org.wso2.carbon.uis.internal.http.msf4j.MicroservicesRegistrar;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,81 +48,128 @@ import static org.mockito.Mockito.when;
 public class AppTransportBinderTest {
 
     @Test
-    public void testAppDeploymentEventForHttp() {
-        MicroservicesRegistrar microservicesRegistrar = createMicroservicesRegistrar();
-        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar);
+    public void testAppDeploymentEventNoConfigurationZeroRegistrations() {
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), anyString())).thenReturn(Collections.emptySet());
+        ServerConfiguration serverConfiguration = new ServerConfiguration();
+        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar, serverConfiguration);
+
+        App app = createApp();
+        final String appContextPath = app.getContextPath();
+
+        Assert.assertThrows(AppDeploymentEventListenerException.class,
+                            () -> appTransportBinder.appDeploymentEvent(app));
+        verify(microservicesRegistrar).register(any(), eq(appContextPath));
+    }
+
+    @Test
+    public void testAppDeploymentEventNoConfiguration() {
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), anyString()))
+                .thenReturn(Collections.singleton(createMicroserviceRegistration()));
+        ServerConfiguration serverConfiguration = new ServerConfiguration();
+        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar, serverConfiguration);
+
         App app = createApp();
         final String appContextPath = app.getContextPath();
 
         appTransportBinder.appDeploymentEvent(app);
-        verify(microservicesRegistrar).registerMicroservice(any(), eq(appContextPath));
+        verify(microservicesRegistrar).register(any(), eq(appContextPath));
     }
 
     @Test
-    public void testAppDeploymentEventForHttps() {
-        MicroservicesRegistrar microservicesRegistrar = createMicroservicesRegistrar();
-        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar);
-
+    public void testAppDeploymentEventInvalidTransportId() {
         App app = createApp();
-        Configuration configuration = mock(Configuration.class);
-        when(configuration.isHttpsOnly()).thenReturn(true);
-        when(app.getConfiguration()).thenReturn(configuration);
+        final String appName = app.getName();
         final String appContextPath = app.getContextPath();
 
-        appTransportBinder.appDeploymentEvent(app);
-        verify(microservicesRegistrar).registerSecuredMicroservice(any(), eq(appContextPath));
+        final String transportId = "someTransportId";
+        ServerConfiguration.AppConfiguration appConfiguration = mock(ServerConfiguration.AppConfiguration.class);
+        when(appConfiguration.getTransportId()).thenReturn(Optional.of(transportId));
+        ServerConfiguration serverConfiguration = mock(ServerConfiguration.class);
+        when(serverConfiguration.getConfigurationForApp(eq(appName))).thenReturn(Optional.of(appConfiguration));
+
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), eq(appContextPath), eq(transportId)))
+                .thenThrow(IllegalArgumentException.class);
+
+        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar, serverConfiguration);
+        Assert.assertThrows(AppDeploymentEventListenerException.class,
+                            () -> appTransportBinder.appDeploymentEvent(app));
     }
 
     @Test
-    public void testAppUndeploymentEventWithException() {
-        MicroservicesRegistrar microservicesRegistrar = createMicroservicesRegistrar();
-        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar);
+    public void testAppDeploymentEventValidTransportId() {
+        App app = createApp();
+        final String appName = app.getName();
+        final String appContextPath = app.getContextPath();
+
+        final String transportId = "bar";
+        ServerConfiguration.AppConfiguration appConfiguration = mock(ServerConfiguration.AppConfiguration.class);
+        when(appConfiguration.getTransportId()).thenReturn(Optional.of(transportId));
+        ServerConfiguration serverConfiguration = mock(ServerConfiguration.class);
+        when(serverConfiguration.getConfigurationForApp(eq(appName))).thenReturn(Optional.of(appConfiguration));
+
+        MicroserviceRegistration microserviceRegistration = createMicroserviceRegistration();
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), eq(appContextPath), eq(transportId)))
+                .thenReturn(microserviceRegistration);
+
+        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar, serverConfiguration);
+        try {
+            appTransportBinder.appDeploymentEvent(app);
+        } catch (Exception e) {
+            Assert.fail("Cannot register web app Microservice for transport '" + transportId + "'.", e);
+        }
+    }
+
+    @Test
+    public void testAppUndeploymentEventWithInvalidAppName() {
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), anyString()))
+                .thenReturn(Collections.singleton(createMicroserviceRegistration()));
+        ServerConfiguration serverConfiguration = new ServerConfiguration();
+        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar, serverConfiguration);
 
         appTransportBinder.appDeploymentEvent(createApp());
-        Assert.assertThrows(IllegalArgumentException.class, () -> appTransportBinder.appUndeploymentEvent("bar"));
+        Assert.assertThrows(AppDeploymentEventListenerException.class,
+                            () -> appTransportBinder.appUndeploymentEvent("foobar"));
     }
 
     @Test
     public void testAppUndeploymentEvent() {
-        MicroservicesRegistrar microservicesRegistrar = createMicroservicesRegistrar();
-        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar);
+        MicroserviceRegistration microserviceRegistration = spy(createMicroserviceRegistration());
+        MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
+        when(microservicesRegistrar.register(any(), anyString()))
+                .thenReturn(Collections.singleton(microserviceRegistration));
+        ServerConfiguration serverConfiguration = new ServerConfiguration();
+        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar, serverConfiguration);
+
         App app = createApp();
 
         appTransportBinder.appDeploymentEvent(app);
         appTransportBinder.appUndeploymentEvent(app.getName());
+        verify(microserviceRegistration).unregister();
     }
 
     @Test
     public void testClose() {
-        MicroservicesRegistrar microservicesRegistrar = createMicroservicesRegistrar();
-        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar);
-        App app = createApp();
-
-        appTransportBinder.appDeploymentEvent(app);
-        appTransportBinder.close();
-    }
-
-    private static MicroservicesRegistrar createMicroservicesRegistrar() {
+        MicroserviceRegistration microserviceRegistration = spy(createMicroserviceRegistration());
         MicroservicesRegistrar microservicesRegistrar = mock(MicroservicesRegistrar.class);
-        MicroserviceRegistration httpMicroserviceRegistration = createMicroserviceRegistration(false);
-        when(microservicesRegistrar.registerMicroservice(any(), anyString()))
-                .thenReturn(httpMicroserviceRegistration);
-        MicroserviceRegistration httpsMicroserviceRegistration = createMicroserviceRegistration(true);
-        when(microservicesRegistrar.registerSecuredMicroservice(any(), anyString()))
-                .thenReturn(httpsMicroserviceRegistration);
-        return microservicesRegistrar;
+        when(microservicesRegistrar.register(any(), anyString()))
+                .thenReturn(Collections.singleton(microserviceRegistration));
+        ServerConfiguration serverConfiguration = new ServerConfiguration();
+        AppTransportBinder appTransportBinder = new AppTransportBinder(microservicesRegistrar, serverConfiguration);
+
+        appTransportBinder.appDeploymentEvent(createApp());
+        appTransportBinder.close();
+        verify(microserviceRegistration).unregister();
     }
 
-    private static MicroserviceRegistration createMicroserviceRegistration(boolean isHttps) {
-        MicroserviceRegistration microserviceRegistration = mock(MicroserviceRegistration.class);
-        if (isHttps) {
-            when(microserviceRegistration.getRegisteredHttpTransports())
-                    .thenReturn(Collections.singleton(new HttpTransport("some-id", "https", "localhost", 9292)));
-        } else {
-            when(microserviceRegistration.getRegisteredHttpTransports())
-                    .thenReturn(Collections.singleton(new HttpTransport("some-id", "http", "localhost", 9292)));
-        }
-        return microserviceRegistration;
+    @SuppressWarnings("unchecked")
+    private static MicroserviceRegistration createMicroserviceRegistration() {
+        HttpTransport httpTransport = new HttpTransport("foo", "bar", "http", "localhost", 9090);
+        return new MicroserviceRegistration(httpTransport, mock(ServiceRegistration.class));
     }
 
     private static App createApp() {
