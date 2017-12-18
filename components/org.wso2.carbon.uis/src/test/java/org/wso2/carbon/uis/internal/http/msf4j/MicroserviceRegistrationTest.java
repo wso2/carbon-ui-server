@@ -18,14 +18,10 @@
 
 package org.wso2.carbon.uis.internal.http.msf4j;
 
-import com.google.common.collect.ImmutableMap;
 import org.osgi.framework.ServiceRegistration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.uis.internal.http.HttpTransport;
-import org.wso2.msf4j.Microservice;
-
-import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,26 +35,26 @@ public class MicroserviceRegistrationTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGetRegisteredHttpTransports() {
-        Map<HttpTransport, ServiceRegistration<Microservice>> serviceRegistrations =
-                ImmutableMap.of(createHttpTransport("foo"), mock(ServiceRegistration.class));
-        MicroserviceRegistration microserviceRegistration = new MicroserviceRegistration(serviceRegistrations);
+    public void testGetRegisteredHttpTransport() {
+        HttpTransport httpTransport = createHttpTransport();
+        ServiceRegistration serviceRegistration = mock(ServiceRegistration.class);
+        MicroserviceRegistration microserviceRegistration = new MicroserviceRegistration(httpTransport,
+                                                                                         serviceRegistration);
 
-        Assert.assertEquals(microserviceRegistration.getRegisteredHttpTransports(), serviceRegistrations.keySet());
+        Assert.assertEquals(microserviceRegistration.getRegisteredHttpTransport(), httpTransport);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void testUnregister() {
-        Map<HttpTransport, ServiceRegistration<Microservice>> serviceRegistrations =
-                ImmutableMap.of(createHttpTransport("foo"), mock(ServiceRegistration.class),
-                                createHttpTransport("bar"), mock(ServiceRegistration.class));
-        new MicroserviceRegistration(serviceRegistrations).unregister();
+        HttpTransport httpTransport = createHttpTransport();
+        ServiceRegistration serviceRegistration = mock(ServiceRegistration.class);
+        new MicroserviceRegistration(httpTransport, serviceRegistration).unregister();
 
-        serviceRegistrations.values().forEach(serviceRegistration -> verify(serviceRegistration).unregister());
+        verify(serviceRegistration).unregister();
     }
 
-    private static HttpTransport createHttpTransport(String id) {
-        return new HttpTransport(id, "http", "localhost", 9292);
+    private static HttpTransport createHttpTransport() {
+        return new HttpTransport("foo", "bar", "http", "localhost", 9292);
     }
 }

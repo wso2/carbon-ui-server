@@ -24,8 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.uis.internal.http.HttpTransport;
 import org.wso2.msf4j.Microservice;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 
 /**
  * Represents a Microservice registration to the HTTP transport(s).
@@ -36,19 +35,28 @@ public class MicroserviceRegistration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MicroserviceRegistration.class);
 
-    private final Map<HttpTransport, ServiceRegistration<Microservice>> microserviceRegistrations;
+    private final HttpTransport httpTransport;
+    private final ServiceRegistration<Microservice> microserviceRegistration;
 
-    MicroserviceRegistration(Map<HttpTransport, ServiceRegistration<Microservice>> microserviceRegistrations) {
-        this.microserviceRegistrations = microserviceRegistrations;
+    /**
+     * Creates a new Microservice service registration.
+     *
+     * @param httpTransport            HTTP transport
+     * @param microserviceRegistration Microservice OSGi service registration
+     */
+    public MicroserviceRegistration(HttpTransport httpTransport,
+                                    ServiceRegistration<Microservice> microserviceRegistration) {
+        this.httpTransport = httpTransport;
+        this.microserviceRegistration = microserviceRegistration;
     }
 
     /**
-     * Returns HTTP transports that this registration occurred.
+     * Returns the HTTP transport that this registration occurred.
      *
-     * @return HTTP transports that the registration occurred
+     * @return relevant HTTP transport
      */
-    public Set<HttpTransport> getRegisteredHttpTransports() {
-        return microserviceRegistrations.keySet();
+    public HttpTransport getRegisteredHttpTransport() {
+        return httpTransport;
     }
 
     /**
@@ -57,9 +65,31 @@ public class MicroserviceRegistration {
      * @throws IllegalStateException if Microservice is already unregistered
      */
     public void unregister() {
-        microserviceRegistrations.forEach((httpTransport, microserviceServiceRegistration) -> {
-            microserviceServiceRegistration.unregister();
-            LOGGER.debug("Microservice unregistered from HTTP transport {}.", httpTransport);
-        });
+        microserviceRegistration.unregister();
+        LOGGER.debug("Microservice unregistered from HTTP transport {}.", httpTransport);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof MicroserviceRegistration)) {
+            return false;
+        }
+        MicroserviceRegistration other = (MicroserviceRegistration) obj;
+        return Objects.equals(httpTransport, other.httpTransport) &&
+               Objects.equals(microserviceRegistration, other.microserviceRegistration);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(httpTransport, microserviceRegistration);
+    }
+
+    @Override
+    public String toString() {
+        return "MicroserviceRegistration{httpTransport=" + httpTransport + ", microserviceRegistration=" +
+               microserviceRegistration + "}";
     }
 }
