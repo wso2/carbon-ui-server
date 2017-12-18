@@ -42,9 +42,13 @@ import org.wso2.carbon.uis.internal.io.deployment.ArtifactAppDeployer;
 import org.wso2.carbon.uis.spi.RestApiProvider;
 import org.wso2.carbon.uis.spi.Server;
 
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Collections.singletonMap;
 
 /**
  * Startup lister service component.
@@ -150,15 +154,16 @@ public class StartupListener implements RequiredCapabilityListener {
 
     @Override
     public void onAllRequiredCapabilitiesAvailable() {
-        appTransportBinder = new AppTransportBinder(microservicesRegistrar);
-        restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar);
+        appTransportBinder = new AppTransportBinder(microservicesRegistrar, serverConfiguration);
+        restApiDeployer = new RestApiDeployer(restApiProviders, microservicesRegistrar, serverConfiguration);
         carbonUiServer = new CarbonUiServer();
         appDeployer = new ArtifactAppDeployer(ImmutableList.of(appTransportBinder, restApiDeployer, carbonUiServer),
                                               serverConfiguration);
 
-        serviceRegistrations.add(bundleContext.registerService(Deployer.class, appDeployer, null));
+        Dictionary<String, Object> properties = new Hashtable<>(singletonMap("skipCarbonStartupResolver", true));
+        serviceRegistrations.add(bundleContext.registerService(Deployer.class, appDeployer, properties));
         LOGGER.debug("Web app deployer '{}' registered as a Carbon Deployer.", appDeployer.getClass().getName());
-        serviceRegistrations.add(bundleContext.registerService(Server.class, carbonUiServer, null));
+        serviceRegistrations.add(bundleContext.registerService(Server.class, carbonUiServer, properties));
         LOGGER.debug("Server '{}' registered as a Carbon UI Server.", carbonUiServer.getClass().getName());
 
         LOGGER.debug("Carbon UI Server Startup Listener fully activated.");
