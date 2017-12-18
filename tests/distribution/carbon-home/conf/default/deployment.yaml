@@ -49,7 +49,7 @@ wso2.transport.http:
       host: "0.0.0.0"
       port: 9090
 
-    - id: "default-https"
+    - id: "for-test-app"
       host: "0.0.0.0"
       port: 9443
       scheme: https
@@ -61,5 +61,7 @@ wso2.transport.http:
     - id: "default-http-sender"
 
 wso2.carbon-ui-server:
-  contextPaths:
-    "test": "/sample"
+  apps:
+    "test":
+      contextPath: "/sample"
+      transportId: "for-test-app"
