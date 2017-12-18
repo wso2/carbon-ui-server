@@ -31,6 +31,6 @@ public class ServerConfigurationTest {
     @Test
     public void testGetContextPaths() {
         ServerConfiguration serverConfiguration = new ServerConfiguration();
-        Assert.assertTrue(serverConfiguration.getContextPaths().isEmpty());
+        Assert.assertFalse(serverConfiguration.getConfigurationForApp("foo").isPresent());
     }
 }
