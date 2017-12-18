@@ -21,18 +21,15 @@ package org.wso2.carbon.uis.internal.deployment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.uis.api.App;
-import org.wso2.carbon.uis.internal.http.HttpTransport;
+import org.wso2.carbon.uis.api.ServerConfiguration;
+import org.wso2.carbon.uis.internal.exception.AppDeploymentEventListenerException;
 import org.wso2.carbon.uis.internal.http.RequestDispatcher;
 import org.wso2.carbon.uis.internal.http.msf4j.MicroserviceRegistration;
 import org.wso2.carbon.uis.internal.http.msf4j.MicroservicesRegistrar;
 import org.wso2.carbon.uis.internal.http.msf4j.WebappMicroservice;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -49,43 +46,71 @@ public class AppTransportBinder implements AppDeploymentEventListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppTransportBinder.class);
 
     private final MicroservicesRegistrar microservicesRegistrar;
-    private final ConcurrentMap<String, MicroserviceRegistration> microserviceRegistrations;
+    private final ConcurrentMap<String, Set<MicroserviceRegistration>> microserviceRegistrations;
+    private final ServerConfiguration serverConfiguration;
 
     /**
      * Creates a new app transport binder.
      *
      * @param microservicesRegistrar Microservices registrar
+     * @param serverConfiguration    server configuration
      */
-    public AppTransportBinder(MicroservicesRegistrar microservicesRegistrar) {
+    public AppTransportBinder(MicroservicesRegistrar microservicesRegistrar,
+                              ServerConfiguration serverConfiguration) {
         this.microservicesRegistrar = microservicesRegistrar;
         this.microserviceRegistrations = new ConcurrentHashMap<>();
+        this.serverConfiguration = serverConfiguration;
     }
 
     @Override
-    public void appDeploymentEvent(App app) {
+    public void appDeploymentEvent(App app) throws AppDeploymentEventListenerException {
+        String appName = app.getName();
         String appContextPath = app.getContextPath();
-        MicroserviceRegistration registration;
-        if (app.getConfiguration().isHttpsOnly()) {
-            registration = microservicesRegistrar.registerSecuredMicroservice(createMicroservice(app), appContextPath);
-        } else {
-            registration = microservicesRegistrar.registerMicroservice(createMicroservice(app), appContextPath);
-        }
+        WebappMicroservice microservice = createMicroservice(app);
+        String transportId = serverConfiguration.getConfigurationForApp(appName)
+                .flatMap(ServerConfiguration.AppConfiguration::getTransportId)
+                .orElse(null);
 
-        for (HttpTransport httpTransport : registration.getRegisteredHttpTransports()) {
-            LOGGER.info("Web app '{}' is available at '{}'.", app.getName(), getAppUrl(appContextPath, httpTransport));
+        if (transportId == null) {
+            Set<MicroserviceRegistration> registrations = microservicesRegistrar.register(microservice, appContextPath);
+            if (registrations.isEmpty()) {
+                throw new AppDeploymentEventListenerException(
+                        "Cannot find any HTTPS transports to register web app '" + appName + "'.");
+            } else {
+                microserviceRegistrations.put(appName, registrations);
+                registrations.stream()
+                        .map(registration -> registration.getRegisteredHttpTransport().getUrlFor(appContextPath))
+                        .forEach(appUrl -> LOGGER.info("Web app '{}' is available at '{}'.", appName, appUrl));
+            }
+        } else {
+            MicroserviceRegistration registration;
+            try {
+                registration = microservicesRegistrar.register(microservice, appContextPath, transportId);
+            } catch (IllegalArgumentException e) {
+                throw new AppDeploymentEventListenerException(
+                        "Cannot find a configured HTTP transport for ID '" + transportId + "' to register web app '" +
+                        appName + "'.", e);
+            }
+            microserviceRegistrations.put(appName, Collections.singleton(registration));
+            LOGGER.info("Web app '{}' is available at '{}'.", appName,
+                        registration.getRegisteredHttpTransport().getUrlFor(appContextPath));
         }
-        microserviceRegistrations.put(app.getName(), registration);
     }
 
     @Override
-    public void appUndeploymentEvent(String appName) {
-        MicroserviceRegistration registration = microserviceRegistrations.remove(appName);
-        if (registration == null) {
-            throw new IllegalArgumentException("Cannot unregister web app '" + appName +
-                                               "'. App might be already unregistered or not be registered at all.");
+    public void appUndeploymentEvent(String appName) throws AppDeploymentEventListenerException {
+        Set<MicroserviceRegistration> microserviceRegistrations = this.microserviceRegistrations.remove(appName);
+        if (microserviceRegistrations == null) {
+            throw new AppDeploymentEventListenerException(
+                    "Cannot unregister web app '" + appName + "'. App might be already unregistered or " +
+                    "not be registered at all.");
         }
 
-        registration.unregister();
+        microserviceRegistrations.forEach(microserviceRegistration -> {
+            microserviceRegistration.unregister();
+            LOGGER.debug("Web app '{}' unregistered from {}.", appName,
+                         microserviceRegistration.getRegisteredHttpTransport());
+        });
         LOGGER.info("Web app '{}' undeployed.", appName);
     }
 
@@ -93,51 +118,14 @@ public class AppTransportBinder implements AppDeploymentEventListener {
      * Closes this binder.
      */
     public void close() {
-        microserviceRegistrations.values().forEach(MicroserviceRegistration::unregister);
+        for (Set<MicroserviceRegistration> microserviceRegistration : this.microserviceRegistrations.values()) {
+            microserviceRegistration.forEach(MicroserviceRegistration::unregister);
+        }
         microserviceRegistrations.clear();
     }
 
     private static WebappMicroservice createMicroservice(App app) {
         RequestDispatcher requestDispatcher = new RequestDispatcher(app);
         return new WebappMicroservice((requestDispatcher::serve));
-    }
-
-    /**
-     * Returns a accessible URL for the given app content path.
-     *
-     * @param appContextPath content path of the app
-     * @param httpTransport  HTTP transport that the relevant app is bound
-     * @return
-     */
-    private static String getAppUrl(String appContextPath, HttpTransport httpTransport) {
-        String hostname = httpTransport.getHost().trim();
-        // We can safely continue with the hostname from HTTP transport, if following if-block breaks at any point.
-        if ("localhost".equals(hostname) || "127.0.0.1".equals(hostname) || "0.0.0.0".equals(hostname) ||
-            "::1".equals(hostname)) {
-            try {
-                Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-                while (networkInterfaces.hasMoreElements()) {
-                    NetworkInterface networkInterface = networkInterfaces.nextElement();
-                    if (!networkInterface.isUp() || networkInterface.isLoopback() || networkInterface.isVirtual()) {
-                        continue;
-                    }
-
-                    Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
-                    while (inetAddresses.hasMoreElements()) {
-                        InetAddress inetAddress = inetAddresses.nextElement();
-                        if (((inetAddress instanceof Inet4Address) || (inetAddress instanceof Inet6Address)) &&
-                            !inetAddress.isLoopbackAddress()) {
-                            hostname = inetAddress.getHostAddress();
-                        }
-                    }
-
-                }
-            } catch (SocketException e) {
-                // Log level DEBUG since this is not a 'breaking' error.
-                LOGGER.debug("Cannot access information on network interfaces.", e);
-            }
-        }
-
-        return httpTransport.getScheme() + "://" + hostname + ":" + httpTransport.getPort() + appContextPath;
     }
 }
