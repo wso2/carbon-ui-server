@@ -36,6 +36,7 @@ import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 import org.wso2.carbon.kernel.startupresolver.StartupServiceUtils;
 import org.wso2.carbon.uis.api.ServerConfiguration;
 import org.wso2.carbon.uis.internal.deployment.listener.AppTransportBinder;
+import org.wso2.carbon.uis.internal.deployment.listener.CarbonUiServer;
 import org.wso2.carbon.uis.internal.deployment.listener.RestApiDeployer;
 import org.wso2.carbon.uis.internal.http.msf4j.MicroservicesRegistrar;
 import org.wso2.carbon.uis.internal.io.deployment.ArtifactAppDeployer;
