@@ -19,7 +19,9 @@
 package org.wso2.carbon.uis.internal.http;
 
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.wso2.carbon.uis.internal.http.util.IpAddressUtils;
 
 /**
  * Test cases for {@link HttpTransport} class.
@@ -30,13 +32,16 @@ public class HttpTransportTest {
 
     @Test
     public void test() {
-        final String id = "some-id";
+        final String listenerInterfaceId = "foo";
+        final String listenerConfigurationId = "bar";
         final String scheme = "http";
         final String host = "localhost";
         final int port = 9292;
 
-        HttpTransport httpTransport = new HttpTransport(id, scheme, host, port);
-        Assert.assertEquals(httpTransport.getId(), id);
+        HttpTransport httpTransport = new HttpTransport(listenerInterfaceId, listenerConfigurationId, scheme, host,
+                                                        port);
+        Assert.assertEquals(httpTransport.getListenerInterfaceId(), listenerInterfaceId);
+        Assert.assertEquals(httpTransport.getListenerConfigurationId(), listenerConfigurationId);
         Assert.assertEquals(httpTransport.getScheme(), scheme);
         Assert.assertEquals(httpTransport.getHost(), host);
         Assert.assertEquals(httpTransport.getPort(), port);
@@ -44,20 +49,42 @@ public class HttpTransportTest {
 
     @Test
     public void testIsSecured() {
-        Assert.assertFalse(createHttpTransport("any", "http").isSecured());
-        Assert.assertTrue(createHttpTransport("any-thing", "HTTPS").isSecured());
+        Assert.assertFalse(createHttpTransport("foo", "bar", "http").isSecured());
+        Assert.assertTrue(createHttpTransport("bar", "foo", "HTTPS").isSecured());
+    }
+
+    @DataProvider
+    public Object[][] httpTransports() {
+        return new Object[][]{
+                {createHttpTransport("localhost"), IpAddressUtils.getLocalIpAddress().orElse("localhost")},
+                {createHttpTransport("127.0.0.1"), IpAddressUtils.getLocalIpAddress().orElse("127.0.01")},
+                {createHttpTransport("0.0.0.0"), IpAddressUtils.getLocalIpAddress().orElse("0.0.0.0")},
+                {createHttpTransport("::1"), IpAddressUtils.getLocalIpAddress().orElse("::1")},
+                {createHttpTransport("192.168.1.1"), "192.168.1.1"}
+        };
+    }
+
+    @Test(dataProvider = "httpTransports")
+    public void testGetUrlFor(HttpTransport httpTransport, String hostname) {
+        Assert.assertEquals(httpTransport.getUrlFor("/test"), "http://" + hostname + ":9090/test");
     }
 
     @Test
     public void testEquals() {
-        Assert.assertNotEquals(null, createHttpTransport("foo", "http"));
-        Assert.assertNotEquals(new Object(), createHttpTransport("foo", "http"));
-        Assert.assertNotEquals(createHttpTransport("foo", "https"), createHttpTransport("bar", "http"));
+        Assert.assertNotEquals(null, createHttpTransport("foo", "bar", "http"));
+        Assert.assertNotEquals(new Object(), createHttpTransport("foo", "bar", "http"));
+        Assert.assertNotEquals(createHttpTransport("foo", "bar", "https"), createHttpTransport("foo2", "bar", "http"));
+        Assert.assertNotEquals(createHttpTransport("foo", "bar", "https"), createHttpTransport("foo2", "bar2", "http"));
 
-        Assert.assertEquals(createHttpTransport("foo", "https"), createHttpTransport("foo", "http"));
+        Assert.assertEquals(createHttpTransport("foo", "bar", "https"), createHttpTransport("foo", "bar", "http"));
     }
 
-    private static HttpTransport createHttpTransport(String id, String scheme) {
-        return new HttpTransport(id, scheme, "localhost", 9292);
+    private static HttpTransport createHttpTransport(String listenerInterfaceId, String listenerConfigurationId,
+                                                     String scheme) {
+        return new HttpTransport(listenerInterfaceId, listenerConfigurationId, scheme, "localhost", 9292);
+    }
+
+    private static HttpTransport createHttpTransport(String host) {
+        return new HttpTransport("foo", "bar", "http", host, 9090);
     }
 }
