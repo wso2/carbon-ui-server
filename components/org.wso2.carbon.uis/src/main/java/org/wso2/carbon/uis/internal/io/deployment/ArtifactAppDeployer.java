@@ -30,6 +30,7 @@ import org.wso2.carbon.uis.internal.deployment.AppCreator;
 import org.wso2.carbon.uis.internal.deployment.AppDeploymentEventListener;
 import org.wso2.carbon.uis.internal.deployment.AppRegistry;
 import org.wso2.carbon.uis.internal.exception.AppCreationException;
+import org.wso2.carbon.uis.internal.exception.AppDeploymentEventListenerException;
 import org.wso2.carbon.uis.internal.impl.OverriddenApp;
 import org.wso2.carbon.uis.internal.io.reference.ArtifactAppReference;
 import org.wso2.carbon.uis.internal.reference.AppReference;
@@ -87,15 +88,17 @@ public class ArtifactAppDeployer implements Deployer {
         }
 
         App createdApp = createApp(appPath);
-        App deployingApp = appRegistry.find(createdApp::canOverrideBy)
-                .map(previouslyCreatedApp -> {
-                    LOGGER.info("Undeploying {} in order to merge it with {} and re-deploy the merged web app.",
-                                previouslyCreatedApp, createdApp);
-                    publishAppUndeploymentEvent(previouslyCreatedApp);
-                    appRegistry.add(createdApp);
-                    return (App) new OverriddenApp(createdApp, previouslyCreatedApp);
-                })
-                .orElse(createdApp);
+        App deployingApp;
+        Optional<App> previouslyCreatedOverridableApp = appRegistry.find(createdApp::canOverrideBy);
+        if (previouslyCreatedOverridableApp.isPresent()) {
+            LOGGER.info("Undeploying {} in order to merge it with {} and re-deploy the merged web app.",
+                        previouslyCreatedOverridableApp.get(), createdApp);
+            publishAppUndeploymentEvent(previouslyCreatedOverridableApp.get());
+            appRegistry.add(createdApp);
+            deployingApp = new OverriddenApp(createdApp, previouslyCreatedOverridableApp.get());
+        } else {
+            deployingApp = createdApp;
+        }
 
         publishAppDeploymentEvent(deployingApp);
         return appRegistry.add(deployingApp);
@@ -145,13 +148,29 @@ public class ArtifactAppDeployer implements Deployer {
         appRegistry.clear();
     }
 
-    private void publishAppDeploymentEvent(App app) {
-        appDeploymentEventListeners.forEach(listener -> listener.appDeploymentEvent(app));
+    private void publishAppDeploymentEvent(App app) throws CarbonDeploymentException {
+        for (AppDeploymentEventListener listener : appDeploymentEventListeners) {
+            try {
+                listener.appDeploymentEvent(app);
+            } catch (AppDeploymentEventListenerException e) {
+                throw new CarbonDeploymentException(
+                        "App deployment event listener '" + listener + "' threw an exception on app '" + app.getName() +
+                        "' deployment event.", e);
+            }
+        }
         LOGGER.debug("Web app '{}' in '{}' deployed successfully.", app.getName(), app.getHighestPriorityPath());
     }
 
-    private void publishAppUndeploymentEvent(App app) {
-        appDeploymentEventListeners.forEach(listner -> listner.appUndeploymentEvent(app.getName()));
+    private void publishAppUndeploymentEvent(App app) throws CarbonDeploymentException {
+        for (AppDeploymentEventListener listener : appDeploymentEventListeners) {
+            try {
+                listener.appUndeploymentEvent(app.getName());
+            } catch (AppDeploymentEventListenerException e) {
+                throw new CarbonDeploymentException(
+                        "App deployment event listener '" + listener + "' threw an exception on app '" + app.getName() +
+                        "' undeployment event.", e);
+            }
+        }
         LOGGER.debug("Web app '{}' in '{}' undeployed successfully.", app.getName(), app.getHighestPriorityPath());
     }
 
