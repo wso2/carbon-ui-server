@@ -68,8 +68,13 @@ public class ServerConfiguration {
          * Returns the context path in this app configuration.
          *
          * @return the context path
+         * @throws IllegalArgumentException if configured context path is invalid
          */
-        public Optional<String> getContextPath() {
+        public Optional<String> getContextPath() throws IllegalArgumentException {
+            if ((contextPath != null) && (contextPath.charAt(0) != '/')) {
+                throw new IllegalArgumentException(
+                        "Configured context path '" + contextPath + "' is invalid as it does not start with a '/'.");
+            }
             return Optional.ofNullable(contextPath);
         }
 
@@ -77,8 +82,12 @@ public class ServerConfiguration {
          * Returns the transport ID in this app configuration.
          *
          * @return the transport ID
+         * @throws IllegalArgumentException if configured transport ID is invalid
          */
-        public Optional<String> getTransportId() {
+        public Optional<String> getTransportId() throws IllegalArgumentException {
+            if ((transportId != null) && !transportId.isEmpty()) {
+                throw new IllegalArgumentException("Configured transport ID is invalid as it cannot be a empty.");
+            }
             return Optional.ofNullable(transportId);
         }
     }

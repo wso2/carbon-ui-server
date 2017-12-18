@@ -169,20 +169,13 @@ public class ArtifactAppDeployer implements Deployer {
 
     private String getAppContextPath(AppReference appReference) throws CarbonDeploymentException {
         String appName = appReference.getName();
-        String contextPath = serverConfiguration.getContextPaths().get(appName);
-        if (contextPath == null) {
-            return ("/" + appName); // default context path
-        } else {
-            if (contextPath.isEmpty()) {
-                throw new CarbonDeploymentException(
-                        "Cannot deploy web app '" + appName + "' as the configured context path is empty.");
-            } else if (contextPath.charAt(0) != '/') {
-                throw new CarbonDeploymentException(
-                        "Cannot deploy web app '" + appName + "' as the configured context path '" + contextPath +
-                        "' does not start with a '/'.");
-            } else {
-                return contextPath;
-            }
+        try {
+            return serverConfiguration.getConfigurationForApp(appName)
+                    .flatMap(ServerConfiguration.AppConfiguration::getContextPath)
+                    .orElse("/" + appName); // default context path
+        } catch (IllegalArgumentException e) {
+            throw new CarbonDeploymentException(
+                    "Cannot deploy web app '" + appName + "' as the configured app context path is invalid.", e);
         }
     }
 
