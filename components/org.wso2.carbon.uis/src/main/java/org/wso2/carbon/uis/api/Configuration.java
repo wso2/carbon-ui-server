@@ -43,31 +43,19 @@ public class Configuration {
      */
     public static final Configuration DEFAULT_CONFIGURATION;
 
-    private final boolean httpsOnly;
     private final HttpResponseHeaders responseHeaders;
 
     static {
-        DEFAULT_CONFIGURATION = new Configuration(false, new HttpResponseHeaders(emptyMap(), emptyMap()));
+        DEFAULT_CONFIGURATION = new Configuration(new HttpResponseHeaders(emptyMap(), emptyMap()));
     }
 
     /**
      * Creates a new configuration.
      *
-     * @param httpsOnly       whether the associated web app is HTTPS only or not.
      * @param responseHeaders HTTP response headers configuration
      */
-    public Configuration(boolean httpsOnly, HttpResponseHeaders responseHeaders) {
-        this.httpsOnly = httpsOnly;
+    public Configuration(HttpResponseHeaders responseHeaders) {
         this.responseHeaders = responseHeaders;
-    }
-
-    /**
-     * Returns whether the associated web app is HTTPS only or not.
-     *
-     * @return {@code true} if the associated web app is HTTPS only, otherwise {@code false}
-     */
-    public boolean isHttpsOnly() {
-        return httpsOnly;
     }
 
     /**

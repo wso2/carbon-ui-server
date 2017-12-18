@@ -29,26 +29,7 @@ import java.util.Map;
  */
 public class ConfigurationYaml {
 
-    private boolean httpsOnly;
     private ResponseHeaders responseHeaders;
-
-    /**
-     * Returns {@code httpsOnly} config value.
-     *
-     * @return {@code httpsOnly} config
-     */
-    public boolean isHttpsOnly() {
-        return httpsOnly;
-    }
-
-    /**
-     * Sets {@code httpsOnly} config value.
-     *
-     * @param httpsOnly config value
-     */
-    public void setHttpsOnly(boolean httpsOnly) {
-        this.httpsOnly = httpsOnly;
-    }
 
     /**
      * Returns {@code responseHeaders} config value.
@@ -74,8 +55,7 @@ public class ConfigurationYaml {
      * @return {@link Configuration} object
      */
     public Configuration toConfiguration() {
-        return new Configuration(this.httpsOnly,
-                                 new Configuration.HttpResponseHeaders(this.responseHeaders.getPages(),
+        return new Configuration(new Configuration.HttpResponseHeaders(this.responseHeaders.getPages(),
                                                                        this.responseHeaders.getResources()));
     }
 

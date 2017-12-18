@@ -16,8 +16,6 @@
 # under the License.
 #
 
-httpsOnly: true
-
 responseHeaders:
   resources:
     "Content-Security-Policy": "default-src 'none'; script-src 'self' ssl.google-analytics.com;"
