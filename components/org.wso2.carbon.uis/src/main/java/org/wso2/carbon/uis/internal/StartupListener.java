@@ -38,7 +38,7 @@ import org.wso2.carbon.uis.api.ServerConfiguration;
 import org.wso2.carbon.uis.internal.deployment.listener.AppTransportBinder;
 import org.wso2.carbon.uis.internal.deployment.listener.CarbonUiServer;
 import org.wso2.carbon.uis.internal.deployment.listener.RestApiDeployer;
-import org.wso2.carbon.uis.internal.http.msf4j.MicroservicesRegistrar;
+import org.wso2.carbon.uis.internal.deployment.msf4j.MicroservicesRegistrar;
 import org.wso2.carbon.uis.internal.io.deployment.ArtifactAppDeployer;
 import org.wso2.carbon.uis.spi.RestApiProvider;
 import org.wso2.carbon.uis.spi.Server;
