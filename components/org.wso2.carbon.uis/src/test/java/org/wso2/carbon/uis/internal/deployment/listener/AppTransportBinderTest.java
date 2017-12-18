@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.deployment;
+package org.wso2.carbon.uis.internal.deployment.listener;
 
 import org.osgi.framework.ServiceRegistration;
 import org.testng.Assert;
