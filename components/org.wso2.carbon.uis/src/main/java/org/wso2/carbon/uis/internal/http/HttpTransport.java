@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.uis.internal.http;
 
+import org.wso2.carbon.uis.internal.http.util.IpAddressUtils;
+
 import java.util.Locale;
 import java.util.Objects;
 
@@ -28,7 +30,8 @@ import java.util.Objects;
  */
 public class HttpTransport {
 
-    private final String id;
+    private final String listenerInterfaceId;
+    private final String listenerConfigurationId;
     private final String scheme;
     private final String host;
     private final int port;
@@ -36,25 +39,37 @@ public class HttpTransport {
     /**
      * Creates a new HTTP transport.
      *
-     * @param id     ID of the transport
-     * @param scheme scheme of the transport (either {@code http} or {@code https})
-     * @param host   host name of the transport
-     * @param port   port of the transport
+     * @param listenerInterfaceId     ID of the listener interface
+     * @param listenerConfigurationId ID of the listener configuration
+     * @param scheme                  scheme of the transport (either {@code http} or {@code https})
+     * @param host                    host name of the transport
+     * @param port                    port of the transport
      */
-    public HttpTransport(String id, String scheme, String host, int port) {
-        this.id = id;
+    public HttpTransport(String listenerInterfaceId, String listenerConfigurationId,
+                         String scheme, String host, int port) {
+        this.listenerInterfaceId = listenerInterfaceId;
+        this.listenerConfigurationId = listenerConfigurationId;
         this.scheme = scheme.toLowerCase(Locale.ENGLISH);
         this.host = host;
         this.port = port;
     }
 
     /**
-     * Returns the ID of the represented HTTP transport.
+     * Returns the ID of the listener interface of the represented HTTP transport
      *
-     * @return ID of the HTTP transport
+     * @return ID of the listener interface
      */
-    public String getId() {
-        return id;
+    public String getListenerInterfaceId() {
+        return listenerInterfaceId;
+    }
+
+    /**
+     * Returns the ID of the listener configuration of the represented HTTP transport
+     *
+     * @return ID of the listener configuration
+     */
+    public String getListenerConfigurationId() {
+        return listenerConfigurationId;
     }
 
     /**
@@ -93,18 +108,41 @@ public class HttpTransport {
         return Objects.equals(scheme, "https");
     }
 
+    /**
+     * Returns an accessible URL for the given context path via this HTTP transport.
+     *
+     * @param contextPath content path of the URL
+     * @return URL
+     */
+    public String getUrlFor(String contextPath) {
+        String properHost = host;
+        if ("localhost".equals(host) || "127.0.0.1".equals(host) || "0.0.0.0".equals(host) || "::1".equals(host)) {
+            properHost = IpAddressUtils.getLocalIpAddress().orElse(host);
+        }
+        return scheme + "://" + properHost + ":" + port + contextPath;
+    }
+
     @Override
     public boolean equals(Object obj) {
-        return (this == obj) || ((obj instanceof HttpTransport) && Objects.equals(id, ((HttpTransport) obj).id));
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof HttpTransport)) {
+            return false;
+        }
+        HttpTransport other = (HttpTransport) obj;
+        return Objects.equals(listenerInterfaceId, other.listenerInterfaceId) &&
+               Objects.equals(listenerConfigurationId, other.listenerConfigurationId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(listenerInterfaceId, listenerConfigurationId);
     }
 
     @Override
     public String toString() {
-        return "HttpTransport{id='" + id + "', scheme='" + scheme + "', host='" + host + "', port='" + port + "'}";
+        return "HttpTransport{listenerInterfaceId='" + listenerInterfaceId + "', listenerConfigurationId='" +
+               listenerConfigurationId + "', scheme='" + scheme + "', host='" + host + "', port=" + port + '}';
     }
 }
