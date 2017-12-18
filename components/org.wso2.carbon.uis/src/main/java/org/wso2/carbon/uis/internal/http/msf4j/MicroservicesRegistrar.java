@@ -28,6 +28,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.uis.internal.deployment.msf4j.MicroserviceRegistration;
 import org.wso2.carbon.uis.internal.http.HttpTransport;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.MicroservicesServer;
