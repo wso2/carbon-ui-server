@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.uis.internal.http.msf4j;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -36,7 +35,7 @@ import org.wso2.msf4j.MicroservicesServer;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -71,11 +70,15 @@ public class MicroservicesRegistrar {
                policy = ReferencePolicy.DYNAMIC,
                unbind = "unsetMicroservicesServer")
     protected void setMicroservicesServer(MicroservicesServer microservicesServer) {
-         microservicesServer.getListenerConfigurations().entrySet().stream()
-                .map(entry -> new HttpTransport(entry.getKey(), entry.getValue().getScheme(),
-                                                entry.getValue().getHost(), entry.getValue().getPort()))
-                .peek(httpTransport -> LOGGER.debug("HTTP transport {} is available.", httpTransport))
-                .forEach(httpTransports::add);
+        microservicesServer.getListenerConfigurations()
+                .forEach((listenerInterfaceId, listenerConfiguration) -> {
+                    HttpTransport httpTransport = new HttpTransport(listenerInterfaceId, listenerConfiguration.getId(),
+                                                                    listenerConfiguration.getScheme(),
+                                                                    listenerConfiguration.getHost(),
+                                                                    listenerConfiguration.getPort());
+                    httpTransports.add(httpTransport);
+                    LOGGER.debug("HTTP transport {} is available.", httpTransport);
+                });
         LOGGER.debug("Microservices Server '{}' registered.", microservicesServer.getClass().getName());
     }
 
@@ -85,44 +88,52 @@ public class MicroservicesRegistrar {
     }
 
     /**
-     * Registers supplied Microservice to available HTTP transports for the specified content path.
+     * Registers supplied Microservice to the specified HTTP transport for the specified content path.
      *
-     * @param microservice Microservice to be registered
-     * @param contextPath  context path
+     * @param microservice            Microservice to be registered
+     * @param contextPath             context path
+     * @param listenerConfigurationId listener configuration ID of the transport that the supplying Microservice should
+     *                                be registered
      * @return Microservice registration object that represents this registration
+     * @throws IllegalArgumentException if cannot find a HTTP transport for the {@code listenerConfigurationId}
      */
-    public MicroserviceRegistration registerMicroservice(Microservice microservice, String contextPath) {
-        return registerMicroservice(microservice, contextPath, false);
+    public MicroserviceRegistration register(Microservice microservice, String contextPath,
+                                             String listenerConfigurationId) throws IllegalArgumentException {
+        HttpTransport httpTransport = httpTransports.stream()
+                .filter(ht -> Objects.equals(ht.getListenerConfigurationId(), listenerConfigurationId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Cannot find a HTTP transport for listener configuration ID '" +
+                        listenerConfigurationId + "'. Available HTTP transport: " + httpTransports));
+        ServiceRegistration<Microservice> serviceRegistration = register(microservice, contextPath,
+                                                                         httpTransport);
+        return new MicroserviceRegistration(httpTransport, serviceRegistration);
     }
 
     /**
-     * Registers supplied Microservice to available <b>HTTPS</b> transports for the specified content path.
+     * Registers supplied Microservice to all available <b>HTTPS</b> transports for the specified content path.
      *
      * @param microservice Microservice to be registered
      * @param contextPath  context path
-     * @return Microservice registration object that represents this registration
+     * @return set of Microservice registrations object that represents registrations
      */
-    public MicroserviceRegistration registerSecuredMicroservice(Microservice microservice, String contextPath) {
-        return registerMicroservice(microservice, contextPath, true);
+    public Set<MicroserviceRegistration> register(Microservice microservice, String contextPath) {
+        return httpTransports.stream()
+                .filter(HttpTransport::isSecured)
+                .map(ht -> new MicroserviceRegistration(ht, register(microservice, contextPath, ht)))
+                .collect(Collectors.toSet());
     }
 
-    private MicroserviceRegistration registerMicroservice(Microservice microservice, String contextPath,
-                                                          boolean isHttpsOnly) {
-        Map<HttpTransport, ServiceRegistration<Microservice>> serviceRegistrations = httpTransports.stream()
-                .filter(httpTransport -> !isHttpsOnly || httpTransport.isSecured())
-                .map(httpTransport -> Pair.of(httpTransport,
-                                              registerMicroservice(contextPath, microservice, httpTransport)))
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
-        return new MicroserviceRegistration(serviceRegistrations);
-    }
-
-    private ServiceRegistration<Microservice> registerMicroservice(String contextPath, Microservice microservice,
-                                                                   HttpTransport httpTransport) {
+    private ServiceRegistration<Microservice> register(Microservice microservice, String contextPath,
+                                                       HttpTransport httpTransport) {
         Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("CHANNEL_ID", httpTransport.getId());
+        properties.put("LISTENER_INTERFACE_ID", httpTransport.getListenerInterfaceId());
         properties.put("contextPath", contextPath);
         properties.put("skipCarbonStartupResolver", true);
-        return bundleContext.registerService(Microservice.class, microservice, properties);
-
+        ServiceRegistration<Microservice> registration = bundleContext.registerService(Microservice.class, microservice,
+                                                                                       properties);
+        LOGGER.debug("Microservice {} registered to {} for context path '{}'.", microservice, httpTransport,
+                     contextPath);
+        return registration;
     }
 }
