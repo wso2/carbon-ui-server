@@ -19,6 +19,7 @@
 package org.wso2.carbon.uis.internal.deployment;
 
 import org.wso2.carbon.uis.api.App;
+import org.wso2.carbon.uis.internal.exception.AppDeploymentEventListenerException;
 
 /**
  * A listener that observes web app deployments.
@@ -31,13 +32,15 @@ public interface AppDeploymentEventListener {
      * Invoked when an app is deployed.
      *
      * @param app the deployed app
+     * @throws AppDeploymentEventListenerException if an error occurred when calling
      */
-    void appDeploymentEvent(App app);
+    void appDeploymentEvent(App app) throws AppDeploymentEventListenerException;
 
     /**
      * Invoked when an app is undeployed.
      *
      * @param appName name of the undeploying app.
+     * @throws AppDeploymentEventListenerException if an error occurred when calling
      */
-    void appUndeploymentEvent(String appName);
+    void appUndeploymentEvent(String appName) throws AppDeploymentEventListenerException;
 }
