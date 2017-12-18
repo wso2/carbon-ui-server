@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.http.msf4j;
+package org.wso2.carbon.uis.internal.deployment.msf4j;
 
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;

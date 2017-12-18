@@ -16,15 +16,16 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.deployment;
+package org.wso2.carbon.uis.internal.deployment.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.ServerConfiguration;
+import org.wso2.carbon.uis.internal.deployment.AppDeploymentEventListener;
+import org.wso2.carbon.uis.internal.deployment.msf4j.MicroserviceRegistration;
+import org.wso2.carbon.uis.internal.deployment.msf4j.MicroservicesRegistrar;
 import org.wso2.carbon.uis.internal.exception.AppDeploymentEventListenerException;
-import org.wso2.carbon.uis.internal.http.msf4j.MicroserviceRegistration;
-import org.wso2.carbon.uis.internal.http.msf4j.MicroservicesRegistrar;
 import org.wso2.carbon.uis.spi.RestApiProvider;
 import org.wso2.msf4j.Microservice;
 

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal;
+package org.wso2.carbon.uis.internal.deployment.listener;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;

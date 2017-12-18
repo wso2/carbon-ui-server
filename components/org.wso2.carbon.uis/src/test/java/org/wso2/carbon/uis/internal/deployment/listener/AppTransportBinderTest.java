@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.uis.internal.deployment;
+package org.wso2.carbon.uis.internal.deployment.listener;
 
 import org.osgi.framework.ServiceRegistration;
 import org.testng.Assert;
@@ -24,10 +24,10 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.uis.api.App;
 import org.wso2.carbon.uis.api.Configuration;
 import org.wso2.carbon.uis.api.ServerConfiguration;
+import org.wso2.carbon.uis.internal.deployment.msf4j.MicroserviceRegistration;
+import org.wso2.carbon.uis.internal.deployment.msf4j.MicroservicesRegistrar;
 import org.wso2.carbon.uis.internal.exception.AppDeploymentEventListenerException;
 import org.wso2.carbon.uis.internal.http.HttpTransport;
-import org.wso2.carbon.uis.internal.http.msf4j.MicroserviceRegistration;
-import org.wso2.carbon.uis.internal.http.msf4j.MicroservicesRegistrar;
 
 import java.util.Collections;
 import java.util.Optional;
