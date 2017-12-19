@@ -89,10 +89,6 @@ public class AppCreator {
         List<Page> pages = appReference.getPageReferences().stream()
                 .map(AppCreator::createPage)
                 .collect(Collectors.toList());
-        if (pages.isEmpty()) {
-            throw new AppCreationException("App '" + appReference.getName() + "' does not contains any pages.");
-        }
-
         // TODO: 10/13/17 remove following workaround after adding support for URI patterns with * in UriPatten class
         if ((pages.size() == 1) && (pages.get(0).getUriPatten().matches("/index"))) {
             final Page indexPage = pages.get(0);
