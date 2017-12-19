@@ -366,8 +366,8 @@
         <carbon.touchpoint.version>1.1.0</carbon.touchpoint.version>
 
         <!--Deployment-->
-        <carbon.deployment.version>5.1.9</carbon.deployment.version>
-        <carbon.deployment.version.range>[5.1.9, 6.0.0)</carbon.deployment.version.range>
+        <carbon.deployment.version>5.2.0</carbon.deployment.version>
+        <carbon.deployment.version.range>[5.2.0, 6.0.0)</carbon.deployment.version.range>
 
         <!--Config-->
         <carbon.config.version>2.1.5</carbon.config.version>
