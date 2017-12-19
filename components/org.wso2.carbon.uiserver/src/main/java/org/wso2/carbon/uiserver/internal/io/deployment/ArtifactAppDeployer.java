@@ -95,7 +95,7 @@ public class ArtifactAppDeployer implements Deployer {
                         previouslyCreatedOverridableApp.get(), createdApp);
             publishAppUndeploymentEvent(previouslyCreatedOverridableApp.get());
             appRegistry.add(createdApp);
-            deployingApp = new OverriddenApp(createdApp, previouslyCreatedOverridableApp.get());
+            deployingApp = new OverriddenApp(previouslyCreatedOverridableApp.get(), createdApp);
         } else {
             deployingApp = createdApp;
         }
