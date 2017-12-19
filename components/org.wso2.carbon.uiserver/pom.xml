@@ -171,16 +171,16 @@
             org.apache.commons.io; version="${commons-io.wso2.version.range}",
             com.github.jknack.handlebars.*;version="${orbit.com.github.jknack.handlebars.version.range}",
         </import.package>
-        <private.package>org.wso2.carbon.uis.internal.*</private.package>
+        <private.package>org.wso2.carbon.uiserver.internal.*</private.package>
         <export.package>
-            !org.wso2.carbon.uis.internal*,
-            org.wso2.carbon.uis.api.*;version="${project.version}",
-            org.wso2.carbon.uis.spi.*;version="${project.version}"
+            !org.wso2.carbon.uiserver.internal*,
+            org.wso2.carbon.uiserver.api.*;version="${project.version}",
+            org.wso2.carbon.uiserver.spi.*;version="${project.version}"
         </export.package>
         <carbon.component>
             osgi.service; objectClass="org.wso2.carbon.deployment.engine.Deployer",
             startup.listener; componentName="carbon-ui-server-startup-listener";
-            requiredService="org.wso2.carbon.uis.spi.RestApiProvider",
+            requiredService="org.wso2.carbon.uiserver.spi.RestApiProvider",
             osgi.service; objectClass="org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener"
         </carbon.component>
     </properties>

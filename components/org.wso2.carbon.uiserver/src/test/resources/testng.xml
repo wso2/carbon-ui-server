@@ -18,10 +18,10 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="uis-core" verbose="1" >
-    <test name="uis-core"   >
+<suite name="carbon-ui-server" verbose="1">
+    <test name="core">
         <packages>
-            <package name="org.wso2.carbon.uis" />
+            <package name="org.wso2.carbon.uiserver" />
         </packages>
     </test>
 </suite>
