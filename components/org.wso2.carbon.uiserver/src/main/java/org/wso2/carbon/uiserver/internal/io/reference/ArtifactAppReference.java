@@ -64,19 +64,16 @@ public class ArtifactAppReference implements AppReference {
     public Set<PageReference> getPageReferences() throws FileOperationException {
         Path pages = getPagesDirectory();
         if (!Files.exists(pages)) {
-            throw new FileOperationException(
-                    "Cannot find '" + DIR_NAME_PAGES + "' directory in app '" + appDirectory + "'.");
+            return Collections.emptySet();
         }
-        Set<PageReference> pageReferences;
         try {
-            pageReferences = Files.walk(pages)
+            return Files.walk(pages)
                     .filter(Files::isRegularFile)
                     .map(pageFile -> new ArtifactPageReference(pageFile, this))
                     .collect(Collectors.toSet());
         } catch (IOException e) {
             throw new FileOperationException("An error occurred while listing pages in '" + pages + "'.", e);
         }
-        return pageReferences;
     }
 
     @Override
