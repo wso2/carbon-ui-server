@@ -23,7 +23,7 @@ package org.wso2.carbon.uiserver.api.exception;
  *
  * @since 0.8.0
  */
-public class HttpErrorException extends UISRuntimeException {
+public class HttpErrorException extends UiServerRuntimeException {
 
     private final int httpStatusCode;
 

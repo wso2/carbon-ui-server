@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.uiserver.internal.io.util;
 
-import org.wso2.carbon.uiserver.api.exception.UISRuntimeException;
+import org.wso2.carbon.uiserver.api.exception.UiServerRuntimeException;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -40,17 +40,17 @@ public class MimeMapper {
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<String, String> loadMimeTypes() throws UISRuntimeException {
+    private static Map<String, String> loadMimeTypes() throws UiServerRuntimeException {
         try (InputStream inputStream = MimeMapper.class.getClassLoader().getResourceAsStream(FILE_NAME_MIME_TYPES)) {
             if (inputStream == null) {
-                throw new UISRuntimeException(
+                throw new UiServerRuntimeException(
                         "Cannot find MIME types file '" + FILE_NAME_MIME_TYPES + "' in class path.");
             }
             return new Yaml().loadAs(inputStream, Map.class);
         } catch (IOException e) {
-            throw new UISRuntimeException("Cannot read MIME types file '" + FILE_NAME_MIME_TYPES + "'.", e);
+            throw new UiServerRuntimeException("Cannot read MIME types file '" + FILE_NAME_MIME_TYPES + "'.", e);
         } catch (Exception e) {
-            throw new UISRuntimeException("MIME types file is '" + FILE_NAME_MIME_TYPES + "' is invalid.", e);
+            throw new UiServerRuntimeException("MIME types file is '" + FILE_NAME_MIME_TYPES + "' is invalid.", e);
         }
     }
 
@@ -59,9 +59,9 @@ public class MimeMapper {
      *
      * @param extension file extension
      * @return MIME type for the given file extension
-     * @throws UISRuntimeException if cannot find or read the MIME types file, or it is invalid
+     * @throws UiServerRuntimeException if cannot find or read the MIME types file, or it is invalid
      */
-    public static Optional<String> getMimeType(String extension) throws UISRuntimeException {
+    public static Optional<String> getMimeType(String extension) throws UiServerRuntimeException {
         if (mimeTypes == null) {
             synchronized (MimeMapper.class) {
                 if (mimeTypes == null) {

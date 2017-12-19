@@ -23,7 +23,7 @@ package org.wso2.carbon.uiserver.api.exception;
  *
  * @since 0.8.0
  */
-public class RenderingException extends UISRuntimeException {
+public class RenderingException extends UiServerRuntimeException {
 
     /**
      * Constructs a new exception with {@code null} as its detail message. The cause is not initialized, and may

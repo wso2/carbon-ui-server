@@ -23,13 +23,13 @@ package org.wso2.carbon.uiserver.api.exception;
  *
  * @since 0.8.0
  */
-public class UISException extends Exception {
+public class UiServerException extends Exception {
 
     /**
      * Constructs a new exception with {@code null} as its detail message. The cause is not initialized, and may
      * subsequently be initialized by a call to {@link #initCause(Throwable)}.
      */
-    public UISException() {
+    public UiServerException() {
     }
 
     /**
@@ -38,7 +38,7 @@ public class UISException extends Exception {
      *
      * @param message the detail message of the exception
      */
-    public UISException(String message) {
+    public UiServerException(String message) {
         super(message);
     }
 
@@ -48,7 +48,7 @@ public class UISException extends Exception {
      *
      * @param cause the cause of the exception
      */
-    public UISException(Throwable cause) {
+    public UiServerException(Throwable cause) {
         super(cause);
     }
 
@@ -58,7 +58,7 @@ public class UISException extends Exception {
      * @param message the detail message of the exception
      * @param cause   the cause of the exception
      */
-    public UISException(String message, Throwable cause) {
+    public UiServerException(String message, Throwable cause) {
         super(message, cause);
     }
 }
