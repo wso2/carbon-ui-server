@@ -20,7 +20,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.wso2.carbon.uis.tests</groupId>
     <artifactId>org.wso2.carbon.uis.tests.distribution</artifactId>
     <packaging>pom</packaging>
 
@@ -29,7 +28,7 @@
     <url>http://wso2.org</url>
 
     <parent>
-        <groupId>org.wso2.carbon.uis.tests</groupId>
+        <groupId>org.wso2.carbon.uiserver.tests</groupId>
         <artifactId>tests-parent</artifactId>
         <version>0.18.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
