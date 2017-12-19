@@ -38,9 +38,9 @@
     <dependencies>
         <!--Carbon UI Server features-->
         <dependency>
-            <groupId>org.wso2.carbon.uis</groupId>
+            <groupId>org.wso2.carbon.uiserver</groupId>
             <artifactId>org.wso2.carbon.uis.feature</artifactId>
-            <version>${carbon.uis.version}</version>
+            <version>${carbon.uiserver.version}</version>
             <type>zip</type>
         </dependency>
 
@@ -192,7 +192,7 @@
                                 <!--Carbon UI Server features-->
                                 <feature>
                                     <id>org.wso2.carbon.uis.feature</id>
-                                    <version>${carbon.uis.version}</version>
+                                    <version>${carbon.uiserver.version}</version>
                                 </feature>
 
                                 <!--Kernel-->
@@ -308,7 +308,7 @@
                                 <!--Carbon UI Server features-->
                                 <feature>
                                     <id>org.wso2.carbon.uis.feature</id>
-                                    <version>${carbon.uis.version}</version>
+                                    <version>${carbon.uiserver.version}</version>
                                 </feature>
 
                                 <!--Kernel-->

@@ -28,7 +28,7 @@
     <url>http://wso2.org</url>
 
     <parent>
-        <groupId>org.wso2.carbon.uis</groupId>
+        <groupId>org.wso2.carbon.uiserver</groupId>
         <artifactId>uis-parent</artifactId>
         <version>0.18.3-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
@@ -36,7 +36,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.uis</groupId>
+            <groupId>org.wso2.carbon.uiserver</groupId>
             <artifactId>org.wso2.carbon.uis</artifactId>
         </dependency>
         <dependency>
@@ -72,7 +72,7 @@
                             <bundles>
                                 <bundle>
                                     <symbolicName>org.wso2.carbon.uis</symbolicName>
-                                    <version>${carbon.uis.version}</version>
+                                    <version>${carbon.uiserver.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>org.yaml.snakeyaml</symbolicName>

@@ -20,7 +20,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.wso2.carbon.uis</groupId>
+    <groupId>org.wso2.carbon.uiserver</groupId>
     <artifactId>uis-parent</artifactId>
     <version>0.18.3-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -51,9 +51,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.wso2.carbon.uis</groupId>
+                <groupId>org.wso2.carbon.uiserver</groupId>
                 <artifactId>org.wso2.carbon.uis</artifactId>
-                <version>${carbon.uis.version}</version>
+                <version>${carbon.uiserver.version}</version>
             </dependency>
 
             <!--Kernel-->
@@ -358,7 +358,7 @@
     </build>
 
     <properties>
-        <carbon.uis.version>0.18.3-SNAPSHOT</carbon.uis.version>
+        <carbon.uiserver.version>0.18.3-SNAPSHOT</carbon.uiserver.version>
 
         <!--Kernel-->
         <carbon.kernel.version>5.2.5</carbon.kernel.version>
