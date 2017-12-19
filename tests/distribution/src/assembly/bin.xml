@@ -17,7 +17,7 @@
   -->
 
 <assembly>
-    <id>cuis</id>
+    <id>carbon-ui-server</id>
 
     <includeBaseDirectory>true</includeBaseDirectory>
     <baseDirectory>wso2-cuis-${project.version}</baseDirectory>
