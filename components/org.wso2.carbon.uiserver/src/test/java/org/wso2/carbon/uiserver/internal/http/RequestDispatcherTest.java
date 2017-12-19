@@ -20,7 +20,7 @@ package org.wso2.carbon.uiserver.internal.http;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.carbon.uiserver.api.exception.UISRuntimeException;
+import org.wso2.carbon.uiserver.api.exception.UiServerRuntimeException;
 import org.wso2.carbon.uiserver.api.http.HttpRequest;
 import org.wso2.carbon.uiserver.api.http.HttpResponse;
 import org.wso2.carbon.uiserver.internal.io.http.StaticRequestDispatcher;
@@ -83,7 +83,7 @@ public class RequestDispatcherTest {
     public void testServeWhenUISRuntimeException() {
         HttpRequest request = createPageRequest();
         PageRequestDispatcher pageRequestDispatcher = mock(PageRequestDispatcher.class);
-        when(pageRequestDispatcher.serve(any())).thenThrow(UISRuntimeException.class);
+        when(pageRequestDispatcher.serve(any())).thenThrow(UiServerRuntimeException.class);
 
         HttpResponse response = new RequestDispatcher(pageRequestDispatcher, null).serve(request);
         Assert.assertEquals(response.getStatus(), HttpResponse.STATUS_INTERNAL_SERVER_ERROR);

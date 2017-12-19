@@ -21,7 +21,7 @@ package org.wso2.carbon.uiserver.internal.http;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.uiserver.api.App;
-import org.wso2.carbon.uiserver.api.exception.UISRuntimeException;
+import org.wso2.carbon.uiserver.api.exception.UiServerRuntimeException;
 import org.wso2.carbon.uiserver.api.http.HttpRequest;
 import org.wso2.carbon.uiserver.api.http.HttpResponse;
 import org.wso2.carbon.uiserver.internal.io.http.StaticRequestDispatcher;
@@ -71,7 +71,7 @@ public class RequestDispatcher {
             } else {
                 return pageRequestDispatcher.serve(request);
             }
-        } catch (UISRuntimeException e) {
+        } catch (UiServerRuntimeException e) {
             LOGGER.error("An error occurred when serving for request '{}'.", request, e);
             return ResponseBuilder.serverError("A server occurred while serving for request.").build();
         } catch (Exception e) {

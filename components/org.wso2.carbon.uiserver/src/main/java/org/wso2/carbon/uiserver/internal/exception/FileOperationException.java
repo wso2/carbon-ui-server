@@ -19,14 +19,14 @@
 package org.wso2.carbon.uiserver.internal.exception;
 
 
-import org.wso2.carbon.uiserver.api.exception.UISRuntimeException;
+import org.wso2.carbon.uiserver.api.exception.UiServerRuntimeException;
 
 /**
  * Indicates an error occurred in a file system related operation.
  *
  * @since 0.8.0
  */
-public class FileOperationException extends UISRuntimeException {
+public class FileOperationException extends UiServerRuntimeException {
 
     /**
      * Constructs a new exception with {@code null} as its detail message. The cause is not initialized, and may
