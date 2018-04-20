@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentMap;
  * Binder that registers web apps to the HTTP transport layer.
  * <p>
  * This class is responsible for binding a web app to the HTTP transport layer, when that web app gets deployed. When
- * the web app gets updeloyed, it will be unbound from the transport layer.
+ * the web app gets undeployed, it will be unbound from the transport layer.
  *
  * @since 0.15.0
  */
