@@ -139,7 +139,8 @@ public class StaticRequestDispatcher {
             return ResponseBuilder.notFound("Requested resource '" + request.getUri() + "' does not exists.").build();
         } catch (FileOperationException e) {
             LOGGER.error("An error occurred when manipulating paths for static resource request '{}'.", request, e);
-            return ResponseBuilder.serverError("A server occurred while serving for static resource request.").build();
+            return ResponseBuilder.serverError("A server error occurred while serving for static resource request.")
+                    .build();
         }
     }
 
