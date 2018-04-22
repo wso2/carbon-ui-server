@@ -405,8 +405,8 @@
         <!--Other-->
         <netty.version>4.0.30.Final</netty.version>
         <netty.version.range>[4.0.30, 5.0.0)</netty.version.range>
-        <guava.version>20.0</guava.version>
-        <guava.version.range>[20.0,21.0)</guava.version.range>
+        <guava.version>21.0</guava.version>
+        <guava.version.range>[21.0, 22.0)</guava.version.range>
         <gson.version>2.7</gson.version>
         <gson.version.range>[2.6, 3.0)</gson.version.range>
         <snakeyaml.version>1.19</snakeyaml.version>
