@@ -73,10 +73,11 @@ public class RequestDispatcher {
             }
         } catch (UiServerRuntimeException e) {
             LOGGER.error("An error occurred when serving for request '{}'.", request, e);
-            return ResponseBuilder.serverError("A server occurred while serving for request.").build();
+            return ResponseBuilder.serverError("A server error occurred while serving for request.").build();
         } catch (Exception e) {
             LOGGER.error("An unexpected error occurred when serving for request '{}'.", request, e);
-            return ResponseBuilder.serverError("An unexpected server occurred while serving for request.").build();
+            return ResponseBuilder.serverError("An unexpected server error occurred while serving for request.")
+                    .build();
         }
     }
 }

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.uiserver.internal.http;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.uiserver.api.App;
 import org.wso2.carbon.uiserver.api.exception.PageNotFoundException;
 import org.wso2.carbon.uiserver.api.exception.PageRedirectException;
@@ -34,6 +36,8 @@ import static org.wso2.carbon.uiserver.api.http.HttpResponse.HEADER_LOCATION;
  * @since 0.13.4
  */
 public class PageRequestDispatcher {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PageRequestDispatcher.class);
 
     private final App app;
 
@@ -59,8 +63,8 @@ public class PageRequestDispatcher {
                     .headers(app.getConfiguration().getResponseHeaders().forPages())
                     .build();
         } catch (RenderingException e) {
-            return ResponseBuilder
-                    .serverError("An error occurred when rendering page '" + request.getUriWithoutContextPath() + "'.")
+            LOGGER.error("An error occurred when rendering page for request '{}'.", request, e);
+            return ResponseBuilder.serverError("A server error occurred while rendering page for page request.")
                     .build();
         } catch (PageNotFoundException e) {
             return ResponseBuilder.notFound("Page '" + request.getUriWithoutContextPath() + "' does not exists.")
