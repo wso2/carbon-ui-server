@@ -30,7 +30,7 @@
     <parent>
         <groupId>org.wso2.carbon.uiserver</groupId>
         <artifactId>uis-parent</artifactId>
-        <version>0.19.5</version>
+        <version>0.19.6-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
