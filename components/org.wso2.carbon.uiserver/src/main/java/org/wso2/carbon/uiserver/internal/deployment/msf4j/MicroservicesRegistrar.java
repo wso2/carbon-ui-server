@@ -52,6 +52,8 @@ public class MicroservicesRegistrar {
 
     private final Set<HttpTransport> httpTransports = new HashSet<>();
     private BundleContext bundleContext;
+    private String propertyKeyListenerInterfaceId;
+    private String propertyKeyContextPath;
 
     @Activate
     protected void activate(BundleContext bundleContext) {
@@ -79,6 +81,25 @@ public class MicroservicesRegistrar {
                     httpTransports.add(httpTransport);
                     LOGGER.debug("HTTP transport {} is available.", httpTransport);
                 });
+
+        /*
+         * This class uses some constants defined in the MSF4JConstants class. Since the MSF4JConstants class is an
+         * internal one, we cannot refer it here. Copying the values of those constants here is not a good approach as
+         * if someone change their values in MSF4JConstants class, it won't be reflect here and will break microservices
+         * registering & unregistering at runtime. Hence, we access those constants in the MSF4JConstants class by
+         * reflection.
+         */
+        try {
+            Class<?> msf4jConstants = microservicesServer.getClass().getClassLoader()
+                    .loadClass("org.wso2.msf4j.internal.MSF4JConstants");
+            propertyKeyListenerInterfaceId = msf4jConstants.getDeclaredField("CHANNEL_ID").get(null).toString();
+            propertyKeyContextPath = msf4jConstants.getDeclaredField("CONTEXT_PATH").get(null).toString();
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException | IllegalArgumentException e) {
+            // If reflection fails, use hard-coded ones.
+            propertyKeyListenerInterfaceId = "LISTENER_INTERFACE_ID";
+            propertyKeyContextPath = "contextPath";
+            LOGGER.debug("Cannot access constants in MSF4JConstants class via reflection.", e);
+        }
         LOGGER.debug("Microservices Server '{}' registered.", microservicesServer.getClass().getName());
     }
 
@@ -127,8 +148,8 @@ public class MicroservicesRegistrar {
     private ServiceRegistration<Microservice> register(Microservice microservice, String contextPath,
                                                        HttpTransport httpTransport) {
         Dictionary<String, Object> properties = new Hashtable<>();
-        properties.put("LISTENER_INTERFACE_ID", httpTransport.getListenerInterfaceId());
-        properties.put("contextPath", contextPath);
+        properties.put(propertyKeyListenerInterfaceId, httpTransport.getListenerInterfaceId());
+        properties.put(propertyKeyContextPath, contextPath);
         properties.put("skipCarbonStartupResolver", true);
         ServiceRegistration<Microservice> registration = bundleContext.registerService(Microservice.class, microservice,
                                                                                        properties);
