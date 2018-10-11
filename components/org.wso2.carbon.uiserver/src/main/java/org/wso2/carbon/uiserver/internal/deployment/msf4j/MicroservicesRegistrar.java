@@ -96,7 +96,7 @@ public class MicroservicesRegistrar {
             propertyKeyContextPath = msf4jConstants.getDeclaredField("CONTEXT_PATH").get(null).toString();
         } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException | IllegalArgumentException e) {
             // If reflection fails, use hard-coded ones.
-            propertyKeyListenerInterfaceId = "LISTENER_INTERFACE_ID";
+            propertyKeyListenerInterfaceId = "listener.interface.id";
             propertyKeyContextPath = "contextPath";
             LOGGER.debug("Cannot access constants in MSF4JConstants class via reflection.", e);
         }
