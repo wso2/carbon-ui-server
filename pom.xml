@@ -380,7 +380,7 @@
         <msf4j.version.range>[2.7.0, 3.0.0)</msf4j.version.range>
         <javax.ws.rs.version.range>[2.0.0, 3.0.0)</javax.ws.rs.version.range>
         <!--Transport-->
-        <transport.http.netty.version>6.0.272</transport.http.netty.version>
+        <transport.http.netty.version>6.0.288</transport.http.netty.version>
         <transport.http.netty.version.range>[6.0.272, 7.0.0)</transport.http.netty.version.range>
         <!--Metrics-->
         <carbon.metrics.version>2.3.2</carbon.metrics.version>
