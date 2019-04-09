@@ -30,7 +30,7 @@
     <parent>
         <groupId>org.wso2.carbon.uiserver.tests</groupId>
         <artifactId>tests-parent</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
