@@ -372,7 +372,7 @@
         <!--Config-->
         <carbon.config.version>2.1.12</carbon.config.version>
         <carbon.config.version.range>[2.0.0, 3.0.0)</carbon.config.version.range>
-        <carbon.securevault.version>5.0.8</carbon.securevault.version>
+        <carbon.securevault.version>5.0.13</carbon.securevault.version>
         <carbon.utils.version>2.0.2</carbon.utils.version>
 
         <!--MSF4J-->
