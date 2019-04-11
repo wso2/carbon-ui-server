@@ -376,11 +376,11 @@
         <carbon.utils.version>2.0.2</carbon.utils.version>
 
         <!--MSF4J-->
-        <msf4j.version>2.7.0</msf4j.version>
+        <msf4j.version>2.7.2</msf4j.version>
         <msf4j.version.range>[2.7.0, 3.0.0)</msf4j.version.range>
         <javax.ws.rs.version.range>[2.0.0, 3.0.0)</javax.ws.rs.version.range>
         <!--Transport-->
-        <transport.http.netty.version>6.0.288</transport.http.netty.version>
+        <transport.http.netty.version>6.0.289</transport.http.netty.version>
         <transport.http.netty.version.range>[6.0.272, 7.0.0)</transport.http.netty.version.range>
         <!--Metrics-->
         <carbon.metrics.version>2.3.2</carbon.metrics.version>
@@ -403,7 +403,7 @@
         <slf4j.log4j.version.range>[1.6.0, 2.0.0)</slf4j.log4j.version.range>
 
         <!--Other-->
-        <netty.version>4.0.30.Final</netty.version>
+        <netty.version>4.1.19.Final</netty.version>
         <netty.version.range>[4.0.30, 5.0.0)</netty.version.range>
         <guava.version>23.0</guava.version>
         <guava.version.range>[21.0, 24.0)</guava.version.range>
