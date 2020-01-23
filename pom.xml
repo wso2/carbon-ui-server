@@ -399,7 +399,7 @@
         <msf4j.version>2.7.3</msf4j.version>
         <msf4j.version.range>[2.7.0, 3.0.0)</msf4j.version.range>
         <javax.ws.rs.version.range>[2.0.0, 3.0.0)</javax.ws.rs.version.range>
-        <carbon.analytics-common.version>6.1.30</carbon.analytics-common.version>
+        <carbon.analytics-common.version>6.1.41</carbon.analytics-common.version>
         <!--Transport-->
         <transport.http.netty.version>6.0.289</transport.http.netty.version>
         <transport.http.netty.version.range>[6.0.272, 7.0.0)</transport.http.netty.version.range>
@@ -437,9 +437,9 @@
         <commons-io.wso2.version>2.4.0.wso2v1</commons-io.wso2.version>
         <commons-io.wso2.version.range>[2.4.0, 3.0.0)</commons-io.wso2.version.range>
         <!-- Handlebars -->
-        <orbit.com.github.jknack.handlebars.version>4.0.3.wso2v1</orbit.com.github.jknack.handlebars.version>
-        <orbit.com.github.jknack.handlebars.version.range>[4.0.3, 5.0.0)</orbit.com.github.jknack.handlebars.version.range>
-        <antlr-version>4.5.1-1</antlr-version>
+        <orbit.com.github.jknack.handlebars.version>4.0.7.wso2v1</orbit.com.github.jknack.handlebars.version>
+        <orbit.com.github.jknack.handlebars.version.range>[4.0.7, 5.0.0)</orbit.com.github.jknack.handlebars.version.range>
+        <antlr-version>4.7.2</antlr-version>
 
         <!--Test-->
         <testng.version>6.9.10</testng.version>
