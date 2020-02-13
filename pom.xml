@@ -381,7 +381,7 @@
         <carbon.uiserver.version>1.0.5-SNAPSHOT</carbon.uiserver.version>
 
         <!--Kernel-->
-        <carbon.kernel.version>5.2.8</carbon.kernel.version>
+        <carbon.kernel.version>5.2.12</carbon.kernel.version>
         <carbon.kernel.version.range>[5.2.0, 6.0.0)</carbon.kernel.version.range>
         <carbon.touchpoint.version>1.1.1</carbon.touchpoint.version>
 
@@ -390,7 +390,7 @@
         <carbon.deployment.version.range>[5.2.0, 6.0.0)</carbon.deployment.version.range>
 
         <!--Config-->
-        <carbon.config.version>2.1.12</carbon.config.version>
+        <carbon.config.version>2.1.16</carbon.config.version>
         <carbon.config.version.range>[2.0.0, 3.0.0)</carbon.config.version.range>
         <carbon.securevault.version>5.0.13</carbon.securevault.version>
         <carbon.utils.version>2.0.8</carbon.utils.version>
@@ -399,14 +399,14 @@
         <msf4j.version>2.7.3</msf4j.version>
         <msf4j.version.range>[2.7.0, 3.0.0)</msf4j.version.range>
         <javax.ws.rs.version.range>[2.0.0, 3.0.0)</javax.ws.rs.version.range>
-        <carbon.analytics-common.version>6.1.41</carbon.analytics-common.version>
+        <carbon.analytics-common.version>6.1.44</carbon.analytics-common.version>
         <!--Transport-->
         <transport.http.netty.version>6.0.289</transport.http.netty.version>
         <transport.http.netty.version.range>[6.0.272, 7.0.0)</transport.http.netty.version.range>
         <!--Metrics-->
         <carbon.metrics.version>2.3.8</carbon.metrics.version>
         <carbon.jndi.version>1.0.5</carbon.jndi.version>
-        <carbon.datasources.version>1.1.4</carbon.datasources.version>
+        <carbon.datasources.version>1.1.8</carbon.datasources.version>
 
         <!--OSGi-->
         <org.osgi.api.version>6.0.0</org.osgi.api.version>
