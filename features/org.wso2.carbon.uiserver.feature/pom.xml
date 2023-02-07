@@ -88,7 +88,11 @@
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.google.guava</symbolicName>
-                                    <version>${guava.version}.0</version>
+                                    <version>${guava.bundle.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.google.guava.failureaccess</symbolicName>
+                                    <version>${guava.failureaccess.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>handlebars</symbolicName>
