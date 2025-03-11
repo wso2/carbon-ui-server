@@ -21,6 +21,7 @@ package org.wso2.carbon.uiserver.internal.deployment.parser;
 import org.wso2.carbon.uiserver.internal.exception.ConfigurationException;
 import org.wso2.carbon.uiserver.internal.exception.FileOperationException;
 import org.wso2.carbon.uiserver.internal.reference.FileReference;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -74,7 +75,7 @@ public class YamlFileParser {
          * @param aClass class that uses for class loading
          */
         public ClassLoaderConstructor(Class aClass) {
-            super(Object.class);
+            super(Object.class, new LoaderOptions());
             this.classLoader = aClass.getClassLoader();
         }
 
